@@ -9,7 +9,7 @@ const Doctors = () => {
             All Doctors
           </h1>
           <p className="text-xl text-gray-600">
-            Coming soon - Browse and book appointments with qualified doctors
+      
           </p>
         </div>
       </div>
