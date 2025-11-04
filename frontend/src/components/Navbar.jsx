@@ -5,7 +5,7 @@ import { User } from "lucide-react";
 import { toast } from "react-toastify";
 
 function Navbar() {
-  const { token, logout, user } = useContext(AuthContext);
+  const { user, logout, loading } = useContext(AuthContext);
   const location = useLocation();
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
@@ -14,7 +14,7 @@ function Navbar() {
     toast.success("Logged out successfully!");
   };
 
-  if (isAuthPage) return null;
+  if (isAuthPage || loading) return null;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg border-b border-blue-100">
@@ -71,7 +71,7 @@ function Navbar() {
             >
               Contact
             </Link>
-            {token ? (
+            {user ? (
               <>
                 <Link
                   to="/profile"

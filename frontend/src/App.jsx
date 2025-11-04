@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AuthProvider, { AuthContext } from "./context/AuthContext";
 import Login from "./pages/Login";
-import Signup from "./pages/SignUp";   
+import Signup from "./pages/Signup";   
 import Profile from "./pages/Profile";
 import Home from "./pages/Home";
 import Doctors from "./pages/Doctors";
@@ -11,11 +11,9 @@ import Contact from "./pages/Contact";
 import Navbar from "./components/Navbar";
 
 function PrivateRoute({ children }) {
-  return (
-    <AuthContext.Consumer>
-      {({ token }) => (token ? children : <Navigate to="/login" replace />)}
-    </AuthContext.Consumer>
-  );
+  const { user, loading } = useContext(AuthContext);
+  if (loading) return null;
+  return user ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {

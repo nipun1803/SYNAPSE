@@ -1,49 +1,69 @@
 import React, { createContext, useEffect, useState } from "react";
-import { api, setAuthToken } from "../api/client";
+import { api } from "../api/client"; // no need for setAuthToken anymore
 
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setTokenState] = useState(localStorage.getItem("token") || "");
+  const [loading, setLoading] = useState(true);
 
+  // Load user info when the app starts
   useEffect(() => {
-    const loadMe = async () => {
-      if (!token) return;
+    const loadUser = async () => {
       try {
-        const { data } = await api.get("/api/users/me");
+        const { data } = await api.get("/api/users/me", { withCredentials: true });
         setUser(data.user);
-      } catch {
-        setAuthToken(null);
+      } catch (err) {
         setUser(null);
-        setTokenState("");
+      } finally {
+        setLoading(false);
       }
     };
-    loadMe();
-  }, [token]);
+    loadUser();
+  }, []);
 
+  // Login
   const login = async (email, password) => {
-    const { data } = await api.post("/api/auth/login", { email, password });
-    setAuthToken(data.token);
-    setTokenState(data.token);
-    setUser(data.user);
+    try {
+      const { data } = await api.post(
+        "/api/auth/login",
+        { email, password },
+        { withCredentials: true } // ✅ important to include cookies
+      );
+      setUser(data.user);
+    } catch (err) {
+      console.error("Login failed:", err.response?.data || err.message);
+      throw err;
+    }
   };
 
+  // Signup
   const signup = async (name, email, password) => {
-    const { data } = await api.post("/api/auth/register", { name, email, password });
-    setAuthToken(data.token);
-    setTokenState(data.token);
-    setUser(data.user);
+    try {
+      const { data } = await api.post(
+        "/api/auth/register",
+        { name, email, password },
+        { withCredentials: true }
+      );
+      setUser(data.user);
+    } catch (err) {
+      console.error("Signup failed:", err.response?.data || err.message);
+      throw err;
+    }
   };
 
-  const logout = () => {
-    setAuthToken(null);
-    setUser(null);
-    setTokenState("");
+  // Logout
+  const logout = async () => {
+    try {
+      await api.post("/api/auth/logout", {}, { withCredentials: true });
+      setUser(null);
+    } catch (err) {
+      console.error("Logout failed:", err.response?.data || err.message);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

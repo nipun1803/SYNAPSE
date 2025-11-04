@@ -18,7 +18,7 @@ export default function Login() {
     try {
       await login(form.email, form.password);
       toast.success("Login successful! Welcome back.");
-      nav("/profile");
+      nav("/");
     } catch (e) {
       const errorMessage = e?.response?.data?.error?.message || "Login failed";
       setErr(errorMessage);
