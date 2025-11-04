@@ -16,7 +16,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 //  CORS (use env-configured frontend origin)
-const allowedOrigin = process.env.ALLOWED_ORIGINS || "http://localhost:5173";
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://synapse-seven-theta.vercel.app",
+  "https://synapse-3bauz8ecu-nipuns-projects-01a674c1.vercel.app", // your new frontend URL
+];
+
+
 app.use(
   cors({
     origin: allowedOrigin,
