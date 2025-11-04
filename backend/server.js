@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 //  CORS (use env-configured frontend origin)
-const allowedOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+const allowedOrigin = process.env.ALLOWED_ORIGINS || "http://localhost:5173";
 app.use(
   cors({
     origin: allowedOrigin,
