@@ -19,8 +19,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://synapse-seven-theta.vercel.app/",
-      "https://synapse-seven-theta.vercel.app"
+      "https://synapse-seven-theta.vercel.app",
+      "https://synapse-3vz83d2oy-nipuns-projects-01a674c1.vercel.app"
     ],
     credentials: true,
   })
