@@ -1,114 +1,107 @@
-import React, { useContext, useState } from "react";
+import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, UserPlus } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function Signup() {
-  const { signup } = useContext(AuthContext);
-  const nav = useNavigate();
+  const { register } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
-    setErr("");
     setLoading(true);
+
     try {
-      await signup(form.name, form.email, form.password);
-      toast.success("Account created successfully! Welcome to Synapse.");
-      nav("/profile");
-    } catch (e) {
-      const errorMessage = e?.response?.data?.error?.message || "Signup failed";
-      setErr(errorMessage);
-      toast.error(errorMessage);
+      await register(form.name, form.email, form.password);
+      toast.success("Account created 🎉");
+      navigate("/login");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-50 px-4 py-12">
-      <div className="w-full max-w-lg mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-blue-100">
-        <div className="text-center mb-6">
-          <div className="mb-4 flex justify-center">
-            <svg width="220" height="46" viewBox="0 0 220 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <text x="0" y="28" fontFamily="Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#000B6D">SYNAPSE</text>
-              <path d="M128 23 L135 23 L139 20 L143 26 L147 23 L154 23" stroke="#5F6FFF" strokeWidth="2.5" strokeLinecap="round"/>
-              <circle cx="158" cy="23" r="2.5" fill="#5F6FFF"/>
-              <text x="0" y="42" fontFamily="Arial, sans-serif" fontSize="10" fill="#5F6FFF">Connecting Healthcare</text>
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-primary mb-2">Join Synapse</h1>
-          <p className="text-blue-600">Smart Doctor Appointment Booking</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+      <div className="w-full max-w-md bg-white shadow-xl p-8 rounded-2xl border border-blue-100">
         
-        <form onSubmit={submit} className="space-y-5">
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-3">
+            <UserPlus className="w-10 h-10 text-blue-700" />
+          </div>
+          <h1 className="text-3xl font-bold text-blue-900">Create Account</h1>
+          <p className="text-gray-600 text-sm mt-1">
+            Join Synapse & start booking appointments
+          </p>
+        </div>
+
+        <form onSubmit={submit} className="space-y-6">
+          
           <div>
-            <label htmlFor="name" className="flex text-sm font-semibold text-blue-900 mb-2 items-center gap-2">
-              <User className="w-4 h-4" />
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <User className="w-4 h-4 text-blue-600" />
               Full Name
             </label>
             <input
-              id="name"
-              placeholder="Enter your full name"
-              value={form.name}
-              onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white"
               required
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
-            <label htmlFor="email" className="flex text-sm font-semibold text-blue-900 mb-2 items-center gap-2">
-              <Mail className="w-4 h-4" />
-              Email
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <Mail className="w-4 h-4 text-blue-600" />
+              Email Address
             </label>
             <input
-              id="email"
-              placeholder="Enter your email"
+              required
               type="email"
               value={form.email}
-              onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white"
-              required
+              placeholder="you@example.com"
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
-            <label htmlFor="password" className="flex text-sm font-semibold text-blue-900 mb-2 items-center gap-2">
-              <Lock className="w-4 h-4" />
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <Lock className="w-4 h-4 text-blue-600" />
               Password
             </label>
             <input
-              id="password"
-              placeholder="Create a password (min 8 characters)"
-              type="password"
-              minLength={8}
-              value={form.password}
-              onChange={(e) => setForm((s) => ({ ...s, password: e.target.value }))}
-              className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white"
               required
+              type="password"
+              placeholder="Choose a strong password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-lg"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold text-white text-lg bg-blue-600 hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
           >
             <UserPlus className="w-5 h-5" />
-            {loading ? "Creating account..." : "Create account"}
+            {loading ? "Creating..." : "Sign Up"}
           </button>
         </form>
-        
-        <p className="mt-6 text-center text-sm text-blue-600">
-          Already have an account?{" "}
-          <Link to="/login" className="text-primary hover:text-blue-700 underline font-semibold">
+
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Already have an account?
+          <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium ml-1">
             Login
           </Link>
         </p>
+
       </div>
     </div>
   );
