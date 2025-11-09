@@ -5,7 +5,6 @@ import User from "../models/usermodel.js";
 const signToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-// Register
 export const register = async (req, res) => {
   try {
     const { name, email, password, role = "user" } = req.body;
@@ -21,12 +20,13 @@ export const register = async (req, res) => {
     const user = await User.create({ name, email, password: hashed, role });
 
     const token = signToken({ id: user._id, role: user.role });
+    const isProduction = process.env.NODE_ENV === "production";
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,      
-      sameSite: "none",  
-      path: "/",          
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -39,7 +39,6 @@ export const register = async (req, res) => {
   }
 };
 
-// Login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -54,11 +53,12 @@ export const login = async (req, res) => {
     if (!valid) return res.status(401).json({ message: "Invalid credentials" });
 
     const token = signToken({ id: user._id, role: user.role });
+    const isProduction = process.env.NODE_ENV === "production";
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -72,18 +72,19 @@ export const login = async (req, res) => {
   }
 };
 
-// Logout
 export const logout = (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production";
+
   res.clearCookie("token", {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     path: "/"
   });
+
   return res.json({ message: "Logged out successfully" });
 };
 
-// Get Current User
 export const me = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
