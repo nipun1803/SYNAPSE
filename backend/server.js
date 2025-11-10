@@ -9,26 +9,42 @@ import userRoutes from "./src/routes/users.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-
+// Connect to MongoDB
 connectDB();
 
 app.use(express.json());
 app.use(cookieParser());
 
+// CORS
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
       "https://synapse-seven-theta.vercel.app",
-      "https://synapse-3vz83d2oy-nipuns-projects-01a674c1.vercel.app"
+      "https://synapse-3vz83d2oy-nipuns-projects-01a674c1.vercel.app",
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.get("/", (req, res) => res.send("Synapse API Running"));
 
+app.options("*", cors({
+  origin: [
+    "http://localhost:5173",
+    "https://synapse-seven-theta.vercel.app",
+    "https://synapse-3vz83d2oy-nipuns-projects-01a674c1.vercel.app",
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+
+app.get("/", (req, res) => res.send("Synapse API Running"));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
