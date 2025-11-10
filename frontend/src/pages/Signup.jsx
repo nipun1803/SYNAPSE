@@ -5,7 +5,7 @@ import { User, Mail, Lock, UserPlus } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function Signup() {
-  const { register } = useContext(AuthContext);
+  const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -15,9 +15,9 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      await register(form.name, form.email, form.password);
-      toast.success("Account created 🎉");
-      navigate("/login");
+      await signup(form.name, form.email, form.password);
+      toast.success("Account created successfully!");
+      navigate("/");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Signup failed");
     } finally {
@@ -48,7 +48,7 @@ export default function Signup() {
             </label>
             <input
               required
-              placeholder="Name"
+              placeholder="Your full name"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500"
@@ -97,7 +97,10 @@ export default function Signup() {
 
         <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?
-          <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium ml-1">
+          <Link
+            to="/login"
+            className="text-blue-600 hover:text-blue-800 font-medium ml-1"
+          >
             Login
           </Link>
         </p>
