@@ -9,13 +9,13 @@ import userRoutes from "./src/routes/users.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Connect to MongoDB
+
 connectDB();
 
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS
+
 app.use(
   cors({
     origin: [
