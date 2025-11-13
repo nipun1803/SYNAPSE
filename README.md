@@ -1,3 +1,5 @@
+
+
 Synapse – Doctor Appointment System
 
 A simple and modern platform for booking doctor appointments online.
@@ -41,10 +43,9 @@ npm install
 npm start
 
 
+
 Frontend
 
 cd frontend
 npm install
 npm run dev
-
-
