@@ -1,112 +1,162 @@
-import React, { useContext } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-import { User } from "lucide-react";
-import { toast } from "react-toastify";
+import React, { useEffect, useState, useContext } from 'react'
+import { assets } from '../assets/assets'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { AppContext } from '../context/AppContext'
 
-function Navbar() {
-  const { user, logout, loading } = useContext(AuthContext);
-  const location = useLocation();
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+const Navbar = () => {
+  const navigate = useNavigate()
+  const { user, isAuthenticated, logout, backendUrl } = useContext(AppContext)
+  const [showMenu, setShowMenu] = useState(false)
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out successfully!");
-  };
+  const handleLogout = async () => {
+    await logout()
+    navigate('/')
+  }
 
-  // ✅ Do not render navbar on login/signup pages
-  if (isAuthPage) return null;
+  const getProfileImageUrl = () => {
+    if (!user?.image) return assets.profile_pic
+    if (user.image.startsWith('http://') || user.image.startsWith('https://')) {
+      return user.image
+    }
+    return `${backendUrl}${user.image.startsWith('/') ? '' : '/'}${user.image}`
+  }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl shadow-sm border-b border-blue-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <div className='bg-white shadow-sm border-b border-gray-200'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='flex items-center justify-between h-16'>
+          <img onClick={() => navigate('/')} className='w-44 cursor-pointer hover:opacity-80 transition-opacity' src={assets.logo} alt="" />
+          
+          <nav className='hidden md:flex items-center space-x-8'>
+            <NavLink to='/' className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}>
+              Home
+            </NavLink>
+            <NavLink to='/doctors' className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}>
+              All Doctors
+            </NavLink>
+            <NavLink to='/about' className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}>
+              About
+            </NavLink>
+            <NavLink to='/contact' className={({ isActive }) => `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}>
+              Contact
+            </NavLink>
+          </nav>
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <svg width="220" height="46" viewBox="0 0 220 46" fill="none">
-              <text x="0" y="28" fontFamily="Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#000B6D">SYNAPSE</text>
-              <path d="M128 23 L135 23 L139 20 L143 26 L147 23 L154 23" stroke="#5F6FFF" strokeWidth="2.5" strokeLinecap="round"/>
-              <circle cx="158" cy="23" r="2.5" fill="#5F6FFF"/>
-              <text x="0" y="42" fontFamily="Arial, sans-serif" fontSize="10" fill="#5F6FFF">Connecting Healthcare</text>
-            </svg>
-          </Link>
-
-          {/* Links */}
-          <div className="flex items-center gap-2">
-            {["/", "/doctors", "/about", "/contact"].map((path, index) => {
-              const labels = ["Home", "All Doctors", "About", "Contact"];
-              return (
-                <Link
-                  key={path}
-                  to={path}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-                    location.pathname === path
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-gray-700 hover:text-primary hover:bg-blue-50"
-                  }`}
-                >
-                  {labels[index]}
-                </Link>
-              );
-            })}
-
-            {/* ✅ While loading: show a placeholder instead of hiding navbar */}
-            {loading ? (
-              <div className="flex items-center gap-2 ml-4 animate-pulse">
-                <div className="w-8 h-8 bg-gray-300 rounded-full" />
-                <div className="h-4 w-24 bg-gray-300 rounded" />
-              </div>
-            ) : user ? (
-              <>
-                <Link
-                  to="/profile"
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 ${
-                    location.pathname === "/profile"
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-gray-700 hover:text-primary hover:bg-blue-50"
-                  }`}
-                >
-                  <User className="w-4 h-4" />
-                  Profile
-                </Link>
-
-                <div className="flex items-center gap-2 ml-2 pl-4 border-l border-gray-200">
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {user?.name?.charAt(0).toUpperCase()}
+          <div className='flex items-center gap-4'>
+            {isAuthenticated ? (
+              <div className='flex items-center gap-2 cursor-pointer group relative'>
+                <div className='flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors'>
+                  <img 
+                    className='w-8 h-8 rounded-full border-2 border-gray-200 object-cover' 
+                    src={getProfileImageUrl()} 
+                    alt="Profile"
+                    onError={(e) => { e.target.src = assets.profile_pic }}
+                  />
+                  {user?.name && (
+                    <span className='hidden lg:block text-sm font-medium text-gray-700'>
+                      {user.name.split(' ')[0]}
                     </span>
-                  </div>
-                  <span className="text-gray-900 text-sm font-medium">{user?.name}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md hover:shadow-lg"
-                  >
-                    Logout
-                  </button>
+                  )}
+                  <img className='w-4 h-4' src={assets.dropdown_icon} alt="" />
                 </div>
-              </>
-            ) : (
-              <div className="flex items-center gap-2 ml-2 pl-4 border-l border-gray-200">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-blue-50 transition"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md hover:shadow-lg"
-                >
-                  Sign Up
-                </Link>
+                <div className='absolute top-12 right-0 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20 hidden group-hover:block'>
+                  <div className='py-2'>
+                    {user?.name && (
+                      <div className='px-4 py-2 border-b border-gray-100'>
+                        <p className='text-sm font-semibold text-gray-800'>{user.name}</p>
+                        <p className='text-xs text-gray-500 truncate'>{user.email}</p>
+                      </div>
+                    )}
+                    <button onClick={() => navigate('/my-profile')} className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
+                      My Profile
+                    </button>
+                    <button onClick={() => navigate('/my-appointments')} className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
+                      My Appointments
+                    </button>
+                    <hr className='my-1' />
+                    <button onClick={handleLogout} className='w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors'>
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </div>
+            ) : (
+              <button onClick={() => navigate('/unified-login')} className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-lg transform hover:scale-105 hidden md:block'>
+                Login / Sign Up
+              </button>
             )}
+            <button onClick={() => setShowMenu(true)} className='md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors'>
+              <img className='w-6 h-6' src={assets.menu_icon} alt="" />
+            </button>
           </div>
         </div>
       </div>
-    </nav>
-  );
+
+      {/* Mobile Menu */}
+      <div className={`md:hidden fixed inset-0 z-50 bg-white transition-all duration-300 ${showMenu ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className='flex items-center justify-between px-6 py-4 border-b border-gray-200'>
+          <img src={assets.logo} className='w-36' alt="" />
+          <button onClick={() => setShowMenu(false)} className='p-2 rounded-lg hover:bg-gray-100 transition-colors'>
+            <img src={assets.cross_icon} className='w-6 h-6' alt="" />
+          </button>
+        </div>
+        <nav className='px-6 py-4'>
+          {isAuthenticated && user && (
+            <div className='mb-6 p-4 bg-gray-50 rounded-lg'>
+              <div className='flex items-center gap-3'>
+                <img 
+                  className='w-12 h-12 rounded-full border-2 border-gray-200 object-cover' 
+                  src={getProfileImageUrl()} 
+                  alt="Profile"
+                  onError={(e) => { e.target.src = assets.profile_pic }}
+                />
+                <div>
+                  <p className='font-semibold text-gray-800'>{user.name}</p>
+                  <p className='text-xs text-gray-500 truncate'>{user.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className='space-y-2'>
+            <NavLink onClick={() => setShowMenu(false)} to='/' className='block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors'>
+              Home
+            </NavLink>
+            <NavLink onClick={() => setShowMenu(false)} to='/doctors' className='block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors'>
+              All Doctors
+            </NavLink>
+            <NavLink onClick={() => setShowMenu(false)} to='/about' className='block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors'>
+              About
+            </NavLink>
+            <NavLink onClick={() => setShowMenu(false)} to='/contact' className='block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors'>
+              Contact
+            </NavLink>
+            {isAuthenticated && (
+              <>
+                <hr className='my-2' />
+                <NavLink onClick={() => setShowMenu(false)} to='/my-profile' className='block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors'>
+                  My Profile
+                </NavLink>
+                <NavLink onClick={() => setShowMenu(false)} to='/my-appointments' className='block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors'>
+                  My Appointments
+                </NavLink>
+                <button onClick={() => { handleLogout(); setShowMenu(false); }} className='w-full text-left px-4 py-3 text-lg font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors'>
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        </nav>
+      </div>
+    </div>
+  )
 }
 
-export default Navbar;
+export default Navbar

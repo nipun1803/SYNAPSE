@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AppContext";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, UserPlus, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
@@ -42,10 +42,11 @@ export default function Signup() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#eef4ff] to-white p-4">
       <Card className="w-full max-w-md bg-white/90 backdrop-blur-md shadow-lg border border-blue-100 rounded-2xl">
-
         <CardHeader className="text-center space-y-2 py-5">
           <UserPlus className="w-12 h-12 mx-auto text-primary" />
-          <CardTitle className="text-2xl font-bold text-primary">Create Account</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary">
+            Create Account
+          </CardTitle>
           <CardDescription className="text-gray-600">
             Join Synapse & start booking appointments
           </CardDescription>
@@ -53,7 +54,6 @@ export default function Signup() {
 
         <CardContent className="px-6 space-y-5 pb-2">
           <form onSubmit={submit} className="space-y-5">
-
             {/* Name */}
             <div className="space-y-1">
               <Label className="flex items-center gap-1 text-sm font-medium text-gray-700">
@@ -94,7 +94,9 @@ export default function Signup() {
                   required
                   placeholder="Choose a strong password"
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                   className="h-10 text-sm pr-10"
                 />
                 <button
@@ -107,23 +109,27 @@ export default function Signup() {
               </div>
             </div>
 
-            <Button disabled={loading} className="w-full h-10 text-sm font-medium">
+            <Button
+              disabled={loading}
+              className="w-full h-10 text-sm font-medium"
+            >
               <UserPlus className="w-4 h-4" />
               {loading ? "Creating..." : "Sign Up"}
             </Button>
-
           </form>
         </CardContent>
 
         <CardFooter className="flex justify-center pt-1 pb-6">
           <p className="text-gray-600 text-sm mt-1">
             Already have an account?
-            <Link to="/login" className="ml-1 text-primary hover:underline font-medium">
+            <Link
+              to="/login"
+              className="ml-1 text-primary hover:underline font-medium"
+            >
               Login
             </Link>
           </p>
         </CardFooter>
-
       </Card>
     </div>
   );
