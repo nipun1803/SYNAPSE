@@ -1,40 +1,56 @@
-import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import "dotenv/config.js";
-import connectDB from "./src/config/mongodb.js";
-import authRoutes from "./src/routes/auth.js";
-import userRoutes from "./src/routes/users.js";
+import express from 'express';
+import cors from 'cors';
+import 'dotenv/config';
+import cookieParser from 'cookie-parser';
+import connectDB from './config/mongodb.js';
+import connectCloudinary from './config/cloudinary.js';
+import adminRouter from './routes/admin.js';
+import doctorRouter from './routes/doctors.js';
+import userRouter from './routes/users.js';
+import authRouter from './routes/auth.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
-
+const port = process.env.PORT || 4000;
 
 connectDB();
+connectCloudinary();
 
+// CORS
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174', process.env.CORS_ORIGINS?.split(',') || ''],
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
+
+// Body parser
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Routes
+app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
+app.use('/api/doctors', doctorRouter);
+app.use('/api/admin', adminRouter);
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://synapse-seven-theta.vercel.app",
-      "https://synapse-3vz83d2oy-nipuns-projects-01a674c1.vercel.app",
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.get('/', (req, res) => {
+  res.json({ message: 'API Working' });
+});
 
+// 404
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found' });
+});
 
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ success: false, message: err.message });
+});
 
+app.listen(port, () => {
+  console.log(`Server started on PORT: ${port}`);
 
-app.get("/", (req, res) => res.send("Synapse API Running"));
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+});
 
-
-app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
+export default app;

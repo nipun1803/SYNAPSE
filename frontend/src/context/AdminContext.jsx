@@ -59,7 +59,7 @@ const AdminContextProvider = ({ children }) => {
 
   const getAllDoctors = async () => {
     try {
-      const { data } = await api.get(`/api/admin/all-doctors`);
+      const { data } = await api.get(`/api/admin/doctors`);
       if (data?.success) setDoctors(data.doctors || []);
       else toast.error(data?.message || "Failed to load doctors");
     } catch (err) {
@@ -69,7 +69,7 @@ const AdminContextProvider = ({ children }) => {
 
   const changeAvailability = async (docId) => {
     try {
-      const { data } = await api.post(`/api/admin/change-availability`, { docId });
+      const { data } = await api.patch(`/api/admin/doctors/${docId}/availability`);
       if (data?.success) {
         toast.success(data.message || "Availability Changed");
         getAllDoctors();
@@ -93,7 +93,7 @@ const AdminContextProvider = ({ children }) => {
 
   const cancelAppointment = async (id) => {
     try {
-      const { data } = await api.post(`/api/admin/cancel-appointment`, { appointmentId: id });
+      const { data } = await api.patch(`/api/admin/appointments/${id}/cancel`);
       if (data?.success) {
         toast.success(data.message || "Appointment Cancelled");
         getAllAppointments();
@@ -117,7 +117,7 @@ const AdminContextProvider = ({ children }) => {
 
   const logoutAdmin = async () => {
     try {
-      await api.post(`/api/admin/logout`);
+      await api.post(`/api/auth/logout/admin`);
       setAToken(null);
       window.location.href = UNIFIED_LOGIN_URL;
     } catch (err) {

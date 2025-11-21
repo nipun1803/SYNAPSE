@@ -1,22 +1,20 @@
 import { useState, useEffect } from 'react'
-
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+import axios from 'axios'
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
+
   const checkAuth = async () => {
     try {
-      setLoading(true)
-      const res = await fetch(`${backendUrl}/api/user/get-profile`, {
-        method: 'GET',
-        credentials: 'include', // Send cookies
+      const { data } = await axios.get(`${backendUrl}/api/users/profile`, {
+        withCredentials: true
       })
-      const data = await res.json()
-      
-      if (data.success && data.userData) {
+
+      if (data.success) {
         setIsAuthenticated(true)
         setUser(data.userData)
       } else {
@@ -24,7 +22,7 @@ export const useAuth = () => {
         setUser(null)
       }
     } catch (error) {
-      console.error('Auth check error:', error)
+      console.error('Auth check failed:', error)
       setIsAuthenticated(false)
       setUser(null)
     } finally {
@@ -36,18 +34,5 @@ export const useAuth = () => {
     checkAuth()
   }, [])
 
-  const logout = async () => {
-    try {
-      await fetch(`${backendUrl}/api/user/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      })
-      setIsAuthenticated(false)
-      setUser(null)
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
-  }
-
-  return { isAuthenticated, loading, user, checkAuth, logout }
+  return { isAuthenticated, loading, user, checkAuth }
 }

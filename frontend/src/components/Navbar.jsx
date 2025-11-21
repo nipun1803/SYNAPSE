@@ -2,23 +2,79 @@ import React, { useEffect, useState, useContext } from 'react'
 import { assets } from '../assets/assets'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const { user, isAuthenticated, logout, backendUrl } = useContext(AppContext)
+  const context = useContext(AppContext)
+  
+  // Safely extract values with fallbacks
+  const user = context?.userData || null
+  const backendUrl = context?.backendUrl || ''
+  const loadUserProfileData = context?.loadUserProfileData
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [profileImage, setProfileImage] = useState(assets.profile_pic)
+
+  // Check if user is authenticated
+  useEffect(() => {
+    setIsAuthenticated(!!user)
+  }, [user])
+
+  // Update profile image dynamically when user data changes
+  useEffect(() => {
+    if (user?.image) {
+      const imageUrl = getProfileImageUrl(user.image)
+      setProfileImage(imageUrl)
+    } else {
+      setProfileImage(assets.profile_pic)
+    }
+  }, [user, user?.image, backendUrl])
+
+  // Reload user data when component mounts
+  useEffect(() => {
+    if (isAuthenticated && loadUserProfileData) {
+      loadUserProfileData()
+    }
+  }, [isAuthenticated])
 
   const handleLogout = async () => {
-    await logout()
-    navigate('/')
+    try {
+      await axios.post(`${backendUrl}/api/auth/logout/user`, {}, {
+        withCredentials: true
+      })
+      toast.success('Logged out successfully')
+      setTimeout(() => {
+        window.location.href = '/unified-login'
+      }, 500)
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast.error('Failed to logout')
+    }
   }
 
-  const getProfileImageUrl = () => {
-    if (!user?.image) return assets.profile_pic
-    if (user.image.startsWith('http://') || user.image.startsWith('https://')) {
-      return user.image
+  const getProfileImageUrl = (image) => {
+    if (!image) return assets.profile_pic
+    
+    // If it's a full URL (http/https)
+    if (image.startsWith('http://') || image.startsWith('https://')) {
+      return image
     }
-    return `${backendUrl}${user.image.startsWith('/') ? '' : '/'}${user.image}`
+    
+    // If it's a Cloudinary URL without protocol
+    if (image.includes('cloudinary.com')) {
+      return `https://${image}`
+    }
+    
+    // If it's a relative path
+    const separator = image.startsWith('/') ? '' : '/'
+    return `${backendUrl}${separator}${image}`
+  }
+
+  const handleImageError = () => {
+    setProfileImage(assets.profile_pic)
   }
 
   return (
@@ -55,10 +111,11 @@ const Navbar = () => {
               <div className='flex items-center gap-2 cursor-pointer group relative'>
                 <div className='flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors'>
                   <img 
+                    key={profileImage} // Force re-render when image changes
                     className='w-8 h-8 rounded-full border-2 border-gray-200 object-cover' 
-                    src={getProfileImageUrl()} 
+                    src={profileImage} 
                     alt="Profile"
-                    onError={(e) => { e.target.src = assets.profile_pic }}
+                    onError={handleImageError}
                   />
                   {user?.name && (
                     <span className='hidden lg:block text-sm font-medium text-gray-700'>
@@ -71,8 +128,18 @@ const Navbar = () => {
                   <div className='py-2'>
                     {user?.name && (
                       <div className='px-4 py-2 border-b border-gray-100'>
-                        <p className='text-sm font-semibold text-gray-800'>{user.name}</p>
-                        <p className='text-xs text-gray-500 truncate'>{user.email}</p>
+                        <div className='flex items-center gap-3 mb-2'>
+                          <img 
+                            className='w-10 h-10 rounded-full border-2 border-gray-200 object-cover' 
+                            src={profileImage} 
+                            alt="Profile"
+                            onError={handleImageError}
+                          />
+                          <div>
+                            <p className='text-sm font-semibold text-gray-800'>{user.name}</p>
+                            <p className='text-xs text-gray-500 truncate'>{user.email}</p>
+                          </div>
+                        </div>
                       </div>
                     )}
                     <button onClick={() => navigate('/my-profile')} className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors'>
@@ -113,10 +180,11 @@ const Navbar = () => {
             <div className='mb-6 p-4 bg-gray-50 rounded-lg'>
               <div className='flex items-center gap-3'>
                 <img 
+                  key={profileImage}
                   className='w-12 h-12 rounded-full border-2 border-gray-200 object-cover' 
-                  src={getProfileImageUrl()} 
+                  src={profileImage} 
                   alt="Profile"
-                  onError={(e) => { e.target.src = assets.profile_pic }}
+                  onError={handleImageError}
                 />
                 <div>
                   <p className='font-semibold text-gray-800'>{user.name}</p>

@@ -34,7 +34,7 @@ const DoctorContextProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       setCheckingAuth(true);
-      const { data } = await api.get(`/api/doctor/profile`);
+      const { data } = await api.get(`/api/doctors/me/profile`);
       if (data.success) {
         setDToken(true);
         setProfileData(data.profileData);
@@ -55,7 +55,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const getAppointments = async () => {
     try {
-      const { data } = await api.get(`/api/doctor/appointments`);
+      const { data } = await api.get(`/api/doctors/me/appointments`);
       if (data.success) setAppointments([...data.appointments].reverse());
       else toast.error(data.message);
     } catch (err) {
@@ -65,7 +65,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const getProfileData = async () => {
     try {
-      const { data } = await api.get(`/api/doctor/profile`);
+      const { data } = await api.get(`/api/doctors/me/profile`);
       if (data.success) setProfileData(data.profileData);
       else toast.error(data.message);
     } catch (err) {
@@ -75,7 +75,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const cancelAppointment = async (id) => {
     try {
-      const { data } = await api.post(`/api/doctor/cancel-appointment`, { appointmentId: id });
+      const { data } = await api.patch(`/api/doctors/me/appointments/${id}/cancel`);
       if (data.success) {
         toast.success(data.message);
         getAppointments();
@@ -88,7 +88,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const completeAppointment = async (id) => {
     try {
-      const { data } = await api.post(`/api/doctor/complete-appointment`, { appointmentId: id });
+      const { data } = await api.patch(`/api/doctors/me/appointments/${id}/complete`);
       if (data.success) {
         toast.success(data.message);
         getAppointments();
@@ -101,7 +101,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const getDashData = async () => {
     try {
-      const { data } = await api.get(`/api/doctor/dashboard`);
+      const { data } = await api.get(`/api/doctors/me/dashboard`);
       if (data.success) setDashData(data.dashData);
       else toast.error(data.message);
     } catch (err) {
@@ -111,7 +111,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const logoutDoctor = async () => {
     try {
-      await api.post(`/api/doctor/logout`);
+      await api.post(`/api/auth/logout/doctor`);
       setDToken(null);
       window.location.href = UNIFIED_LOGIN_URL;
     } catch (err) {

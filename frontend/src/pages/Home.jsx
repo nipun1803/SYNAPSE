@@ -1,15 +1,18 @@
-import React from "react";
-import Header from "../components/Header";
-import Features from "../components/Features";
+import React from 'react'
+import Header from '../components/Header'
+import TopDoctors from '../components/TopDoctors'
+import Banner from '../components/Banner'
+import SpecialityMenu from '../components/SpecialityMenu'
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-white pt-20">
+    <div>
       <Header />
-      <Features />
+      <SpecialityMenu />
+      <TopDoctors />
+      <Banner />
     </div>
-  );
-};
+  )
+}
 
-export default Home;
-
+export default Home

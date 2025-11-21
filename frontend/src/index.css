@@ -1,42 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-   /* Synapse Background & Text */
-   --background: 210 100% 98%; /* soft blue-white */
-   --foreground: 222 47% 11%; /* near black */
- 
-   /* Synapse Brand Colors */
-   --primary: 221 83% 53%; /* #2563eb (Blue 600) */
-   --primary-foreground: 0 0% 100%; /* white */
- 
-   --secondary: 243 75% 59%; /* #4f46e5 (Indigo 600) */
-   --secondary-foreground: 0 0% 100%;
- 
-   /* UI Layers */
-   --card: 0 0% 100%;
-   --card-foreground: 222 47% 11%;
- 
-   --popover: 0 0% 100%;
-   --popover-foreground: 222 47% 11%;
- 
-   /* Muted / Subtle UI */
-   --muted: 215 20% 95%;
-   --muted-foreground: 222 20% 35%;
- 
-   --accent: 221 100% 97%;
-   --accent-foreground: 221 83% 30%;
- 
-   /* Errors */
-   --destructive: 0 84% 60%;
-   --destructive-foreground: 0 0% 100%;
- 
-   /* Borders / Inputs / Rings */
-   --border: 220 14% 85%;
-   --input: 220 14% 85%;
-   --ring: var(--primary);
- 
-   /* Corners */
-   --radius: 0.75rem;
- }
+* {
+    font-family: Outfit;
+}
+
+.active hr {
+    @apply block
+}
+
+@media (max-width:740px) {
+    .active  p{
+       @apply text-white bg-primary
+    }
+}
+
+::-webkit-scrollbar {
+    @apply hidden
+}
