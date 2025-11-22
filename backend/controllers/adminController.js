@@ -6,15 +6,7 @@ import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
 import userModel from "../models/usermodel.js";
 
-// const shouldUseSecureCookies = (() => {
-//   const isProd = process.env.NODE_ENV === 'production';
-//   const isLocalHost = [process.env.FRONTEND_URL, process.env.ADMIN_URL]
-//     .filter(Boolean)
-//     .some((url) => url.includes('localhost') || url.includes('127.0.0.1'));
-//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'true') return true;
-//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'false') return false;
-//   return isProd && !isLocalHost;
-// })();
+
 
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -142,8 +134,8 @@ const addDoctor = async (req, res) => {
       return res.status(409).json({ success: false, message: "Doctor already exists with this email" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     let imageUrl = "";
     if (imageFile) {

@@ -1,7 +1,7 @@
 
 import { io } from "socket.io-client";
 
-// Use backend base URL if provided; fallback to same-origin (works when admin and API are hosted together)
+
 const BASE = (import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
 
 let socket;

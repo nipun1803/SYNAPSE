@@ -23,7 +23,7 @@ const Doctors = () => {
 
     const categories = [
         'General physician', 'Gynecologist', 'Dermatologist', 
-        'Pediatricians', 'Neurologist', 'Gastroenterologist'
+        'Pediatrician', 'Neurologist', 'Gastroenterologist'
     ]
 
     return (

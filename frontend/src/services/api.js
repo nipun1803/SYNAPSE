@@ -1,6 +1,6 @@
 import API from '../api/endpoints';
 
-// Generic fetch wrapper (JSON)
+
 async function fetchAPI(url, options = {}) {
   const res = await fetch(url, {
     credentials: 'include',
@@ -11,7 +11,7 @@ async function fetchAPI(url, options = {}) {
     ...options
   });
 
-  // Try to parse JSON; if no JSON, return status-only object
+
   let data = null;
   try {
     data = await res.json();
@@ -30,7 +30,7 @@ async function fetchAPI(url, options = {}) {
   return data;
 }
 
-// Auth
+
 export const authService = {
   login: (payload) => fetchAPI(API.AUTH.LOGIN, {
     method: 'POST',
@@ -43,7 +43,7 @@ export const authService = {
   logoutUser: () => fetchAPI(API.AUTH.LOGOUT_USER, { method: 'POST' })
 };
 
-// Users
+
 export const userService = {
   getProfile: () => fetchAPI(API.USERS.PROFILE),
   updateProfile: (formData) => fetch(API.USERS.PROFILE, {
@@ -59,7 +59,7 @@ export const userService = {
   cancelAppointment: (id) => fetchAPI(API.USERS.CANCEL_APPOINTMENT(id), { method: 'PATCH' })
 };
 
-// Doctors
+
 export const doctorService = {
   getList: () => fetchAPI(API.DOCTORS.LIST),
   getById: (id) => fetchAPI(API.DOCTORS.BY_ID(id)),
@@ -78,7 +78,7 @@ export const doctorService = {
   completeAppointment: (id) => fetchAPI(API.DOCTORS.COMPLETE_APPOINTMENT(id), { method: 'PATCH' })
 };
 
-// Admin
+
 export const adminService = {
   getDashboard: () => fetchAPI(API.ADMIN.DASHBOARD),
   getAppointments: () => fetchAPI(API.ADMIN.APPOINTMENTS),

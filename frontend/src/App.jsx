@@ -1,18 +1,18 @@
 import React, { useContext } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import "react-toastify/dist/ReactToastify.css"
+import Footer from './components/Footer'
 import Navbar from './components/Navbar'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/Home'
-import Doctors from './pages/Doctors'
-import UnifiedLogin from './pages/UnifiedLogin'
+import { AppContext } from './context/AppContext'
 import About from './pages/About'
-import Contact from './pages/Contact'
 import Appointment from './pages/Appointment'
+import Contact from './pages/Contact'
+import Doctors from './pages/Doctors'
+import Home from './pages/Home'
 import MyAppointments from './pages/MyAppointments'
 import MyProfile from './pages/MyProfile'
-import Footer from './components/Footer'
-import { AppContext } from './context/AppContext'
-import { ToastContainer } from 'react-toastify'
-import "react-toastify/dist/ReactToastify.css";
+import UnifiedLogin from './pages/UnifiedLogin'
 
 
 const ProtectedRoute = ({ children }) => {

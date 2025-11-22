@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { assets } from '../../assets/assets'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
@@ -67,10 +67,10 @@ const AllAppointments = () => {
         <p className='text-gray-600 mt-1'>Manage and track all patient appointments</p>
       </div>
 
-      {/* Stats Cards - Simple style like Doctor Dashboard */}
+
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6'>
         
-        {/* Total Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -85,7 +85,7 @@ const AllAppointments = () => {
           </div>
         </div>
 
-        {/* Upcoming Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -100,7 +100,7 @@ const AllAppointments = () => {
           </div>
         </div>
 
-        {/* Completed Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -115,7 +115,7 @@ const AllAppointments = () => {
           </div>
         </div>
 
-        {/* Cancelled Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -131,10 +131,10 @@ const AllAppointments = () => {
         </div>
       </div>
 
-      {/* Filters and Search */}
+      {/* Filtering ,searching */}
       <div className='bg-white border border-gray-200 rounded-xl p-5 mb-5'>
         <div className='space-y-4'>
-          {/* Filter Buttons */}
+
           <div className='flex flex-wrap gap-2'>
             {[
               { value: 'all', label: 'All', color: 'gray' },

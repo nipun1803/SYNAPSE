@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { DoctorContext } from '../../context/DoctorContext'
-import { AppContext } from '../../context/AppContext'
 import { assets } from '../../assets/assets'
+import { AppContext } from '../../context/AppContext'
+import { DoctorContext } from '../../context/DoctorContext'
 
 const DoctorAppointments = () => {
   const { dToken, appointments, getAppointments, cancelAppointment, completeAppointment } =
@@ -56,13 +56,13 @@ const DoctorAppointments = () => {
   return (
     <div className="max-w-6xl mx-auto p-5">
 
-      {/* Header */}
+
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">My Appointments</h1>
         <p className="text-sm text-gray-500">Review and manage all booked sessions</p>
       </div>
 
-      {/* Updated Stats Section (colored headers + numbers) */}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
 
         <div className="bg-white border rounded-md p-4 shadow-sm">
@@ -93,7 +93,7 @@ const DoctorAppointments = () => {
 
       </div>
 
-      {/* Filters */}
+
       <div className="border bg-white rounded-md p-3 mb-6">
         <div className="flex gap-3 overflow-x-auto">
           {[
@@ -117,7 +117,7 @@ const DoctorAppointments = () => {
         </div>
       </div>
 
-      {/* Appointments Table */}
+
       <div className="bg-white border rounded-md overflow-hidden">
         {filteredList.length > 0 ? (
           <div className="overflow-x-auto">
@@ -140,7 +140,7 @@ const DoctorAppointments = () => {
                   <tr key={item._id || index} className="border-t hover:bg-gray-50">
                     <td className="px-5 py-4 text-sm">{index + 1}</td>
 
-                    {/* Patient */}
+
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -154,18 +154,18 @@ const DoctorAppointments = () => {
                       </div>
                     </td>
 
-                    {/* Age */}
+
                     <td className="px-5 py-4 text-sm">
                       {calculateAge(item.userData?.dob) || "-"}
                     </td>
 
-                    {/* Date & Time */}
+
                     <td className="px-5 py-4 text-sm">
                       <p className="font-medium">{slotDateFormat(item.slotDate)}</p>
                       <p className="text-gray-500">{item.slotTime}</p>
                     </td>
 
-                    {/* Payment */}
+
                     <td className="px-5 py-4">
                       <span
                         className={`text-xs px-2 py-1 rounded-md ${
@@ -178,12 +178,12 @@ const DoctorAppointments = () => {
                       </span>
                     </td>
 
-                    {/* Fee */}
+
                     <td className="px-5 py-4 text-sm font-medium">
                       {currency}{item.amount}
                     </td>
 
-                    {/* Status */}
+
                     <td className="px-5 py-4">
                       {item.cancelled ? (
                         <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-md">
@@ -200,7 +200,7 @@ const DoctorAppointments = () => {
                       )}
                     </td>
 
-                    {/* Actions */}
+
                     <td className="px-5 py-4">
                       {!item.cancelled && !item.isCompleted ? (
                         <div className="flex items-center gap-2">

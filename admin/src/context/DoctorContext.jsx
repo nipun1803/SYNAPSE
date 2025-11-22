@@ -1,5 +1,5 @@
-import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export const DoctorContext = createContext();
@@ -61,7 +61,7 @@ const DoctorContextProvider = ({ children }) => {
     }
   }, []);
 
-  // Logout function
+
   const logoutDoctor = async () => {
     try {
       const { data } = await api.post('/api/auth/logout/doctor');
@@ -74,7 +74,6 @@ const DoctorContextProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback
       setDToken(null);
       localStorage.removeItem('dToken');
       localStorage.removeItem('userType');
@@ -82,7 +81,7 @@ const DoctorContextProvider = ({ children }) => {
     }
   };
 
-  // Get doctor appointments - Fixed endpoint
+
   const getAppointments = async () => {
     try {
       const { data } = await api.get(`/api/doctors/me/appointments`);
@@ -96,7 +95,7 @@ const DoctorContextProvider = ({ children }) => {
     }
   };
 
-  // Get doctor profile - Fixed endpoint
+
   const getProfileData = async () => {
     try {
       const { data } = await api.get(`/api/doctors/me/profile`);
@@ -110,7 +109,6 @@ const DoctorContextProvider = ({ children }) => {
     }
   };
 
-  // Cancel appointment - Fixed endpoint and body
   const cancelAppointment = async (appointmentId) => {
     try {
       const { data } = await api.patch(`/api/doctors/me/appointments/${appointmentId}/cancel`, { appointmentId });
@@ -126,7 +124,7 @@ const DoctorContextProvider = ({ children }) => {
     }
   };
 
-  // Complete appointment - Fixed endpoint and body
+
   const completeAppointment = async (appointmentId) => {
     try {
       const { data } = await api.patch(`/api/doctors/me/appointments/${appointmentId}/complete`, { appointmentId });
@@ -142,7 +140,7 @@ const DoctorContextProvider = ({ children }) => {
     }
   };
 
-  // Get dashboard data - Fixed endpoint
+
   const getDashData = async () => {
     try {
       const { data } = await api.get(`/api/doctors/me/dashboard`);

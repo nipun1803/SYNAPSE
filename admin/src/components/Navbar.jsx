@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
-import { DoctorContext } from '../context/DoctorContext'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { AdminContext } from '../context/AdminContext'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { DoctorContext } from '../context/DoctorContext'
 
 const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || 'http://localhost:5173/unified-login'
 

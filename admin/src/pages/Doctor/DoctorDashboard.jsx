@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { DoctorContext } from '../../context/DoctorContext'
 import { assets } from '../../assets/assets'
 import { AppContext } from '../../context/AppContext'
+import { DoctorContext } from '../../context/DoctorContext'
 
 const DoctorDashboard = () => {
   const { dToken, dashData, getDashData, cancelAppointment, completeAppointment } = useContext(DoctorContext)
@@ -48,16 +48,15 @@ const DoctorDashboard = () => {
   return (
     <div className='p-6 max-w-7xl mx-auto'>
       
-      {/* Welcome Header */}
       <div className='mb-6'>
         <h1 className='text-2xl font-bold text-gray-900'>Doctor Dashboard</h1>
         <p className='text-gray-600 mt-1'>Manage your practice and appointments</p>
       </div>
 
-      {/* Stats Grid - Professional Colors */}
+
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6'>
         
-        {/* Earnings Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -72,7 +71,7 @@ const DoctorDashboard = () => {
           </div>
         </div>
 
-        {/* Appointments Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -87,7 +86,7 @@ const DoctorDashboard = () => {
           </div>
         </div>
 
-        {/* Patients Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -102,7 +101,7 @@ const DoctorDashboard = () => {
           </div>
         </div>
 
-        {/* Upcoming Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -118,7 +117,7 @@ const DoctorDashboard = () => {
         </div>
       </div>
 
-      {/* Latest Bookings */}
+
       <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
         <div className='px-6 py-4 border-b border-gray-200 bg-gray-50'>
           <h2 className='font-semibold text-gray-900'>Latest Bookings</h2>

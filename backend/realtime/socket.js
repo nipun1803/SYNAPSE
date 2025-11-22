@@ -1,6 +1,6 @@
 
-import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
+import { Server } from "socket.io";
 
 export function createSocketServer(httpServer, { jwtSecret } = {}) {
   const io = new Server(httpServer, {

@@ -1,6 +1,5 @@
-import { createContext, useState, useEffect } from 'react'
 import axios from 'axios'
-import { toast } from 'react-toastify'
+import { createContext, useEffect, useState } from 'react'
 
 export const AppContext = createContext()
 
@@ -31,7 +30,7 @@ const AppContextProvider = ({ children }) => {
     }
   }
 
-  // Add refreshDoctors function
+
   const refreshDoctors = async () => {
     try {
       const { data } = await api.get('/api/doctors')
@@ -80,7 +79,7 @@ const AppContextProvider = ({ children }) => {
     return age
   }
 
-  // Load initial data
+
   useEffect(() => {
     fetchDoctors()
     loadUserProfileData()
@@ -89,13 +88,13 @@ const AppContextProvider = ({ children }) => {
   const value = {
     doctors,
     currency,
-    currencySymbol: currency, // Add alias for currencySymbol
+    currencySymbol: currency,
     backendUrl,
     userData,
     setUserData,
     loading,
     fetchDoctors,
-    refreshDoctors, // Export refreshDoctors
+    refreshDoctors, 
     loadUserProfileData,
     slotDateFormat,
     calculateAge

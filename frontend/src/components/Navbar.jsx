@@ -1,15 +1,14 @@
-import React, { useEffect, useState, useContext } from 'react'
-import { assets } from '../assets/assets'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { AppContext } from '../context/AppContext'
-import { toast } from 'react-toastify'
 import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { assets } from '../assets/assets'
+import { AppContext } from '../context/AppContext'
 
 const Navbar = () => {
   const navigate = useNavigate()
   const context = useContext(AppContext)
   
-  // Safely extract values with fallbacks
   const user = context?.userData || null
   const backendUrl = context?.backendUrl || ''
   const loadUserProfileData = context?.loadUserProfileData
@@ -18,12 +17,12 @@ const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false)
   const [profileImage, setProfileImage] = useState(assets.profile_pic)
 
-  // Check if user is authenticated
+  // user is logged in or not
   useEffect(() => {
     setIsAuthenticated(!!user)
   }, [user])
 
-  // Update profile image dynamically when user data changes
+
   useEffect(() => {
     if (user?.image) {
       const imageUrl = getProfileImageUrl(user.image)
@@ -33,7 +32,6 @@ const Navbar = () => {
     }
   }, [user, user?.image, backendUrl])
 
-  // Reload user data when component mounts
   useEffect(() => {
     if (isAuthenticated && loadUserProfileData) {
       loadUserProfileData()

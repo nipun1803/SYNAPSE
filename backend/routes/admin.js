@@ -1,33 +1,33 @@
-import express from 'express';
-import authAdmin from '../middleware/authAdmin.js';
-import upload from '../middleware/multer.js';
+import express from "express";
 import {
-  appointmentsAdmin,
-  appointmentCancel,
   addDoctor,
+  adminDashboard,
   allDoctors,
-  adminDashboard
-} from '../controllers/adminController.js';
-import { changeAvailability } from '../controllers/doctorController.js';
+  appointmentCancel,
+  appointmentsAdmin,
+} from "../controllers/adminController.js";
+import { changeAvailability } from "../controllers/doctorController.js";
+import authAdmin from "../middleware/authAdmin.js";
+import upload from "../middleware/multer.js";
 
 const router = express.Router();
 
 // GET /api/admin/dashboard
-router.get('/dashboard', authAdmin, adminDashboard);
+router.get("/dashboard", authAdmin, adminDashboard);
 
 // GET /api/admin/appointments
-router.get('/appointments', authAdmin, appointmentsAdmin);
+router.get("/appointments", authAdmin, appointmentsAdmin);
 
 // PATCH /api/admin/appointments/:id/cancel
-router.patch('/appointments/:id/cancel', authAdmin, appointmentCancel);
+router.patch("/appointments/:id/cancel", authAdmin, appointmentCancel);
 
 // GET /api/admin/doctors
-router.get('/doctors', authAdmin, allDoctors);
+router.get("/doctors", authAdmin, allDoctors);
 
 // POST /api/admin/doctors
-router.post('/doctors', authAdmin, upload.single('image'), addDoctor);
+router.post("/doctors", authAdmin, upload.single("image"), addDoctor);
 
 // PATCH /api/admin/doctors/:id/availability
-router.patch('/doctors/:id/availability', authAdmin, changeAvailability);
+router.patch("/doctors/:id/availability", authAdmin, changeAvailability);
 
 export default router;

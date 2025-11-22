@@ -1,36 +1,35 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 import { resolveImageUrl } from '../utils/resolveImageUrl'
-import { toast } from 'react-toastify'
 
 const MyProfile = () => {
-  const { backendUrl, loadUserProfileData } = useContext(AppContext) // Fixed: use loadUserProfileData instead of checkAuth
+  const { backendUrl, loadUserProfileData } = useContext(AppContext) // for loading user data
   
-  // State
+
   const [isEdit, setIsEdit] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [userData, setUserData] = useState(null)
   
-  // Image handling
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
 
   const fetchProfile = async () => {
     try {
-      // Don't show loader if we are just refreshing after save, only on mount
+
       if (!userData) setLoading(true)
       
       const res = await fetch(`${backendUrl || ''}/api/users/profile`, { credentials: 'include' })
       const data = await res.json()
 
       if (data.success) {
-        // Normalizing data to ensure inputs don't become uncontrolled
+
         setUserData({
           ...data.userData,
           address: data.userData.address || { line1: '', line2: '' },
-          gender: data.userData.gender || '', // Use empty string for no selection
+          gender: data.userData.gender || '', 
           phone: data.userData.phone || '',
           dob: data.userData.dob || ''
         })
@@ -48,7 +47,7 @@ const MyProfile = () => {
   useEffect(() => {
     fetchProfile()
     
-    // Cleanup preview URL on unmount
+
     return () => {
       if (imagePreview) {
         URL.revokeObjectURL(imagePreview)
@@ -63,7 +62,7 @@ const MyProfile = () => {
     if (!file.type.startsWith('image/')) return toast.error('Please select an image file')
     if (file.size > 5 * 1024 * 1024) return toast.error('Image must be less than 5MB')
 
-    // Cleanup old preview
+
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview)
     }
@@ -102,17 +101,14 @@ const MyProfile = () => {
         toast.success('Profile updated successfully!')
         setIsEdit(false)
         
-        // Cleanup preview
         if (imagePreview) {
           URL.revokeObjectURL(imagePreview)
         }
         setImageFile(null)
         setImagePreview(null)
         
-        // Refresh profile data
         await fetchProfile()
         
-        // Refresh global auth state if the function exists
         if (loadUserProfileData) {
           await loadUserProfileData()
         }

@@ -6,15 +6,7 @@ import doctorModel from "../models/doctormodel.js";
 import appointmentModel from "../models/appointmentmodel.js";
 import { v2 as cloudinary } from "cloudinary";
 
-// const shouldUseSecureCookies = (() => {
-//   const isProd = process.env.NODE_ENV === 'production';
-//   const isLocalHost = [process.env.FRONTEND_URL, process.env.ADMIN_URL]
-//     .filter(Boolean)
-//     .some((url) => url.includes('localhost') || url.includes('127.0.0.1'));
-//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'true') return true;
-//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'false') return false;
-//   return isProd && !isLocalHost;
-// })();
+
 
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -87,8 +79,8 @@ const registerUser = async (req, res) => {
       return res.status(409).json({ success: false, message: "User already exists with this email" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const created = await userModel.create({ name, email, password: hashedPassword });
 

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useAdminSocket } from "../context/SocketProvider";
 import { AdminContext } from "../context/AdminContext";
+import { useAdminSocket } from "../context/SocketProvider";
 
 export default function DoctorsManager() {
   const { socket } = useAdminSocket();
@@ -21,11 +21,10 @@ export default function DoctorsManager() {
           },
           credentials: "include",
         });
-        if (!res.ok) return; // 401/403 => likely missing/invalid token
+        if (!res.ok) return; // for missing token 
         const data = await res.json();
         if (!cancelled) setDoctors(Array.isArray(data?.doctors) ? data.doctors : []);
       } catch {
-        // noop
       }
     };
 

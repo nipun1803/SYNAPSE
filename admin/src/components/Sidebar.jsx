@@ -1,8 +1,8 @@
 import React, { useContext } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { DoctorContext } from '../context/DoctorContext'
-import { AdminContext } from '../context/AdminContext'
 import { assets } from '../assets/assets'
+import { AdminContext } from '../context/AdminContext'
+import { DoctorContext } from '../context/DoctorContext'
 
 const adminNav = [
   { to: '/admin-dashboard', label: 'Dashboard', icon: assets.home_icon },

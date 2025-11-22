@@ -1,5 +1,5 @@
-import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export const DoctorContext = createContext();

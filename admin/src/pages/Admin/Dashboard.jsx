@@ -72,15 +72,15 @@ const Dashboard = () => {
   return (
     <div className='p-5 w-full max-w-7xl mx-auto'>
       
-      {/* Page Header */}
+
       <div className='mb-6'>
         <h1 className='text-2xl font-bold text-gray-900'>Dashboard</h1>
         <p className='text-gray-600 text-sm mt-1'>Overview of your medical practice</p>
       </div>
 
-      {/* Stats Cards - Professional Colors */}
+
       <div className='grid grid-cols-1 md:grid-cols-3 gap-5 mb-6'>
-        {/* Doctors Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -95,7 +95,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Appointments Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -110,7 +110,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Patients Card */}
+
         <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
           <div className='flex items-center justify-between'>
             <div>
@@ -126,7 +126,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Quick Stats - Professional Colors */}
+
       <div className='grid grid-cols-3 gap-4 mb-6'>
         <div className='bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4'>
           <div className='flex items-center gap-3'>

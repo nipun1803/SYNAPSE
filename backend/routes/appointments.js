@@ -1,10 +1,10 @@
 import express from 'express';
-import authUser from '../middleware/authUser.js';
+import { appointmentCancel as adminCancel, appointmentsAdmin } from '../controllers/adminController.js';
+import { appointmentComplete, appointmentCancel as doctorCancel } from '../controllers/doctorController.js';
+import { bookAppointment, cancelAppointment } from '../controllers/userController.js';
 import authAdmin from '../middleware/authAdmin.js';
 import authDoctor from '../middleware/authDoctor.js';
-import { bookAppointment, cancelAppointment } from '../controllers/userController.js';
-import { appointmentsAdmin, appointmentCancel as adminCancel } from '../controllers/adminController.js';
-import { appointmentComplete, appointmentCancel as doctorCancel } from '../controllers/doctorController.js';
+import authUser from '../middleware/authUser.js';
 
 const router = express.Router();
 

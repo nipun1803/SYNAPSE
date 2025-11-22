@@ -1,13 +1,13 @@
 import express from 'express';
-import upload from '../middleware/multer.js';
-import authUser from '../middleware/authUser.js';
 import {
-  getProfile,
-  updateProfile,
-  listAppointment,
   bookAppointment,
-  cancelAppointment
+  cancelAppointment,
+  getProfile,
+  listAppointment,
+  updateProfile
 } from '../controllers/userController.js';
+import authUser from '../middleware/authUser.js';
+import upload from '../middleware/multer.js';
 
 const router = express.Router();
 

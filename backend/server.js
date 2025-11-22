@@ -1,13 +1,13 @@
-import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
-import cookieParser from 'cookie-parser';
-import connectDB from './config/mongodb.js';
+import express from 'express';
 import connectCloudinary from './config/cloudinary.js';
+import connectDB from './config/mongodb.js';
 import adminRouter from './routes/admin.js';
+import authRouter from './routes/auth.js';
 import doctorRouter from './routes/doctors.js';
 import userRouter from './routes/users.js';
-import authRouter from './routes/auth.js';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Routes
+
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/doctors', doctorRouter); 
@@ -45,14 +45,20 @@ app.get('/', (req, res) => {
 
 
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
 });
-
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ success: false, message: err.message });
+  res.status(500).json({
+    success: false,
+    message: err.message || 'Internal server error'
+  });
 });
+
 
 app.listen(port, () => {
   console.log(`Server started on PORT: ${port}`);

@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { DoctorContext } from './context/DoctorContext'
-import { AdminContext } from './context/AdminContext'
-import { Route, Routes, useLocation, Navigate } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
-import Dashboard from './pages/Admin/Dashboard'
-import AllAppointments from './pages/Admin/AllAppointments'
+import { AdminContext } from './context/AdminContext'
+import { DoctorContext } from './context/DoctorContext'
 import AddDoctor from './pages/Admin/AddDoctor'
+import AllAppointments from './pages/Admin/AllAppointments'
+import Dashboard from './pages/Admin/Dashboard'
 import DoctorsList from './pages/Admin/DoctorsList'
 import DoctorAppointments from './pages/Doctor/DoctorAppointments'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard'
@@ -16,7 +16,7 @@ import DoctorProfile from './pages/Doctor/DoctorProfile'
 
 const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || 'http://localhost:5173/unified-login'
 
-// Protected Route Wrappers
+
 const AdminRoute = ({ children }) => {
   const { aToken, checkingAuth } = useContext(AdminContext)
   
@@ -67,7 +67,7 @@ const App = () => {
 
   return (
     <div className='min-h-screen bg-slate-50 flex flex-col'>
-      {/* Toast Container - Set to light theme for white background */}
+
       <ToastContainer 
         position='top-right'
         autoClose={3000}
@@ -93,7 +93,7 @@ const App = () => {
               <Navigate to={UNIFIED_LOGIN_URL} replace />
             } />
             
-            {/* Admin Routes */}
+
             <Route path='/admin-dashboard' element={
               <AdminRoute>
                 <Dashboard />
@@ -115,7 +115,7 @@ const App = () => {
               </AdminRoute>
             } />
             
-            {/* Doctor Routes */}
+
             <Route path='/doctor-dashboard' element={
               <DoctorRoute>
                 <DoctorDashboard />

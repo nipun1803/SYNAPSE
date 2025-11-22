@@ -1,18 +1,18 @@
 import express from 'express';
-import authDoctor from '../middleware/authDoctor.js';
-import authAdmin from '../middleware/authAdmin.js';
-import upload from '../middleware/multer.js';
+import { addDoctor, allDoctors } from '../controllers/adminController.js';
 import {
+  appointmentCancel,
+  appointmentComplete,
+  appointmentsDoctor,
+  changeAvailability,
+  doctorDashboard,
   doctorList,
   doctorProfile,
-  updateDoctorProfile,
-  appointmentsDoctor,
-  appointmentComplete,
-  appointmentCancel,
-  changeAvailability,
-  doctorDashboard
+  updateDoctorProfile
 } from '../controllers/doctorController.js';
-import { addDoctor, allDoctors } from '../controllers/adminController.js';
+import authAdmin from '../middleware/authAdmin.js';
+import authDoctor from '../middleware/authDoctor.js';
+import upload from '../middleware/multer.js';
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ const router = express.Router();
 router.get('/', doctorList);
 
 // GET /api/doctors/:id (retrieve single doctor)
-router.get('/:id', doctorList); // you can implement dedicated controller for single doctor
+router.get('/:id', doctorList); 
 
 // Doctor's own profile
 router.get('/me/profile', authDoctor, doctorProfile);

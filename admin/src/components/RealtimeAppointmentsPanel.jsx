@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useAdminSocket } from "../context/SocketProvider";
 import { AdminContext } from "../context/AdminContext";
+import { useAdminSocket } from "../context/SocketProvider";
 
 export default function RealtimeAppointmentsPanel() {
   const { socket, connected } = useAdminSocket();
@@ -23,11 +23,10 @@ export default function RealtimeAppointmentsPanel() {
           },
           credentials: "include",
         });
-        if (!res.ok) return; // 401/403 => likely missing/invalid token
+        if (!res.ok) return; // for missing token
         const data = await res.json();
         if (!cancelled) setAppointments(Array.isArray(data?.appointments) ? data.appointments : []);
       } catch {
-        // noop
       }
     };
 
@@ -40,7 +39,7 @@ export default function RealtimeAppointmentsPanel() {
     socket?.on?.("appointment:created", onCreated);
     socket?.on?.("appointment:updated", onUpdated);
 
-    // Fallback polling if socket is down for > 15s
+    // it will fallback to polling it it isn't connected
     const interval = setInterval(() => {
       if (!connected && Date.now() - lastFetchRef.current > 15000) {
         snapshot();

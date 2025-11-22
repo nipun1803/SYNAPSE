@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
+import { AppContext } from '../context/AppContext'
 
 const MyAppointments = () => {
   const { backendUrl, currencySymbol, slotDateFormat } = useContext(AppContext)

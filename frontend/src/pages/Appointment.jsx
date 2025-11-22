@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import RelatedDoctors from '../components/RelatedDoctors'
+import { AppContext } from '../context/AppContext'
 
 const Appointment = () => {
   const { docId } = useParams()
@@ -95,7 +95,7 @@ const Appointment = () => {
       return
     }
 
-    if (booking) return // Prevent double booking
+    if (booking) return // Prevent multiple clicks
 
     try {
       setBooking(true)
@@ -113,12 +113,12 @@ const Appointment = () => {
       if (data.success) {
         toast.success('Appointment booked successfully!')
         
-        // Refresh doctors list to update available slots
+        // Refreshing the doc list to check for updated availability
         if (refreshDoctors) {
           await refreshDoctors()
         }
         
-        // Navigate to appointments page after a short delay
+
         setTimeout(() => {
           navigate('/my-appointments')
         }, 1000)

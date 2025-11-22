@@ -3,15 +3,7 @@ import appointmentModel from '../models/appointmentmodel.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-// const shouldUseSecureCookies = (() => {
-//   const isProd = process.env.NODE_ENV === 'production';
-//   const isLocalHost = [process.env.FRONTEND_URL, process.env.ADMIN_URL]
-//     .filter(Boolean)
-//     .some((url) => url.includes('localhost') || url.includes('127.0.0.1'));
-//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'true') return true;
-//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'false') return false;
-//   return isProd && !isLocalHost;
-// })();
+
 
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === 'production';

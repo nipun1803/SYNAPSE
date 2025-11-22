@@ -4,14 +4,14 @@ const connectCloudinary = async () => {
   try {
     const env = process.env;
 
-    // Accept standard names, legacy names, or a single CLOUDINARY_URL
+
     const cloudName = (env.CLOUDINARY_CLOUD_NAME || env.CLOUDINARY_NAME || '').trim();
     const apiKey = (env.CLOUDINARY_API_KEY || '').trim();
     const apiSecret = (env.CLOUDINARY_API_SECRET || env.CLOUDINARY_SECRET_KEY || '').trim();
     const url = (env.CLOUDINARY_URL || '').trim();
 
     if (url) {
-      // Let SDK parse from CLOUDINARY_URL
+
       cloudinary.config({ 
         cloudinary_url: url,
         secure: true 

@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { assets } from '../../assets/assets'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
 import { resolveImageUrl } from '../../utils/resolveImageUrl'
-import { assets } from '../../assets/assets'
 
 const DoctorsList = () => {
   const { doctors, changeAvailability, aToken, getAllDoctors } = useContext(AdminContext)
@@ -104,10 +104,9 @@ const DoctorsList = () => {
         </div>
       </div>
 
-      {/* Filters and Search */}
+      {/* Filtering and search*/}
       <div className='bg-white border border-gray-200 rounded-xl p-5 mb-5'>
         <div className='space-y-4'>
-          {/* Filter Buttons */}
           <div className='flex gap-2'>
             <button
               onClick={() => setFilter('all')}
@@ -141,7 +140,7 @@ const DoctorsList = () => {
             </button>
           </div>
 
-          {/* Search Bar */}
+
           <input
             type='text'
             placeholder='Search by name or speciality...'
@@ -152,7 +151,7 @@ const DoctorsList = () => {
         </div>
       </div>
 
-      {/* Doctors Grid */}
+      {/* Doctors menu */}
       <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
         <div className='px-6 py-4 border-b border-gray-200 bg-gray-50'>
           <div className='flex items-center justify-between'>
@@ -170,14 +169,14 @@ const DoctorsList = () => {
                 key={item._id}
                 className='bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow'
               >
-                {/* Doctor Image */}
+                {/* doc img */}
                 <div className='relative h-48 bg-gray-100'>
                   <img
                     className='w-full h-full object-cover'
                     src={toSrc(item.image, assets.doctor_icon)}
                     alt={item.name}
                   />
-                  {/* Availability Badge */}
+                  {/* avail button */}
                   <div className='absolute top-3 right-3'>
                     {item.available ? (
                       <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200'>
@@ -191,7 +190,7 @@ const DoctorsList = () => {
                   </div>
                 </div>
 
-                {/* Doctor Info */}
+                {/* doc inf */}
                 <div className='p-4'>
                   <h3 className='text-base font-semibold text-gray-900 mb-1'>
                     Dr. {item.name}
@@ -199,13 +198,12 @@ const DoctorsList = () => {
                   <p className='text-sm text-gray-600 mb-1'>{item.speciality}</p>
                   <p className='text-xs text-gray-500 mb-3'>{item.degree}</p>
 
-                  {/* Experience and Fees */}
                   <div className='flex items-center justify-between text-sm text-gray-600 mb-3 pb-3 border-b border-gray-200'>
                     <span>{item.experience}</span>
                     <span className='font-semibold text-gray-900'>{currency}{item.fees}</span>
                   </div>
 
-                  {/* Availability Toggle */}
+
                   <div className='flex items-center justify-between'>
                     <span className='text-sm font-medium text-gray-700'>Status</span>
                     <label className='relative inline-flex items-center cursor-pointer'>

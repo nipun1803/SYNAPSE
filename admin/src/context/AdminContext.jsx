@@ -1,5 +1,5 @@
-import { createContext, useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 export const AdminContext = createContext();
@@ -65,7 +65,7 @@ const AdminContextProvider = ({ children }) => {
     }
   }, []);
 
-  // Logout function
+
   const logoutAdmin = async () => {
     try {
       const { data } = await api.post('/api/auth/logout/admin');
@@ -85,7 +85,7 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
-  // Get all doctors
+
   const getAllDoctors = async () => {
     try {
       const { data } = await api.get(`/api/admin/doctors`);
@@ -99,18 +99,16 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
-  // Change doctor availability - FIXED: Send proper request
+
   const changeAvailability = async (docId) => {
     try {
       ('Changing availability for doctor:', docId);
       
-      // Send BOTH in URL params AND body for maximum compatibility
+
       const { data } = await api.patch(
         `/api/admin/doctors/${docId}/availability`, 
-        { docId: docId }  // Send docId in body
+        { docId: docId }  
       );
-      
-      // console.log('Change availability response:', data);
       
       if (data?.success) {
         toast.success(data.message || "Availability Changed");
@@ -124,7 +122,7 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
-  // Get all appointments
+
   const getAllAppointments = async () => {
     try {
       const { data } = await api.get(`/api/admin/appointments`);
@@ -138,7 +136,7 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
-  // Cancel appointment
+
   const cancelAppointment = async (appointmentId) => {
     try {
       const { data } = await api.patch(`/api/admin/appointments/${appointmentId}/cancel`, { appointmentId });
@@ -153,7 +151,7 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
-  // Get dashboard data
+
   const getDashData = async () => {
     try {
       const { data } = await api.get(`/api/admin/dashboard`);

@@ -1,21 +1,21 @@
-import React, { useState, useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AppContext } from '../context/AppContext'
 import { toast } from 'react-toastify'
+import { AppContext } from '../context/AppContext'
 
 const ADMIN_PORTAL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'
 const DOCTOR_PORTAL_URL = import.meta.env.VITE_DOCTOR_URL || ADMIN_PORTAL_URL
 
 const UnifiedLogin = () => {
   const navigate = useNavigate()
-  const { backendUrl, loadUserProfileData } = useContext(AppContext) // Fixed: use loadUserProfileData instead of checkAuth
+  const { backendUrl, loadUserProfileData } = useContext(AppContext) // for loading user data 
   
-  const [state, setState] = useState('Login') // 'Login' or 'Sign Up'
-  const [role, setRole] = useState('user') // user, doctor, admin
+  const [state, setState] = useState('Login') 
+  const [role, setRole] = useState('user') 
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
 
-  // Grouping form data is standard human practice
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -37,7 +37,6 @@ const UnifiedLogin = () => {
     e.preventDefault()
     const { email, password, name } = formData
 
-    // Quick validation
     if (state === 'Sign Up' && !name) return toast.error('Name is required')
     if (!email || !password) return toast.error('Please fill all fields')
 
@@ -57,17 +56,14 @@ const UnifiedLogin = () => {
         if (data.success) {
           toast.success('Welcome back!')
           
-          // Simple routing logic
           if (data.userType === 'admin') {
             window.location.href = `${ADMIN_PORTAL_URL}/admin-dashboard`
           } else if (data.userType === 'doctor') {
             window.location.href = `${DOCTOR_PORTAL_URL}/doctor-dashboard`
           } else {
-            // Load user profile data after login
             if (loadUserProfileData) {
               await loadUserProfileData()
             }
-            // Refresh to update auth state
             setTimeout(() => {
               window.location.href = '/'
             }, 500)
@@ -77,7 +73,6 @@ const UnifiedLogin = () => {
         }
 
       } else {
-        // Registration Logic
         if (role !== 'user') return toast.error('Only patients can register online.')
 
         const res = await fetch(`${backendUrl || ''}/api/auth/register`, {
@@ -90,7 +85,6 @@ const UnifiedLogin = () => {
 
         if (data.success) {
           toast.success('Account created!')
-          // Load user profile data after registration
           if (loadUserProfileData) {
             await loadUserProfileData()
           }

@@ -1,15 +1,15 @@
 import express from 'express';
-import {
-  registerUser,
-  loginUser,
-  unifiedLogin,
-  logoutUser
-} from '../controllers/userController.js';
-import { loginDoctor, logoutDoctor } from '../controllers/doctorController.js';
 import { loginAdmin, logoutAdmin } from '../controllers/adminController.js';
-import authUser from '../middleware/authUser.js';
-import authDoctor from '../middleware/authDoctor.js';
+import { loginDoctor, logoutDoctor } from '../controllers/doctorController.js';
+import {
+  loginUser,
+  logoutUser,
+  registerUser,
+  unifiedLogin
+} from '../controllers/userController.js';
 import authAdmin from '../middleware/authAdmin.js';
+import authDoctor from '../middleware/authDoctor.js';
+import authUser from '../middleware/authUser.js';
 
 const router = express.Router();
 
