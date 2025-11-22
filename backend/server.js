@@ -17,11 +17,15 @@ connectCloudinary();
 
 // CORS
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', process.env.CORS_ORIGINS?.split(',') || ''],
+  origin: [
+    process.env.FRONTEND_URL,
+    process.env.ADMIN_URL,
+    'http://localhost:5173',
+    'http://localhost:5174'
+  ].filter(Boolean),
   credentials: true,
   optionsSuccessStatus: 200
 }));
-
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
