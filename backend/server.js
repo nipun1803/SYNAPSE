@@ -15,7 +15,6 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-// CORS
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL,
@@ -24,29 +23,32 @@ app.use(cors({
     'http://localhost:5174'
   ].filter(Boolean),
   credentials: true,
-  optionsSuccessStatus: 200
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], 
+  exposedHeaders: ['Set-Cookie']
 }));
-// Body parser
+app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRouter);
-app.use('/api/users', userRouter);
-app.use('/api/doctors', doctorRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/doctors', doctorRouter); 
+app.use('/api/users', userRouter);
+
 
 app.get('/', (req, res) => {
   res.json({ message: 'API Working' });
 });
 
-// 404
+
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Error handler
+
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(500).json({ success: false, message: err.message });
