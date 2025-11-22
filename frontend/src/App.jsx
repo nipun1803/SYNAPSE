@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Navbar from './components/Navbar'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
@@ -10,13 +10,13 @@ import Appointment from './pages/Appointment'
 import MyAppointments from './pages/MyAppointments'
 import MyProfile from './pages/MyProfile'
 import Footer from './components/Footer'
-import { useAuth } from './hooks/useAuth'
+import { AppContext } from './context/AppContext'
 import { ToastContainer } from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
 
-// Protected Route Wrapper
+
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth()
+  const { userData, loading } = useContext(AppContext)
 
   if (loading) {
     return (
@@ -26,8 +26,27 @@ const ProtectedRoute = ({ children }) => {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!userData) {
     return <Navigate to='/unified-login' replace />
+  }
+
+  return children
+}
+
+const PublicOnlyRoute = ({ children }) => {
+  const { userData, loading } = useContext(AppContext)
+
+  if (loading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary'></div>
+      </div>
+    )
+  }
+
+
+  if (userData) {
+    return <Navigate to='/' replace />
   }
 
   return children
@@ -53,11 +72,14 @@ const App = () => {
           <Route path='/' element={<Home />} />
           <Route path='/doctors' element={<Doctors />} />
           <Route path='/doctors/:speciality' element={<Doctors />} />
-          <Route path='/unified-login' element={<UnifiedLogin />} />
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
+          <Route path='/unified-login' element={
+            <PublicOnlyRoute>
+              <UnifiedLogin />
+            </PublicOnlyRoute>
+          } />
           
-          {/* Protected Routes */}
           <Route path='/appointment/:docId' element={
             <ProtectedRoute>
               <Appointment />
