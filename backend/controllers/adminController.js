@@ -6,23 +6,27 @@ import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
 import userModel from "../models/usermodel.js";
 
-const shouldUseSecureCookies = (() => {
-  const isProd = process.env.NODE_ENV === 'production';
-  const isLocalHost = [process.env.FRONTEND_URL, process.env.ADMIN_URL]
-    .filter(Boolean)
-    .some((url) => url.includes('localhost') || url.includes('127.0.0.1'));
-  if (process.env.COOKIE_SECURE?.toLowerCase() === 'true') return true;
-  if (process.env.COOKIE_SECURE?.toLowerCase() === 'false') return false;
-  return isProd && !isLocalHost;
-})();
+// const shouldUseSecureCookies = (() => {
+//   const isProd = process.env.NODE_ENV === 'production';
+//   const isLocalHost = [process.env.FRONTEND_URL, process.env.ADMIN_URL]
+//     .filter(Boolean)
+//     .some((url) => url.includes('localhost') || url.includes('127.0.0.1'));
+//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'true') return true;
+//   if (process.env.COOKIE_SECURE?.toLowerCase() === 'false') return false;
+//   return isProd && !isLocalHost;
+// })();
 
-const getCookieOptions = () => ({
-  httpOnly: true,
-  secure: shouldUseSecureCookies,
-  sameSite: shouldUseSecureCookies ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-  path: '/',
-});
+const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/',
+  };
+};
 
 const loginAdmin = async (req, res) => {
   try {
@@ -44,7 +48,12 @@ const loginAdmin = async (req, res) => {
 
 const logoutAdmin = async (req, res) => {
   try {
-    res.clearCookie('aToken', { path: '/' });
+    res.clearCookie('aToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/'
+    });
     
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
