@@ -20,8 +20,8 @@ const AddDoctor = () => {
   const [address2, setAddress2] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const { backendUrl, currency } = useContext(AppContext)
-  const { aToken, getAllDoctors } = useContext(AdminContext)
+  const { backendUrl, aToken, getAllDoctors } = useContext(AdminContext)
+  const currency = import.meta.env.VITE_CURRENCY || '₹'
 
   const UPLOAD_PLACEHOLDER = useMemo(
     () => assets?.upload_area || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=',
