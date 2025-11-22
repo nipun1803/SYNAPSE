@@ -33,9 +33,7 @@ const connectCloudinary = async () => {
       });
     }
     
-    console.log('Cloudinary configured successfully');
-    console.log('Cloud Name:', cloudName || 'from URL');
-    
+    console.log('Cloudinary configured successfully');    
 
     
   } catch (error) {

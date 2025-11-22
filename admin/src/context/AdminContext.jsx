@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 export const AdminContext = createContext();
 
 const AdminContextProvider = ({ children }) => {
-  const backendUrl = ""; // Empty for Vite proxy
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
   const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || "http://localhost:5173/unified-login";
 
   const [aToken, setAToken] = useState(null);
@@ -24,7 +24,7 @@ const AdminContextProvider = ({ children }) => {
       (res) => res,
       (error) => {
         const status = error?.response?.status;
-        if (status === 401 && window.location.pathname.startsWith('/admin')) {
+        if (status === 401) {
           toast.error("Session expired. Please login again.");
           setAToken(null);
           localStorage.removeItem('aToken');

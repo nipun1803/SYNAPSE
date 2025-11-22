@@ -3,7 +3,7 @@ import { createContext } from "react";
 export const AppContext = createContext()
 
 const AppContextProvider = (props) => {
-  const currency = import.meta.env.VITE_CURRENCY || '$'
+  const currency = import.meta.env.VITE_CURRENCY || '₹'
   const backendUrl = "" // Use Vite proxy
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 export const AdminContext = createContext();
 
 const AdminContextProvider = ({ children }) => {
-  const backendUrl = ""; // Use Vite proxy (empty = relative URLs)
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
   const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || "http://localhost:5173/unified-login";
 
   const [aToken, setAToken] = useState(null);
