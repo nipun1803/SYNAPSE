@@ -12,7 +12,7 @@ import MyProfile from './pages/MyProfile'
 import Footer from './components/Footer'
 import { useAuth } from './hooks/useAuth'
 import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import "react-toastify/dist/ReactToastify.min.css";
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
