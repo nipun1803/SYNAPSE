@@ -17,7 +17,7 @@ const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false)
   const [profileImage, setProfileImage] = useState(assets.profile_pic)
 
-
+  // user is logged in or not
   useEffect(() => {
     setIsAuthenticated(!!user)
   }, [user])

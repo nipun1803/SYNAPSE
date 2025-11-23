@@ -1,135 +1,165 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { assets } from "../assets/assets";
+import React from "react"
+import { Link } from "react-router-dom"
+import { assets } from "../assets/assets"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Clock } from "lucide-react"
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()
+
+  const socialLinks = [
+    { name: 'Facebook', icon: Facebook, href: "/", hoverColor: 'hover:bg-blue-100 hover:text-blue-600' },
+    { name: 'Twitter', icon: Twitter, href: "/", hoverColor: 'hover:bg-blue-100 hover:text-blue-400' },
+    { name: 'Instagram', icon: Instagram, href: "/", hoverColor: 'hover:bg-pink-100 hover:text-pink-600' },
+    { name: 'LinkedIn', icon: Linkedin, href: "/", hoverColor: 'hover:bg-blue-100 hover:text-blue-700' }
+  ]
+
+  const quickLinks = [
+    { to: "/", label: "Home" },
+    { to: "/doctors", label: "Find Doctors" },
+    { to: "/about", label: "About Us" },
+    { to: "/contact", label: "Contact" },
+    { to: "/my-appointments", label: "My Appointments" }
+  ]
+
+  const legalLinks = [
+    { to: "/privacy-policy", label: "Privacy Policy" },
+    { to: "/terms", label: "Terms of Service" },
+    { to: "/cookie-policy", label: "Cookie Policy" }
+  ]
+
+  const contactInfo = [
+    {
+      icon: MapPin,
+      label: "Address",
+      content: (
+        <>
+          123 Healthcare Street<br/>
+          Medical District, City 12345
+        </>
+      )
+    },
+    {
+      icon: Phone,
+      label: "Phone",
+      content: (
+        <a href="tel:+919848111289" className="text-blue-600 hover:text-blue-700 transition-colors">
+          +91 98481 11289
+        </a>
+      )
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      content: (
+        <a href="mailto:support@synapse.com" className="text-blue-600 hover:text-blue-700 transition-colors">
+          support@synapse.com
+        </a>
+      )
+    },
+    {
+      icon: Clock,
+      label: "Hours",
+      content: "24/7 Support Available"
+    }
+  ]
 
   return (
     <footer className="bg-white border-t mt-20">
       <div className="max-w-7xl mx-auto px-4 py-12">
         
-
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           
-
           <div className="md:col-span-2">
             <img className="mb-5 w-40" src={assets.logo} alt="Synapse" />
             <p className="text-gray-600 leading-relaxed mb-6 max-w-md">
               Your trusted healthcare partner. Book appointments with top doctors, 
               manage your health records, and get quality medical care - all in one place.
             </p>
-            <div className="flex gap-3">
-              <a href="/" target="_blank" rel="noopener noreferrer" 
-                className="w-10 h-10 border border-gray-300 hover:border-blue-600 hover:bg-blue-50 rounded-full flex items-center justify-center transition-all">
-                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a href="/" target="_blank" rel="noopener noreferrer"
-                className="w-10 h-10 border border-gray-300 hover:border-blue-400 hover:bg-blue-50 rounded-full flex items-center justify-center transition-all">
-                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                </svg>
-              </a>
-              <a href="/" target="_blank" rel="noopener noreferrer"
-                className="w-10 h-10 border border-gray-300 hover:border-pink-500 hover:bg-pink-50 rounded-full flex items-center justify-center transition-all">
-                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
-              <a href="/" target="_blank" rel="noopener noreferrer"
-                className="w-10 h-10 border border-gray-300 hover:border-blue-700 hover:bg-blue-50 rounded-full flex items-center justify-center transition-all">
-                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              </a>
+            <div className="flex gap-2">
+              {socialLinks.map((social) => {
+                const IconComponent = social.icon
+                return (
+                  <Button
+                    key={social.name}
+                    variant="outline"
+                    size="icon"
+                    className={`rounded-full ${social.hoverColor} transition-all`}
+                    asChild
+                  >
+                    <a 
+                      href={social.href}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      aria-label={social.name}
+                    >
+                      <IconComponent className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )
+              })}
             </div>
           </div>
-
 
           <div>
             <h3 className="text-gray-900 font-semibold text-base mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              <li>
-                <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/doctors" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
-                  Find Doctors
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/my-appointments" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
-                  My Appointments
-                </Link>
-              </li>
+              {quickLinks.map((link) => (
+                <li key={link.to}>
+                  <Link 
+                    to={link.to} 
+                    className="text-gray-600 hover:text-blue-600 transition-colors text-sm inline-flex items-center group"
+                  >
+                    <span className="group-hover:translate-x-1 transition-transform">
+                      {link.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-
           <div>
             <h3 className="text-gray-900 font-semibold text-base mb-4">Contact Us</h3>
-            <ul className="space-y-3 text-sm">
-              <li className="text-gray-600">
-                <span className="block font-medium text-gray-700 mb-1">Address</span>
-                123 Healthcare Street<br/>
-                Medical District, City 12345
-              </li>
-              <li>
-                <span className="block font-medium text-gray-700 mb-1">Phone</span>
-                <a href="tel:+919848111289" className="text-blue-600 hover:text-blue-700">
-                  +91 98481 11289
-                </a>
-              </li>
-              <li>
-                <span className="block font-medium text-gray-700 mb-1">Email</span>
-                <a href="mailto:support@synapse.com" className="text-blue-600 hover:text-blue-700">
-                  support@synapse.com
-                </a>
-              </li>
-              <li className="text-gray-600">
-                <span className="block font-medium text-gray-700 mb-1">Hours</span>
-                24/7 Support Available
-              </li>
+            <ul className="space-y-4 text-sm">
+              {contactInfo.map((item) => {
+                const IconComponent = item.icon
+                return (
+                  <li key={item.label} className="flex gap-3">
+                    <IconComponent className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="block font-medium text-gray-700 mb-1">{item.label}</span>
+                      <div className="text-gray-600">{item.content}</div>
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         </div>
 
+        <Separator className="my-6" />
 
-        <div className="border-t border-gray-200 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-500">
-              Copyright © {currentYear} Synapse. All rights reserved.
-            </p>
-            <div className="flex flex-wrap gap-6 text-sm">
-              <Link to="/privacy-policy" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Privacy Policy
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-500">
+            Copyright © {currentYear} Synapse. All rights reserved.
+          </p>
+          <div className="flex flex-wrap gap-6 text-sm">
+            {legalLinks.map((link) => (
+              <Link 
+                key={link.to}
+                to={link.to} 
+                className="text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                {link.label}
               </Link>
-              <Link to="/terms" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Terms of Service
-              </Link>
-              <Link to="/cookie-policy" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Cookie Policy
-              </Link>
-            </div>
+            ))}
           </div>
         </div>
       </div>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

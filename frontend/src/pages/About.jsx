@@ -1,74 +1,110 @@
 import React from "react";
 import { assets } from "../assets/assets";
+import { Card, CardContent } from "@/components/ui/card";
+import { Clock, MapPin, Sparkles } from "lucide-react";
 
 const About = () => {
+  const features = [
+    {
+      icon: Clock,
+      title: "Efficiency",
+      description: "Streamlined appointment scheduling that fits into your busy lifestyle."
+    },
+    {
+      icon: MapPin,
+      title: "Convenience",
+      description: "Access to a network of trusted healthcare professionals in your area."
+    },
+    {
+      icon: Sparkles,
+      title: "Personalization",
+      description: "Book your next checkup in just a few clicks. No more waiting on hold—Synapse works like your own digital assistant."
+    }
+  ];
+
   return (
-    <div>
-      <div className="text-center text-2xl pt-10 text-gray-500">
-        <p>
-          ABOUT <span className="text-gray-700 font-semibold">US</span>
-        </p>
+    <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      
+      {/* Page Title */}
+      <div className="text-center mb-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+          About <span className="text-blue-600">Us</span>
+        </h1>
       </div>
 
-      <div className="my-10 flex flex-col md:flex-row gap-12">
+      {/* Main Content Section */}
+      <div className="my-16 flex flex-col md:flex-row gap-12 items-center">
         <img
-          className="w-full md:max-w-[360px]"
+          className="w-full md:max-w-[360px] rounded-2xl shadow-lg"
           src={assets.about_image}
-          alt=""
+          alt="About Synapse healthcare platform"
         />
-        <div className="flex flex-col justify-center gap-6 md:w-2/4 text-sm text-gray-600">
-          <p>
+        
+        <div className="flex flex-col justify-center gap-6 md:w-2/4 text-gray-600">
+          <p className="text-base leading-relaxed">
             Welcome to Synapse, your trusted partner in managing your healthcare
             needs conveniently and efficiently. At Synapse, we understand the
             challenges individuals face when it comes to scheduling doctor
             appointments and managing their health records.
           </p>
-          <p>
+          
+          <p className="text-base leading-relaxed">
             Synapse is committed to excellence in healthcare technology. We
             continuously strive to enhance our platform, integrating the latest
             advancements to improve user experience and deliver superior
             service. Whether you're booking your first appointment or managing
             ongoing care, Synapse is here to support you every step of the way.
           </p>
-          <b className="text-gray-800">Our Vision</b>
-          <p>
-            Our vision at Synapse is to create a seamless healthcare experience
-            for every user. We aim to bridge the gap between patients and
-            healthcare providers, making it easier for you to access the care
-            you need, when you need it.
-          </p>
+          
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              Our Vision
+            </h2>
+            <p className="text-base leading-relaxed">
+              Our vision at Synapse is to create a seamless healthcare experience
+              for every user. We aim to bridge the gap between patients and
+              healthcare providers, making it easier for you to access the care
+              you need, when you need it.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="text-xl my-4">
-        <p>
-          WHY <span className="text-gray-700 font-semibold">CHOOSE US</span>
-        </p>
+      {/* Why Choose Us Section */}
+      <div className="mt-20">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
+          Why <span className="text-blue-600">Choose Us</span>
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            
+            return (
+              <Card 
+                key={index}
+                className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-gray-200 hover:border-blue-300"
+              >
+                <CardContent className="p-8 flex flex-col gap-4">
+                  <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors duration-300">
+                    <IconComponent className="w-6 h-6 text-blue-600" />
+                  </div>
+                  
+                  <h3 className="text-lg font-semibold text-gray-900 uppercase tracking-wide">
+                    {feature.title}
+                  </h3>
+                  
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row mb-20">
-        <div className="border px-10 md:px-16 py-8 sm:py-16 flex flex-col gap-5 text-[15px] hover:bg-primary hover:text-white transition-all duration-300 text-gray-600 cursor-pointer">
-          <b>EFFICIENCY:</b>
-          <p>
-            Streamlined appointment scheduling that fits into your busy
-            lifestyle.
-          </p>
-        </div>
-        <div className="border px-10 md:px-16 py-8 sm:py-16 flex flex-col gap-5 text-[15px] hover:bg-primary hover:text-white transition-all duration-300 text-gray-600 cursor-pointer">
-          <b>CONVENIENCE: </b>
-          <p>
-            Access to a network of trusted healthcare professionals in your
-            area.
-          </p>
-        </div>
-        <div className="border px-10 md:px-16 py-8 sm:py-16 flex flex-col gap-5 text-[15px] hover:bg-primary hover:text-white transition-all duration-300 text-gray-600 cursor-pointer">
-          <b>PERSONALIZATION:</b>
-          <p>
-          Book your next checkup in just a few clicks. No more waiting on hold—Synapse works like your own digital assistant.
-          </p>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 };
 

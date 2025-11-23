@@ -1,257 +1,311 @@
-import React, { useContext, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import { AppContext } from '../context/AppContext'
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { 
+  User, Mail, Lock, Eye, EyeOff, Loader2, 
+  Activity, CheckCircle2, ShieldCheck, Sparkles, HelpCircle, AlertCircle 
+} from "lucide-react";
 
-const ADMIN_PORTAL_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'
-const DOCTOR_PORTAL_URL = import.meta.env.VITE_DOCTOR_URL || ADMIN_PORTAL_URL
+import { AppContext } from "../context/AppContext";
+
+// SHADCN UI COMPONENTS
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+// Config
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL;
+const DOCTOR_URL = import.meta.env.VITE_DOCTOR_URL || ADMIN_URL;
+
+const AuthSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(6, "Password should be at least 6 chars"),
+});
 
 const UnifiedLogin = () => {
-  const navigate = useNavigate()
-  const { backendUrl, loadUserProfileData } = useContext(AppContext)
+  const navigate = useNavigate();
+  const { backendUrl, loadUserProfileData } = useContext(AppContext);
+
+  const [authMode, setAuthMode] = useState("login");
+  const [userRole, setUserRole] = useState("user");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [state, setState] = useState('Login')
-  const [role, setRole] = useState('user')
-  const [loading, setLoading] = useState(false)
-  const [showPass, setShowPass] = useState(false)
+  // Form setup
+  const form = useForm({
+    resolver: zodResolver(AuthSchema),
+    defaultValues: { name: "", email: "", password: "" },
+  });
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  })
+  // Reset on mode change
+  useEffect(() => {
+    form.reset();
+  }, [authMode, userRole]);
 
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-
-  const roles = [
-    { id: 'user', label: 'Patient' },
-    { id: 'doctor', label: 'Doctor' },
-    { id: 'admin', label: 'Admin' }
-  ]
-
-
-  const guestCredentials = {
-    user: {
-      email: 'test@gmail.com',
-      password: '12345678',
-      label: 'Patient'
-    },
-    doctor: {
-      email: 'testdoc@gmail.com',
-      password: 'doctor123',
-      label: 'Doctor'
-    },
-    admin: {
-      email: 'admin@gmail.com',
-      password: 'admin123',
-      label: 'Admin'
-    }
-  }
-
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    const { email, password, name } = formData
-
-    if (state === 'Sign Up' && !name) return toast.error('Name is required')
-    if (!email || !password) return toast.error('Please fill all fields')
-
-    setLoading(true)
+  const handleAuthSubmit = async (values) => {
+    setIsSubmitting(true);
     try {
-      let data
-      
-      if (state === 'Login') {
-        const res = await fetch(`${backendUrl || ''}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email, password, userType: role }),
-        })
-        data = await res.json()
+      if (authMode === "signup" && userRole !== "user") {
+        toast.error("Doctors and admins need to be invited by an admin.");
+        return;
+      }
 
-        if (data.success) {
-          toast.success('Welcome back!')
-          
-          if (data.userType === 'admin') {
-            window.location.href = `${ADMIN_PORTAL_URL}/admin-dashboard`
-          } else if (data.userType === 'doctor') {
-            window.location.href = `${DOCTOR_PORTAL_URL}/doctor-dashboard`
-          } else {
-            if (loadUserProfileData) {
-              await loadUserProfileData()
-            }
-            setTimeout(() => {
-              window.location.href = '/'
-            }, 500)
-          }
-        } else {
-          toast.error(data.message || 'Login failed')
+      const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const payload = { ...values, userType: userRole };
+
+      const response = await fetch(`${backendUrl}${endpoint}`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) throw new Error(data.message || "Auth failed");
+
+      toast.success(authMode === "login" ? "Welcome back!" : "Account created!");
+
+      // Redirects
+      if (authMode === "login") {
+        if (data.userType === "admin") window.location.href = `${ADMIN_URL}/admin-dashboard`;
+        else if (data.userType === "doctor") window.location.href = `${DOCTOR_URL}/doctor-dashboard`;
+        else {
+          if (loadUserProfileData) await loadUserProfileData();
+          navigate("/");
         }
       } else {
-        if (role !== 'user') return toast.error('Only patients can register online.')
-
-        const res = await fetch(`${backendUrl || ''}/api/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ name, email, password }),
-        })
-        data = await res.json()
-
-        if (data.success) {
-          toast.success('Account created!')
-          if (loadUserProfileData) {
-            await loadUserProfileData()
-          }
-          setTimeout(() => {
-            navigate('/my-profile')
-            window.location.reload()
-          }, 500)
-        } else {
-          toast.error(data.message || 'Registration failed')
-        }
+        if (loadUserProfileData) await loadUserProfileData();
+        navigate("/my-profile");
       }
     } catch (error) {
-      console.error(error)
-      toast.error('Something went wrong. Please try again.')
+      toast.error(error.message);
     } finally {
-      setLoading(false)
+      setIsSubmitting(false);
     }
-  }
+  };
+
+  const fillDemo = () => {
+    const demos = {
+      user: { email: "test@gmail.com", password: "12345678" },
+      doctor: { email: "testdoc@gmail.com", password: "doctor123" },
+      admin: { email: "admin@gmail.com", password: "admin123" },
+    };
+    form.setValue("email", demos[userRole].email);
+    form.setValue("password", demos[userRole].password);
+    toast.info(`Filled ${userRole} demo creds`);
+  };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4'>
-      <form onSubmit={onSubmit} className='bg-white rounded-lg shadow-lg border border-gray-100 p-8 w-full max-w-md'>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 font-sans text-slate-800">
+      
+      {/* Main Card */}
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 lg:gap-8 overflow-hidden rounded-3xl shadow-2xl bg-white border border-blue-100">
         
-
-        <div className='text-center mb-8'>
-          <h1 className='text-3xl font-bold text-gray-800 mb-2'>
-            {state === 'Login' ? 'Sign In' : 'Create Account'}
-          </h1>
-          <p className='text-gray-500 text-sm'>
-            Please select your role to continue
-          </p>
-        </div>
-
-
-        <div className='grid grid-cols-3 gap-2 mb-6 bg-gray-100 p-1 rounded-lg'>
-          {roles.map((r) => (
-            <button
-              key={r.id}
-              type='button'
-              onClick={() => setRole(r.id)}
-              className={`py-2 text-sm font-medium rounded-md transition-all ${
-                role === r.id ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
-
-
-        <div className='space-y-4'>
-          {state === 'Sign Up' && role === 'user' && (
-            <div>
-              <label className='text-xs font-semibold text-gray-600 uppercase'>Full Name</label>
-              <input
-                name='name'
-                value={formData.name}
-                onChange={handleChange}
-                className='w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-                placeholder="John Doe"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className='text-xs font-semibold text-gray-600 uppercase'>Email</label>
-            <input
-              name='email'
-              type='email'
-              value={formData.email}
-              onChange={handleChange}
-              className='w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-              placeholder="name@example.com"
+        {/* Left Side: Brand */}
+        <div className="hidden lg:flex flex-col relative text-white">
+          <div className="absolute inset-0">
+            <img 
+              src="https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80" 
+              alt="Medical Tech" 
+              className="w-full h-full object-cover"
             />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-700/90 to-blue-900/90 mix-blend-multiply" />
           </div>
 
-          <div>
-            <label className='text-xs font-semibold text-gray-600 uppercase'>Password</label>
-            <div className='relative'>
-              <input
-                name='password'
-                type={showPass ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                className='w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-                placeholder="••••••••"
-              />
-              <span 
-                onClick={() => setShowPass(!showPass)}
-                className='absolute right-3 top-3 text-xs text-gray-500 cursor-pointer hover:text-blue-600'
-              >
-                {showPass ? 'HIDE' : 'SHOW'}
-              </span>
+          <div className="relative z-10 flex flex-col justify-between h-full p-12">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 shadow-inner">
+                <Activity className="text-white h-6 w-6" />
+              </div>
+              <span className="font-bold text-2xl tracking-tight text-white">Synapse</span>
             </div>
-          </div>
-        </div>
 
-
-        <button
-          disabled={loading}
-          className='w-full mt-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed'
-        >
-          {loading ? 'Processing...' : (state === 'Login' ? 'Login' : 'Create Account')}
-        </button>
-
-        {/* Guest Credentials Display  */}
-        {state === 'Login' && (
-          <div className='mt-6 p-3 bg-slate-50 rounded-lg border border-slate-200'>
-            <div className='flex items-start gap-2'>
-              <svg className='w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
-              </svg>
-              <div className='flex-1 min-w-0'>
-                <p className='text-xs font-semibold text-slate-700 mb-1.5'>
-                  {guestCredentials[role].label} Demo Login
-                </p>
-                <div className='space-y-1'>
-                  <div className='flex items-center justify-between gap-2'>
-                    <span className='text-[10px] text-slate-500 uppercase tracking-wide'>Email:</span>
-                    <span className='text-xs text-slate-700 font-mono truncate'>{guestCredentials[role].email}</span>
-                  </div>
-                  <div className='flex items-center justify-between gap-2'>
-                    <span className='text-[10px] text-slate-500 uppercase tracking-wide'>Password:</span>
-                    <span className='text-xs text-slate-700 font-mono'>{guestCredentials[role].password}</span>
-                  </div>
+            <div className="space-y-8">
+              <h2 className="text-4xl lg:text-5xl font-bold leading-[1.1]">
+                Healthcare, <br />
+                <span className="text-blue-200">Connected.</span>
+              </h2>
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl max-w-md shadow-lg">
+                <div className="flex items-center gap-3 mb-3">
+                   <ShieldCheck className="text-blue-200 h-5 w-5" />
+                   <span className="font-semibold text-sm">Bank-Grade Security</span>
                 </div>
+                <p className="text-sm text-blue-50 leading-relaxed font-light opacity-90">
+                  Synapse protects your medical data with end-to-end encryption, ensuring your privacy is never compromised.
+                </p>
               </div>
             </div>
+
+            <div className="flex items-center gap-6 text-xs text-blue-100 font-medium opacity-80">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> HIPAA Compliant</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> 24/7 Access</span>
+            </div>
           </div>
-        )}
-
-
-        <div className='mt-6 text-center text-sm text-gray-600'>
-          {state === 'Login' ? (
-            <p>New here? <span onClick={() => setState('Sign Up')} className='text-blue-600 font-medium cursor-pointer hover:underline'>Create an account</span></p>
-          ) : (
-            <p>Already have an account? <span onClick={() => setState('Login')} className='text-blue-600 font-medium cursor-pointer hover:underline'>Login here</span></p>
-          )}
         </div>
 
+        {/* Right Side: Form */}
+        <div className="flex flex-col justify-center p-8 lg:p-16 bg-white relative">
+          <div className="max-w-[400px] mx-auto w-full space-y-8">
+            
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                {authMode === "login" ? "Welcome Back" : "Join Synapse"}
+              </h1>
+              <p className="text-sm text-slate-500">
+                {authMode === "login" 
+                  ? "Sign in to access your portal." 
+                  : "Create an account to manage your health."}
+              </p>
+            </div>
 
-        {state === 'Sign Up' && role !== 'user' && (
-          <div className='mt-4 p-3 bg-yellow-50 text-yellow-700 text-xs rounded border border-yellow-200'>
-            Note: Doctors and Admins must be added by the system administrator.
+            {/* Tabs */}
+            <Tabs value={userRole} onValueChange={setUserRole} className="w-full">
+              <TabsList className="w-full grid grid-cols-3 bg-blue-50/80 p-1.5 rounded-xl h-12 border border-blue-100/50">
+                <TabsTrigger value="user" className="rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">Patient</TabsTrigger>
+                <TabsTrigger value="doctor" className="rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">Doctor</TabsTrigger>
+                <TabsTrigger value="admin" className="rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">Admin</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* Form */}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleAuthSubmit)} className="space-y-4">
+                
+                {authMode === "signup" && (
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
+                            <Input 
+                              placeholder="Full Name" 
+                              className="pl-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
+                          <Input 
+                            placeholder="Email Address" 
+                            className="pl-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-xs text-red-500" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
+                          <Input 
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password" 
+                            className="pl-10 pr-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
+                            {...field} 
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => setShowPassword(!showPassword)} 
+                            className="absolute right-3 top-3.5 text-blue-300 hover:text-blue-500 transition-colors"
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-xs text-red-500" />
+                    </FormItem>
+                  )}
+                />
+
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all hover:-translate-y-0.5 mt-2"
+                >
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : (authMode === "login" ? "Sign In" : "Create Account")}
+                </Button>
+
+              </form>
+            </Form>
+
+            {/* Demo Section */}
+            {authMode === 'login' && (
+               <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mt-4 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                     <p className="text-xs font-semibold text-blue-700 flex items-center gap-2">
+                        <Sparkles size={14} className="text-blue-500"/> 
+                        Demo Access
+                     </p>
+                     <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Test Mode</span>
+                  </div>
+                  <Button 
+                     variant="outline" 
+                     onClick={fillDemo} 
+                     className="w-full h-9 bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium"
+                  >
+                    Auto-Fill {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Credentials
+                  </Button>
+               </div>
+            )}
+
+            <div className="text-center pt-2">
+              <p className="text-sm text-slate-600">
+                {authMode === "login" ? "New to Synapse?" : "Already have an account?"}{" "}
+                <button 
+                  onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")} 
+                  className="text-blue-600 font-bold hover:text-blue-700 hover:underline transition-all"
+                >
+                  {authMode === "login" ? "Create an account" : "Log in"}
+                </button>
+              </p>
+            </div>
+            
+            <div className="mt-8 flex justify-center gap-6 text-[10px] text-slate-400">
+               <a href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</a>
+               <a href="#" className="hover:text-blue-600 transition-colors">Terms of Service</a>
+            </div>
+
           </div>
-        )}
-
-      </form>
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default UnifiedLogin
+export default UnifiedLogin;

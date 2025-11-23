@@ -4,6 +4,10 @@ import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import RelatedDoctors from '../components/RelatedDoctors'
 import { AppContext } from '../context/AppContext'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Info } from 'lucide-react'
 
 const Appointment = () => {
   const { docId } = useParams()
@@ -19,74 +23,88 @@ const Appointment = () => {
   const [booking, setBooking] = useState(false)
 
   const toLocalDateInputValue = (d) => {
-    const off = d.getTimezoneOffset()
-    const d2 = new Date(d.getTime() - off * 60 * 1000)
-    return d2.toISOString().split('T')[0]
+    const offset = d.getTimezoneOffset()
+    const adjusted = new Date(d.getTime() - offset * 60 * 1000)
+    return adjusted.toISOString().split('T')[0]
   }
   
   const minDateStr = useMemo(() => toLocalDateInputValue(new Date()), [])
   const maxDateStr = useMemo(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 30)
-    return toLocalDateInputValue(d)
+    const maxDate = new Date()
+    maxDate.setDate(maxDate.getDate() + 30)
+    return toLocalDateInputValue(maxDate)
   }, [])
 
-  const makeSlotDateKey = (d) => `${d.getDate()}_${d.getMonth() + 1}_${d.getFullYear()}`
-  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+  const makeSlotDateKey = (date) => `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
+
+  const isSameDay = (date1, date2) => {
+    return date1.getFullYear() === date2.getFullYear() && 
+           date1.getMonth() === date2.getMonth() && 
+           date1.getDate() === date2.getDate()
+  }
 
   const generateSlotsForDate = (date, bookedTimes = []) => {
-    const start = new Date(date)
-    const end = new Date(date)
-    start.setHours(10, 0, 0, 0)
-    end.setHours(21, 0, 0, 0)
+    const startTime = new Date(date)
+    const endTime = new Date(date)
+    startTime.setHours(10, 0, 0, 0)
+    endTime.setHours(21, 0, 0, 0)
 
     const now = new Date()
-    if (sameDay(date, now)) {
-      const adj = new Date(now)
-      const m = adj.getMinutes()
-      if (m > 0 && m <= 30) adj.setMinutes(30, 0, 0)
-      else if (m > 30) adj.setHours(adj.getHours() + 1, 0, 0, 0)
-      else adj.setMinutes(0, 0, 0)
-      if (adj < start) adj.setHours(10, 0, 0, 0)
-      if (adj >= end) return []
-      start.setTime(adj.getTime())
+    if (isSameDay(date, now)) {
+      const adjustedTime = new Date(now)
+      const minutes = adjustedTime.getMinutes()
+      
+      if (minutes > 0 && minutes <= 30) {
+        adjustedTime.setMinutes(30, 0, 0)
+      } else if (minutes > 30) {
+        adjustedTime.setHours(adjustedTime.getHours() + 1, 0, 0, 0)
+      } else {
+        adjustedTime.setMinutes(0, 0, 0)
+      }
+      
+      if (adjustedTime < startTime) adjustedTime.setHours(10, 0, 0, 0)
+      if (adjustedTime >= endTime) return []
+      
+      startTime.setTime(adjustedTime.getTime())
     }
 
     const slots = []
-    const cur = new Date(start)
-    while (cur < end) {
-      const timeStr = cur.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      const disabled = bookedTimes.includes(timeStr)
-      slots.push({ time: timeStr, disabled })
-      cur.setMinutes(cur.getMinutes() + 30)
+    const currentSlot = new Date(startTime)
+    
+    while (currentSlot < endTime) {
+      const timeStr = currentSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      slots.push({ time: timeStr, disabled: bookedTimes.includes(timeStr) })
+      currentSlot.setMinutes(currentSlot.getMinutes() + 30)
     }
+    
     return slots
   }
 
   useEffect(() => {
-    const found = doctors.find(d => String(d._id) === String(docId))
-    setDocInfo(found || null)
+    const foundDoctor = doctors.find(doc => String(doc._id) === String(docId))
+    setDocInfo(foundDoctor || null)
     setLoadingDoc(false)
   }, [doctors, docId])
 
   useEffect(() => {
     if (!docInfo) return
+    
     setLoadingSlots(true)
     setSlotTime('')
 
-    const key = makeSlotDateKey(selectedDate)
-    const bookedTimes =
-      (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[key]) && docInfo.slots_booked[key]) ||
-      (docInfo.slots_booked && docInfo.slots_booked[key]) ||
-      []
+    const dateKey = makeSlotDateKey(selectedDate)
+    const bookedTimes = 
+      (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
+      (docInfo.slots_booked && docInfo.slots_booked[dateKey]) || []
+    
     const slots = generateSlotsForDate(selectedDate, bookedTimes)
     setTimeSlots(slots)
     setLoadingSlots(false)
   }, [docInfo, selectedDate])
 
-  const onDateChange = (e) => {
-    const [y, m, d] = e.target.value.split('-').map(n => parseInt(n, 10))
-    setSelectedDate(new Date(y, m - 1, d))
+  const handleDateChange = (e) => {
+    const [year, month, day] = e.target.value.split('-').map(num => parseInt(num, 10))
+    setSelectedDate(new Date(year, month - 1, day))
   }
 
   const bookAppointment = async () => {
@@ -94,39 +112,30 @@ const Appointment = () => {
       toast.warning('Please select a time slot')
       return
     }
-
-    if (booking) return // Prevent multiple clicks
+    if (booking) return
 
     try {
       setBooking(true)
       const slotDate = makeSlotDateKey(selectedDate)
       
-      const res = await fetch(`${backendUrl || ''}/api/users/appointments`, {
+      const response = await fetch(`${backendUrl || ''}/api/users/appointments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ docId, slotDate, slotTime })
       })
       
-      const data = await res.json()
+      const data = await response.json()
       
       if (data.success) {
         toast.success('Appointment booked successfully!')
-        
-        // Refreshing the doc list to check for updated availability
-        if (refreshDoctors) {
-          await refreshDoctors()
-        }
-        
-
-        setTimeout(() => {
-          navigate('/my-appointments')
-        }, 1000)
+        if (refreshDoctors) await refreshDoctors()
+        setTimeout(() => navigate('/my-appointments'), 1000)
       } else {
         toast.error(data.message || 'Failed to book appointment')
       }
-    } catch (err) {
-      console.error('Booking error:', err)
+    } catch (error) {
+      console.error('Booking error:', error)
       toast.error('Failed to book appointment. Please try again.')
     } finally {
       setBooking(false)
@@ -136,7 +145,7 @@ const Appointment = () => {
   if (loadingDoc || !docInfo) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
+        <Loader2 className='w-12 h-12 text-blue-600 animate-spin' />
       </div>
     )
   }
@@ -144,139 +153,174 @@ const Appointment = () => {
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
   return (
-    <div className='max-w-6xl mx-auto py-8'>
+    <div className='max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8'>
       <div className='flex flex-col sm:flex-row gap-6 mb-8'>
-        <div>
-          <img className='bg-primary w-full sm:max-w-72 rounded-lg' src={docInfo.image} alt="" />
+        <div className='flex-shrink-0'>
+          <img 
+            className='w-full sm:w-72 h-auto rounded-2xl object-cover shadow-lg' 
+            src={docInfo.image} 
+            alt={docInfo.name}
+          />
         </div>
-        <div className='flex-1 border border-gray-200 rounded-xl p-8 bg-white shadow-lg mx-2 sm:mx-0 mt-[-80px] sm:mt-0'>
-          <p className='flex items-center gap-2 text-2xl font-medium text-gray-900'>
-            {docInfo.name}
-            <img className='w-5' src={assets.verified_icon} alt="" />
-          </p>
-          <div className='flex items-center gap-2 text-sm mt-1 text-gray-600'>
-            <p>{docInfo.degree} - {docInfo.speciality}</p>
-            <button className='py-0.5 px-2 border text-xs rounded-full'>{docInfo.experience}</button>
-          </div>
-          <div className='mt-3'>
-            <p className='flex items-center gap-1 text-sm font-medium text-gray-900'>
-              About <img className='w-3' src={assets.info_icon} alt="" />
-            </p>
-            <p className='text-sm text-gray-500 max-w-[700px] mt-1'>{docInfo.about}</p>
-          </div>
-          <div className='flex items-center justify-between mt-4'>
-            <p className='text-gray-500 font-medium'>
-              Appointment fee: <span className='text-gray-600'>{currencySymbol}{docInfo.fees}</span>
-            </p>
-            <div className='flex items-center gap-2 text-sm'>
-              <span className={`w-2 h-2 rounded-full ${docInfo.available ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              <span className={`${docInfo.available ? 'text-green-600' : 'text-red-600'}`}>
+        
+        <Card className='flex-1 border-gray-200 shadow-lg'>
+          <CardContent className='p-6 sm:p-8'>
+            <div className='flex items-start justify-between gap-4 mb-4'>
+              <div>
+                <h1 className='flex items-center gap-2 text-2xl font-bold text-gray-900 mb-2'>
+                  {docInfo.name}
+                  <img className='w-5 h-5' src={assets.verified_icon} alt='Verified' />
+                </h1>
+                <div className='flex flex-wrap items-center gap-2 text-sm text-gray-600'>
+                  <span>{docInfo.degree} - {docInfo.speciality}</span>
+                  <Badge variant='outline' className='text-xs'>{docInfo.experience}</Badge>
+                </div>
+              </div>
+              
+              <Badge 
+                variant={docInfo.available ? 'default' : 'destructive'}
+                className={docInfo.available ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
+              >
+                <span className={`w-2 h-2 rounded-full mr-1.5 ${docInfo.available ? 'bg-green-500' : 'bg-red-500'}`}></span>
                 {docInfo.available ? 'Available' : 'Not Available'}
-              </span>
+              </Badge>
             </div>
-          </div>
-        </div>
+            
+            <div className='space-y-4'>
+              <div>
+                <p className='flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2'>
+                  <Info className='w-4 h-4' />
+                  About
+                </p>
+                <p className='text-sm text-gray-600 leading-relaxed'>{docInfo.about}</p>
+              </div>
+              
+              <div className='pt-4 border-t border-gray-200'>
+                <p className='text-gray-600 text-sm'>
+                  Appointment fee: <span className='text-lg font-semibold text-gray-900'>{currencySymbol}{docInfo.fees}</span>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className='sm:ml-72 sm:pl-4 mt-8'>
-        <h2 className='text-2xl font-bold text-gray-800 mb-6'>Book Your Appointment</h2>
+      <Card className='border-gray-200 shadow-lg'>
+        <CardContent className='p-6 sm:p-8'>
+          <h2 className='text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2'>
+            <Calendar className='w-6 h-6 text-blue-600' />
+            Book Your Appointment
+          </h2>
 
-        <div className='mb-6 grid gap-4 sm:grid-cols-2'>
-          <div>
-            <h3 className='text-lg font-semibold text-gray-700 mb-2'>Select Date</h3>
+          <div className='mb-8'>
+            <h3 className='text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2'>
+              <Calendar className='w-5 h-5' />
+              Select Date
+            </h3>
             <input
               type='date'
-              className='w-full sm:w-64 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 transition-colors'
+              className='w-full sm:w-auto px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors text-gray-900'
               value={toLocalDateInputValue(selectedDate)}
-              onChange={onDateChange}
+              onChange={handleDateChange}
               min={minDateStr}
               max={maxDateStr}
             />
-            <p className='mt-2 text-sm text-gray-500'>
-              {daysOfWeek[selectedDate.getDay()]}, {selectedDate.toLocaleDateString()}
+            <p className='mt-2 text-sm text-gray-500 font-medium'>
+              {daysOfWeek[selectedDate.getDay()]}, {selectedDate.toLocaleDateString('en-US', { 
+                month: 'long', day: 'numeric', year: 'numeric' 
+              })}
             </p>
           </div>
-          <div className='flex items-center gap-4'>
+
+          <div className='flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg'>
             <div className='flex items-center gap-2'>
-              <span className='inline-block w-3 h-3 rounded bg-gray-200 border'></span>
-              <span className='text-sm text-gray-600'>Available</span>
+              <span className='inline-block w-3 h-3 rounded bg-gray-200 border-2 border-gray-300'></span>
+              <span className='text-xs sm:text-sm text-gray-600'>Available</span>
             </div>
             <div className='flex items-center gap-2'>
-              <span className='inline-block w-3 h-3 rounded bg-green-600'></span>
-              <span className='text-sm text-gray-600'>Selected</span>
+              <CheckCircle2 className='w-3 h-3 text-green-600' />
+              <span className='text-xs sm:text-sm text-gray-600'>Selected</span>
             </div>
             <div className='flex items-center gap-2'>
-              <span className='inline-block w-3 h-3 rounded bg-red-300'></span>
-              <span className='text-sm text-gray-600'>Booked</span>
+              <XCircle className='w-3 h-3 text-red-400' />
+              <span className='text-xs sm:text-sm text-gray-600'>Booked</span>
             </div>
           </div>
-        </div>
 
-        <div className='mb-6'>
-          <h3 className='text-lg font-semibold text-gray-700 mb-4'>Select Time</h3>
-          {loadingSlots ? (
-            <div className='flex items-center gap-2 text-gray-500'>
-              <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600'></div>
-              <span>Loading slots...</span>
-            </div>
-          ) : timeSlots.length === 0 ? (
-            <div className='text-gray-500 p-4 bg-gray-50 rounded-lg border border-gray-200'>
-              No available slots for the selected date. Please choose another date.
-            </div>
-          ) : (
-            <div className='flex items-center gap-3 w-full overflow-x-auto pb-2 flex-wrap'>
-              {timeSlots.map((slot, idx) => {
-                const isSelected = slotTime === slot.time
-                const base = 'text-sm font-medium flex-shrink-0 px-4 py-3 rounded-lg cursor-pointer transition-all duration-200'
-                const enabled = 'text-gray-700 border-2 border-gray-300 hover:border-green-400 hover:shadow-md'
-                const selected = 'bg-green-600 text-white shadow-lg transform scale-105'
-                const disabled = 'bg-red-300 text-white cursor-not-allowed opacity-70'
-                return (
-                  <button
-                    key={idx}
+          <div className='mb-8'>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2'>
+              <Clock className='w-5 h-5' />
+              Select Time
+            </h3>
+            
+            {loadingSlots ? (
+              <div className='flex items-center gap-2 text-gray-500 p-4'>
+                <Loader2 className='w-5 h-5 animate-spin' />
+                <span>Loading available slots...</span>
+              </div>
+            ) : timeSlots.length === 0 ? (
+              <div className='text-gray-600 p-6 bg-gray-50 rounded-xl border border-gray-200 text-center'>
+                <XCircle className='w-8 h-8 text-gray-400 mx-auto mb-2' />
+                <p>No available slots for this date. Please choose another date.</p>
+              </div>
+            ) : (
+              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'>
+                {timeSlots.map((slot, index) => (
+                  <Button
+                    key={index}
                     onClick={() => !slot.disabled && setSlotTime(slot.time)}
                     disabled={slot.disabled}
-                    className={`${base} ${slot.disabled ? disabled : isSelected ? selected : enabled}`}
+                    variant={slotTime === slot.time ? 'default' : 'outline'}
+                    className={`h-12 font-medium transition-all ${
+                      slot.disabled 
+                        ? 'bg-red-100 text-red-400 border-red-200 cursor-not-allowed hover:bg-red-100' 
+                        : slotTime === slot.time 
+                        ? 'bg-green-600 hover:bg-green-700 text-white border-green-600 shadow-md' 
+                        : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                    }`}
                     title={slot.disabled ? 'Already booked' : 'Click to select'}
                   >
                     {slot.time}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className='flex justify-center'>
-          <button
-            onClick={bookAppointment}
-            disabled={!slotTime || !docInfo.available || booking}
-            className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform ${
-              slotTime && docInfo.available && !booking
-                ? 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:scale-105 active:scale-95'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {booking ? (
-              <span className='flex items-center gap-2'>
-                <svg className='animate-spin h-5 w-5' fill='none' viewBox='0 0 24 24'>
-                  <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-                  <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-                </svg>
-                Booking...
-              </span>
-            ) : !slotTime ? (
-              'Select a time slot'
-            ) : !docInfo.available ? (
-              'Doctor not available'
-            ) : (
-              'Book Appointment'
+                  </Button>
+                ))}
+              </div>
             )}
-          </button>
-        </div>
-      </div>
+          </div>
 
-      <RelatedDoctors speciality={docInfo.speciality} docId={docId} />
+          <div className='flex justify-center pt-6'>
+            <Button
+              onClick={bookAppointment}
+              disabled={!slotTime || !docInfo.available || booking}
+              size='lg'
+              className={`px-8 h-12 rounded-xl font-semibold text-lg transition-all ${
+                slotTime && docInfo.available && !booking
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-gray-200 text-gray-500 cursor-not-allowed hover:bg-gray-200'
+              }`}
+            >
+              {booking ? (
+                <>
+                  <Loader2 className='w-5 h-5 mr-2 animate-spin' />
+                  Booking...
+                </>
+              ) : !slotTime ? (
+                'Select a time slot'
+              ) : !docInfo.available ? (
+                'Doctor not available'
+              ) : (
+                <>
+                  <CheckCircle2 className='w-5 h-5 mr-2' />
+                  Book Appointment
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className='mt-12'>
+        <RelatedDoctors speciality={docInfo.speciality} docId={docId} />
+      </div>
     </div>
   )
 }

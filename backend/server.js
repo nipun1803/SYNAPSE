@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
+// routes
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/doctors', doctorRouter); 
@@ -45,20 +45,14 @@ app.get('/', (req, res) => {
 
 
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
+  res.status(404).json({ success: false, message: 'Route not found' });
 });
+
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({
-    success: false,
-    message: err.message || 'Internal server error'
-  });
+  res.status(500).json({ success: false, message: err.message });
 });
-
 
 app.listen(port, () => {
   console.log(`Server started on PORT: ${port}`);

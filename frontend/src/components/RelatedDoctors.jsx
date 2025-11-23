@@ -1,42 +1,87 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AppContext } from '../context/AppContext'
-
+import React, { useContext, useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { AppContext } from "../context/AppContext"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "lucide-react"
 
 const RelatedDoctors = ({ speciality, docId }) => {
+  const navigate = useNavigate()
+  const { doctors } = useContext(AppContext)
+  const [relatedDoctors, setRelatedDoctors] = useState([])
 
-    const navigate = useNavigate()
-    const { doctors } = useContext(AppContext)
+  useEffect(() => {
+    if (!doctors.length || !speciality) return
 
-    const [relDoc, setRelDoc] = useState([])
-
-    useEffect(() => {
-        if (doctors.length > 0 && speciality) {
-            const doctorsData = doctors.filter((doc) => doc.speciality === speciality && doc._id !== docId)
-            setRelDoc(doctorsData)
-        }
-    }, [doctors, speciality, docId])
-
-    return (
-        <div className='flex flex-col items-center gap-4 my-16 text-gray-900'>
-            <h1 className='text-3xl font-medium'>Related Doctors</h1>
-            <p className='sm:w-1/3 text-center text-sm'>Simply browse through our extensive list of trusted doctors.</p>
-            <div className='w-full grid grid-cols-auto gap-4 pt-5 gap-y-6 px-3 sm:px-0'>
-                {relDoc.map((item, index) => (
-                    <div onClick={() => { navigate(`/appointment/${item._id}`); window.scrollTo(0, 0) }} className='border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500' key={index}>
-                        <img className='bg-blue-100' src={item.image} alt="" />
-                        <div className='p-4'>
-                            <div className='flex items-center gap-2 text-sm text-center text-green-500'>
-                                <p className='w-2 h-2 bg-green-500 rounded-full'></p><p>Available</p>
-                            </div>
-                            <p className='text-gray-900 text-lg font-medium'>{item.name}</p>
-                            <p className='text-gray-600 text-sm'>{item.speciality}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+    const filtered = doctors.filter(
+      (doc) => doc.speciality === speciality && doc._id !== docId
     )
+
+    setRelatedDoctors(filtered)
+  }, [doctors, speciality, docId])
+
+  const handleDoctorClick = (doctorId) => {
+    navigate(`/appointment/${doctorId}`)
+    window.scrollTo(0, 0)
+  }
+
+  if (!relatedDoctors.length) return null
+
+  return (
+    <div className="flex flex-col items-center gap-4 my-16 text-gray-900">
+      <h2 className="text-3xl font-semibold">Related Doctors</h2>
+      <p className="sm:w-1/3 text-center text-sm text-gray-600">
+        Doctors with similar specialities you might want to check out.
+      </p>
+
+      <div className="w-full grid grid-cols-auto gap-4 pt-5 gap-y-6 px-3 sm:px-0">
+        {relatedDoctors.map((doctor) => (
+          <Card
+            key={doctor._id}
+            className="overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-blue-200 group"
+            onClick={() => handleDoctorClick(doctor._id)}
+          >
+            <div className="relative">
+              <img
+                src={doctor.image}
+                alt={doctor.name}
+                className="bg-blue-100 w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <Badge 
+                variant="secondary" 
+                className="absolute top-3 right-3 bg-green-500 hover:bg-green-500 text-white border-0"
+              >
+                Available
+              </Badge>
+            </div>
+
+            <CardContent className="p-4">
+              <div className="space-y-2">
+                <p className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                  {doctor.name}
+                </p>
+                <p className="text-gray-600 text-sm">{doctor.speciality}</p>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="w-full mt-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDoctorClick(doctor._id)
+                  }}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Book Appointment
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default RelatedDoctors
