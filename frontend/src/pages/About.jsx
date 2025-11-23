@@ -64,8 +64,7 @@ const About = () => {
         <div className="border px-10 md:px-16 py-8 sm:py-16 flex flex-col gap-5 text-[15px] hover:bg-primary hover:text-white transition-all duration-300 text-gray-600 cursor-pointer">
           <b>PERSONALIZATION:</b>
           <p>
-            Tailored recommendations and reminders to help you stay on top of
-            your health.
+          Book your next checkup in just a few clicks. No more waiting on hold—Synapse works like your own digital assistant.
           </p>
         </div>
       </div>

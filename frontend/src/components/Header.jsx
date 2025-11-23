@@ -4,12 +4,12 @@ import { assets } from '../assets/assets'
 const Header = () => {
   return (
     <header className='bg-blue-600 rounded-2xl shadow-2xl overflow-hidden relative'>
-      {/* Background Gradient Overlay */}
+
       <div className='absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 opacity-90'></div>
 
       <div className='relative z-10 flex flex-col lg:flex-row items-center px-8 py-12 lg:p-16 gap-10'>
         
-        {/* Text Content */}
+
         <div className='lg:w-1/2 flex flex-col items-start gap-6'>
           <h1 className='text-4xl lg:text-6xl text-white font-bold leading-tight'>
             Book Appointment <br /> 
@@ -32,7 +32,7 @@ const Header = () => {
           </a>
         </div>
 
-        {/* Hero Image */}
+
         <div className='lg:w-1/2 w-full'>
           <img 
             className='w-full h-auto object-cover rounded-xl shadow-lg' 
