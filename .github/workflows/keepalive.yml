@@ -1,0 +1,14 @@
+name: Keep Render Awake
+
+on:
+  schedule:
+    - cron: "*/14 * * * *"  
+  workflow_dispatch:       
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl request to keep alive
+        run: |
+          curl -I https://synapse-backend-tz3v.onrender.com || true
