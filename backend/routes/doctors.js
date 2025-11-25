@@ -16,10 +16,10 @@ import upload from '../middleware/multer.js';
 
 const router = express.Router();
 
-// Public: GET /api/doctors
+//  /api/doctors
 router.get('/', doctorList);
 
-// GET /api/doctors/:id (retrieve single doctor)
+//  /api/doctors/:id 
 router.get('/:id', doctorList); 
 
 // Doctor's own profile

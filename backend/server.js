@@ -43,6 +43,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'API Working' });
 });
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });

@@ -8,22 +8,22 @@ import authUser from '../middleware/authUser.js';
 
 const router = express.Router();
 
-// Admin: GET /api/appointments (all)
+// Admin: /api/appointments (all)
 router.get('/', authAdmin, appointmentsAdmin);
 
-// User: POST /api/appointments (create)
+// POST /api/appointments (create)
 router.post('/', authUser, bookAppointment);
 
-// PATCH /api/appointments/:id/cancel (user)
+// /api/appointments/:id/cancel (user)
 router.patch('/:id/cancel', authUser, cancelAppointment);
 
-// PATCH /api/appointments/:id/admin-cancel (admin)
+// /api/appointments/:id/admin-cancel (admin)
 router.patch('/:id/admin-cancel', authAdmin, adminCancel);
 
-// PATCH /api/appointments/:id/doctor-cancel (doctor)
+// /api/appointments/:id/doctor-cancel (doctor)
 router.patch('/:id/doctor-cancel', authDoctor, doctorCancel);
 
-// PATCH /api/appointments/:id/complete (doctor)
+// /api/appointments/:id/complete (doctor)
 router.patch('/:id/complete', authDoctor, appointmentComplete);
 
 export default router;
