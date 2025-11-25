@@ -1,0 +1,26 @@
+name: Keep Render Backend Awake
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # Run every 10 minutes
+  workflow_dispatch:        # Allow manual run
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render backend
+        run: |
+          for i in {1..5}; do
+            echo "Attempt $i..."
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://synapse-backend-tz3v.onrender.com/api/health || echo "000")
+            echo "Response: $RESPONSE"
+            if [ "$RESPONSE" = "200" ]; then
+              echo "Backend awake"
+              exit 0
+            fi
+            sleep 7
+          done
+
+          echo "Backend did not wake but continuing"
+          exit 0
