@@ -3,6 +3,11 @@ import { assets } from '../../assets/assets'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
 import { resolveImageUrl } from '../../utils/resolveImageUrl'
+import { toast } from 'react-toastify'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Users, CheckCircle, XCircle, Search, Trash2 } from 'lucide-react'
 
 const DoctorsList = () => {
   const { doctors, changeAvailability, aToken, getAllDoctors } = useContext(AdminContext)
@@ -10,6 +15,7 @@ const DoctorsList = () => {
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [deleting, setDeleting] = useState(null)
 
   useEffect(() => {
     if (aToken) {
@@ -25,6 +31,31 @@ const DoctorsList = () => {
 
   const handleAvailabilityToggle = async (docId) => {
     await changeAvailability(docId)
+  }
+
+  const handleDeleteDoctor = async (docId, docName) => {
+    if (!confirm(`Are you sure you want to delete Dr. ${docName}? This action cannot be undone.`)) return
+
+    try {
+      setDeleting(docId)
+      const res = await fetch(`${backendUrl}/api/admin/doctors/${docId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        toast.success(data.message || 'Doctor deleted successfully')
+        getAllDoctors()
+      } else {
+        toast.error(data.message || 'Failed to delete doctor')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast.error('Failed to delete doctor')
+    } finally {
+      setDeleting(null)
+    }
   }
 
   const filteredDoctors = doctors.filter(doctor => {
@@ -52,7 +83,7 @@ const DoctorsList = () => {
 
   return (
     <div className='p-6 max-w-7xl mx-auto'>
-      
+
       {/* Page Header */}
       <div className='mb-6'>
         <h1 className='text-2xl font-bold text-gray-900'>Doctors List</h1>
@@ -110,31 +141,28 @@ const DoctorsList = () => {
           <div className='flex gap-2'>
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                filter === 'all'
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'all'
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               All ({doctors.length})
             </button>
             <button
               onClick={() => setFilter('available')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                filter === 'available'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'available'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               Available ({availableCount})
             </button>
             <button
               onClick={() => setFilter('unavailable')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                filter === 'unavailable'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'unavailable'
+                ? 'bg-red-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               Unavailable ({unavailableCount})
             </button>
@@ -213,11 +241,19 @@ const DoctorsList = () => {
                         onChange={() => handleAvailabilityToggle(item._id)}
                         className='sr-only peer'
                       />
-                      <div className={`w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
-                        item.available ? 'peer-checked:bg-green-600' : ''
-                      }`}></div>
+                      <div className={`w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${item.available ? 'peer-checked:bg-green-600' : ''
+                        }`}></div>
                     </label>
                   </div>
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDeleteDoctor(item._id, item.name)}
+                    disabled={deleting === item._id}
+                    className='mt-3 w-full px-3 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition'
+                  >
+                    {deleting === item._id ? 'Deleting...' : 'Delete Doctor'}
+                  </button>
                 </div>
               </div>
             ))}

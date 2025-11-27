@@ -1,82 +1,110 @@
-import axios from 'axios';
-import React, { useContext, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { DoctorContext } from '../../context/DoctorContext';
+import axios from "axios";
+import React, { useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { DoctorContext } from "../../context/DoctorContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  DollarSign,
+  Save,
+  X,
+  Edit,
+  Loader2,
+  Info,
+  Briefcase,
+  GraduationCap,
+  Calendar,
+} from "lucide-react";
 
 const DoctorProfile = () => {
-
-  const { dToken, profileData, setProfileData, getProfileData, backendUrl } = useContext(DoctorContext)
-  const currency = import.meta.env.VITE_CURRENCY || '₹'
-  const [isEdit, setIsEdit] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const { dToken, profileData, setProfileData, getProfileData, backendUrl } =
+    useContext(DoctorContext);
+  const currency = import.meta.env.VITE_CURRENCY || "₹";
+  const [isEdit, setIsEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
     if (!profileData?.about?.trim()) {
-      toast.error('About section is required')
-      return false
+      toast.error("About section is required");
+      return false;
     }
     if (!profileData?.fees || profileData.fees <= 0) {
-      toast.error('Please enter a valid consultation fee')
-      return false
+      toast.error("Please enter a valid consultation fee");
+      return false;
     }
     if (!profileData?.address?.line1?.trim()) {
-      toast.error('Address Line 1 is required')
-      return false
+      toast.error("Address Line 1 is required");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const updateProfile = async () => {
-    if (!profileData) return
-    if (!validateForm()) return
+    if (!profileData) return;
+    if (!validateForm()) return;
 
     try {
-      setLoading(true)
+      setLoading(true);
       const updateData = {
         address: {
           line1: profileData.address.line1.trim(),
-          line2: profileData.address.line2?.trim() || ''
+          line2: profileData.address.line2?.trim() || "",
         },
         fees: Number(profileData.fees),
         about: profileData.about.trim(),
         available: profileData.available,
+      };
+
+      if (profileData.name?.trim()) {
+        updateData.name = profileData.name.trim();
       }
+      if (profileData.phone?.trim()) {
+        updateData.phone = profileData.phone.trim();
+      }
+
       const { data } = await axios.put(
         `${backendUrl}/api/doctors/me/profile`,
         updateData,
         { withCredentials: true }
-      )
+      );
 
       if (data.success) {
-        toast.success('Profile updated successfully')
-        setIsEdit(false)
-        await getProfileData()
+        toast.success("Profile updated successfully");
+        setIsEdit(false);
+        await getProfileData();
       } else {
-        toast.error(data.message || 'Update failed')
+        toast.error(data.message || "Update failed");
       }
     } catch (error) {
-      console.error('Update error:', error)
-      toast.error(error?.response?.data?.message || 'Failed to update profile')
+      console.error("Update error:", error);
+      toast.error(error?.response?.data?.message || "Failed to update profile");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setIsEdit(false)
-    getProfileData() 
-  }
+    setIsEdit(false);
+    getProfileData();
+  };
 
   useEffect(() => {
     if (dToken) {
-      getProfileData()
+      getProfileData();
     }
-  }, [dToken])
+  }, [dToken]);
 
   if (!profileData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -84,13 +112,14 @@ const DoctorProfile = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
-
+        {/* Profile Header Card */}
         <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
-
+          {/* Cover Image */}
           <div className="h-32 bg-gradient-to-r from-green-500 to-teal-600"></div>
+
           <div className="px-6 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-12">
-
+              {/* Profile Picture */}
               <div className="mb-4 sm:mb-0">
                 <img
                   src={profileData.image}
@@ -99,44 +128,57 @@ const DoctorProfile = () => {
                 />
               </div>
 
+              {/* Edit Button */}
               {!isEdit && (
                 <button
                   onClick={() => setIsEdit(true)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
                 >
+                  <Edit className="h-4 w-4" />
                   Edit Profile
                 </button>
               )}
             </div>
 
-
+            {/* Profile Info */}
             <div className="mt-4">
               <h1 className="text-2xl font-bold text-gray-900">
                 {profileData.name}
               </h1>
               <div className="flex items-center gap-2 mt-2 text-gray-600">
+                <GraduationCap className="h-4 w-4" />
                 <span className="font-medium">{profileData.degree}</span>
                 <span>•</span>
+                <Briefcase className="h-4 w-4" />
                 <span>{profileData.speciality}</span>
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-800"
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
                   {profileData.experience}
-                </span>
+                </Badge>
               </div>
-              <p className="text-gray-500 mt-1">{profileData.email}</p>
+              <div className="flex items-center gap-2 text-gray-500 mt-1">
+                <Mail className="h-4 w-4" />
+                <p>{profileData.email}</p>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Professional Information Card */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Professional Information
           </h2>
 
           <div className="space-y-6">
+            {/* About */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 mb-2">
                 About {isEdit && <span className="text-red-500">*</span>}
-              </label>
+              </Label>
               {isEdit ? (
                 <textarea
                   onChange={(e) =>
@@ -157,22 +199,73 @@ const DoctorProfile = () => {
               )}
             </div>
 
-
+            {/* Name Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <User className="h-4 w-4" />
+                Name
+              </Label>
+              {isEdit ? (
+                <Input
+                  type="text"
+                  className="w-full"
+                  onChange={(e) =>
+                    setProfileData((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                  value={profileData.name || ""}
+                  placeholder="Enter your name"
+                />
+              ) : (
+                <p className="text-gray-900">{profileData.name}</p>
+              )}
+            </div>
+
+            {/* Phone Field */}
+            <div>
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <Phone className="h-4 w-4" />
+                Phone Number
+              </Label>
+              {isEdit ? (
+                <Input
+                  type="tel"
+                  className="w-full"
+                  onChange={(e) =>
+                    setProfileData((prev) => ({
+                      ...prev,
+                      phone: e.target.value,
+                    }))
+                  }
+                  value={profileData.phone || ""}
+                  placeholder="Enter phone number"
+                />
+              ) : (
+                <p className="text-gray-900">
+                  {profileData.phone || "Not provided"}
+                </p>
+              )}
+            </div>
+
+            {/* Consultation Fee */}
+            <div>
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <DollarSign className="h-4 w-4" />
                 Consultation Fee{" "}
                 {isEdit && <span className="text-red-500">*</span>}
-              </label>
+              </Label>
               {isEdit ? (
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                     {currency}
                   </span>
-                  <input
+                  <Input
                     type="number"
                     min="0"
                     step="1"
-                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-8"
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
@@ -190,18 +283,19 @@ const DoctorProfile = () => {
               )}
             </div>
 
-
+            {/* Clinic Address */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <MapPin className="h-4 w-4" />
                 Clinic Address{" "}
                 {isEdit && <span className="text-red-500">*</span>}
-              </label>
+              </Label>
               {isEdit ? (
                 <div className="space-y-3">
-                  <input
+                  <Input
                     type="text"
                     placeholder="Street address, building name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full"
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
@@ -210,10 +304,10 @@ const DoctorProfile = () => {
                     }
                     value={profileData.address.line1}
                   />
-                  <input
+                  <Input
                     type="text"
                     placeholder="City, State, Zip Code (optional)"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full"
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
@@ -233,13 +327,13 @@ const DoctorProfile = () => {
               )}
             </div>
 
-
+            {/* Availability Toggle */}
             <div className="border-t pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <Label className="block text-sm font-medium text-gray-700">
                     Availability Status
-                  </label>
+                  </Label>
                   <p className="text-xs text-gray-500 mt-1">
                     {profileData.available
                       ? "You are currently accepting appointments"
@@ -270,70 +364,44 @@ const DoctorProfile = () => {
             </div>
           </div>
 
-
+          {/* Action Buttons */}
           {isEdit && (
             <div className="flex gap-3 mt-6 pt-6 border-t">
-              <button
+              <Button
                 onClick={updateProfile}
                 disabled={loading}
-                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                className="px-6 py-2 bg-green-600 hover:bg-green-700"
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-4 w-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Saving...
                   </span>
                 ) : (
-                  "Save Changes"
+                  <span className="flex items-center gap-2">
+                    <Save className="h-4 w-4" />
+                    Save Changes
+                  </span>
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleCancel}
                 disabled={loading}
-                className="px-6 py-2 border border-gray-300 hover:bg-gray-50 font-medium rounded-lg transition"
+                variant="outline"
+                className="px-6 py-2"
               >
+                <X className="h-4 w-4 mr-2" />
                 Cancel
-              </button>
+              </Button>
             </div>
           )}
         </div>
 
-
+        {/* Info Banner */}
         {!isEdit && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex gap-3">
-              <svg
-                className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <Info className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm text-green-900 font-medium">
                   Keep your profile updated

@@ -14,12 +14,13 @@ import DoctorAppointments from './pages/Doctor/DoctorAppointments'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard'
 import DoctorProfile from './pages/Doctor/DoctorProfile'
 
+
 const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || 'http://localhost:5173/unified-login'
 
 
 const AdminRoute = ({ children }) => {
   const { aToken, checkingAuth } = useContext(AdminContext)
-  
+
   if (checkingAuth) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-slate-50'>
@@ -27,18 +28,18 @@ const AdminRoute = ({ children }) => {
       </div>
     )
   }
-  
+
   if (!aToken) {
     window.location.href = UNIFIED_LOGIN_URL
     return null
   }
-  
+
   return children
 }
 
 const DoctorRoute = ({ children }) => {
   const { dToken, checkingAuth } = useContext(DoctorContext)
-  
+
   if (checkingAuth) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-slate-50'>
@@ -46,12 +47,12 @@ const DoctorRoute = ({ children }) => {
       </div>
     )
   }
-  
+
   if (!dToken) {
     window.location.href = UNIFIED_LOGIN_URL
     return null
   }
-  
+
   return children
 }
 
@@ -68,7 +69,7 @@ const App = () => {
   return (
     <div className='min-h-screen bg-slate-50 flex flex-col'>
 
-      <ToastContainer 
+      <ToastContainer
         position='top-right'
         autoClose={3000}
         hideProgressBar={false}
@@ -81,18 +82,18 @@ const App = () => {
         theme='light'
         limit={3}
       />
-      
+
       <Navbar onToggleSidebar={() => setSidebarOpen(prev => !prev)} />
       <div className='flex flex-1 overflow-hidden'>
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main className='flex-1 overflow-y-auto'>
           <Routes>
             <Route path='/' element={
-              aToken ? <Navigate to='/admin-dashboard' replace /> : 
-              dToken ? <Navigate to='/doctor-dashboard' replace /> :
-              <Navigate to={UNIFIED_LOGIN_URL} replace />
+              aToken ? <Navigate to='/admin-dashboard' replace /> :
+                dToken ? <Navigate to='/doctor-dashboard' replace /> :
+                  <Navigate to={UNIFIED_LOGIN_URL} replace />
             } />
-            
+
 
             <Route path='/admin-dashboard' element={
               <AdminRoute>
@@ -114,7 +115,7 @@ const App = () => {
                 <DoctorsList />
               </AdminRoute>
             } />
-            
+
 
             <Route path='/doctor-dashboard' element={
               <DoctorRoute>

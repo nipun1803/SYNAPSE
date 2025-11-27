@@ -17,6 +17,9 @@ const DoctorContextProvider = ({ children }) => {
   const api = axios.create({
     baseURL: backendUrl,
     withCredentials: true,
+    headers: {
+      'Content-Type': 'application/json'
+    }
   });
 
   api.interceptors.response.use(
@@ -82,11 +85,12 @@ const DoctorContextProvider = ({ children }) => {
   };
 
 
-  const getAppointments = async () => {
+  const getAppointments = async (page = 1, limit = 5) => {
     try {
-      const { data } = await api.get(`/api/doctors/me/appointments`);
+      const { data } = await api.get(`/api/doctors/me/appointments?page=${page}&limit=${limit}`);
       if (data.success) {
         setAppointments([...data.appointments].reverse());
+        return data.pagination; // Return pagination info
       } else {
         toast.error(data.message);
       }

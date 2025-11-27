@@ -18,6 +18,9 @@ const AdminContextProvider = ({ children }) => {
     const instance = axios.create({
       baseURL: backendUrl,
       withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
 
     instance.interceptors.response.use(
@@ -103,13 +106,13 @@ const AdminContextProvider = ({ children }) => {
   const changeAvailability = async (docId) => {
     try {
       ('Changing availability for doctor:', docId);
-      
+
 
       const { data } = await api.patch(
-        `/api/admin/doctors/${docId}/availability`, 
-        { docId: docId }  
+        `/api/admin/doctors/${docId}/availability`,
+        { docId: docId }
       );
-      
+
       if (data?.success) {
         toast.success(data.message || "Availability Changed");
         getAllDoctors();
@@ -123,11 +126,12 @@ const AdminContextProvider = ({ children }) => {
   };
 
 
-  const getAllAppointments = async () => {
+  const getAllAppointments = async (page = 1, limit = 5) => {
     try {
-      const { data } = await api.get(`/api/admin/appointments`);
+      const { data } = await api.get(`/api/admin/appointments?page=${page}&limit=${limit}`);
       if (data?.success) {
         setAppointments([...data.appointments].reverse());
+        return data.pagination; // Return pagination info
       } else {
         toast.error(data?.message || "Failed to load appointments");
       }

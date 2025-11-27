@@ -1,203 +1,231 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { assets } from '../../assets/assets'
-import { AppContext } from '../../context/AppContext'
-import { DoctorContext } from '../../context/DoctorContext'
+import React, { useContext, useEffect, useState } from 'react';
+import { assets } from '../../assets/assets';
+import { AppContext } from '../../context/AppContext';
+import { DoctorContext } from '../../context/DoctorContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { DollarSign, Calendar, Users, TrendingUp, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 const DoctorDashboard = () => {
-  const { dToken, dashData, getDashData, cancelAppointment, completeAppointment } = useContext(DoctorContext)
-  const { slotDateFormat, currency } = useContext(AppContext)
-  const [loading, setLoading] = useState(false)
+  const { dToken, dashData, getDashData, cancelAppointment, completeAppointment } = useContext(DoctorContext);
+  const { slotDateFormat, currency } = useContext(AppContext);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (dToken) {
-      setLoading(true)
-      getDashData().finally(() => setLoading(false))
+      setLoading(true);
+      getDashData().finally(() => setLoading(false));
     }
-  }, [dToken])
+  }, [dToken]);
 
   const handleCancel = async (id) => {
-    if (!confirm('Cancel this appointment?')) return
-    await cancelAppointment(id)
-    await getDashData()
-  }
+    if (!confirm('Cancel this appointment?')) return;
+    await cancelAppointment(id);
+    await getDashData();
+  };
 
   const handleComplete = async (id) => {
-    if (!confirm('Mark as completed?')) return
-    await completeAppointment(id)
-    await getDashData()
-  }
+    if (!confirm('Mark as completed?')) return;
+    await completeAppointment(id);
+    await getDashData();
+  };
 
   if (loading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-green-600'></div>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary'></div>
       </div>
-    )
+    );
   }
 
   if (!dashData) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <p className='text-gray-500'>No data available</p>
+        <div className='text-center'>
+          <svg className='mx-auto h-12 w-12 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+          </svg>
+          <p className='text-gray-500 mt-2'>No data available</p>
+        </div>
       </div>
-    )
+    );
   }
 
-  const upcomingAppointments = dashData.latestAppointments?.filter(a => !a.cancelled && !a.isCompleted) || []
-
   return (
-    <div className='p-6 max-w-7xl mx-auto'>
-      
-      <div className='mb-6'>
-        <h1 className='text-2xl font-bold text-gray-900'>Doctor Dashboard</h1>
-        <p className='text-gray-600 mt-1'>Manage your practice and appointments</p>
+    <div className='p-6 max-w-7xl mx-auto space-y-6'>
+      {/* Header */}
+      <div>
+        <h1 className='text-3xl font-bold text-gray-900'>Doctor Dashboard</h1>
+        <p className='text-gray-600 mt-1'>Welcome back! Here's your practice overview.</p>
       </div>
 
-
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6'>
-        
-
-        <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-gray-600 text-sm font-medium mb-1'>Total Earnings</p>
-              <p className='text-3xl font-bold text-gray-900'>{currency} {dashData.earnings}</p>
-            </div>
-            <div className='w-14 h-14 rounded-xl flex items-center justify-center' style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}>
-              <svg className='w-7 h-7 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-
-        <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-gray-600 text-sm font-medium mb-1'>Total Appointments</p>
-              <p className='text-3xl font-bold text-gray-900'>{dashData.appointments}</p>
-            </div>
-            <div className='w-14 h-14 rounded-xl flex items-center justify-center' style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' }}>
-              <svg className='w-7 h-7 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-
-        <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-gray-600 text-sm font-medium mb-1'>Total Patients</p>
-              <p className='text-3xl font-bold text-gray-900'>{dashData.patients}</p>
-            </div>
-            <div className='w-14 h-14 rounded-xl flex items-center justify-center' style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)' }}>
-              <svg className='w-7 h-7 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-
-        <div className='bg-white border border-gray-200 rounded-xl p-6 card-hover'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-gray-600 text-sm font-medium mb-1'>Upcoming</p>
-              <p className='text-3xl font-bold text-gray-900'>{upcomingAppointments.length}</p>
-            </div>
-            <div className='w-14 h-14 rounded-xl flex items-center justify-center' style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' }}>
-              <svg className='w-7 h-7 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
-        <div className='px-6 py-4 border-b border-gray-200 bg-gray-50'>
-          <h2 className='font-semibold text-gray-900'>Latest Bookings</h2>
-          <p className='text-sm text-gray-600 mt-1'>Recent patient appointments</p>
-        </div>
-
-        <div className='divide-y divide-gray-100'>
-          {dashData.latestAppointments && dashData.latestAppointments.length > 0 ? (
-            dashData.latestAppointments.slice(0, 5).map((item, index) => (
-              <div key={item._id || index} className='px-6 py-4 hover:bg-gray-50 transition-colors'>
-                <div className='flex items-center justify-between gap-4'>
-                  <div className='flex items-center gap-4 flex-1'>
-                    <img 
-                      className='w-12 h-12 rounded-full object-cover border-2 border-gray-200' 
-                      src={item.userData?.image || assets.profile_pic} 
-                      alt='' 
-                    />
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-semibold text-gray-900 truncate'>
-                        {item.userData?.name || 'Unknown Patient'}
-                      </p>
-                      <p className='text-xs text-gray-500 mt-0.5'>
-                        {slotDateFormat(item.slotDate)} at {item.slotTime}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className='flex items-center gap-3'>
-                    {item.cancelled ? (
-                      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200'>
-                        Cancelled
-                      </span>
-                    ) : item.isCompleted ? (
-                      <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200'>
-                        Completed
-                      </span>
-                    ) : (
-                      <>
-                        <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200'>
-                          Upcoming
-                        </span>
-                        <div className='flex items-center gap-2'>
-                          <button
-                            onClick={() => handleComplete(item._id)}
-                            className='p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors'
-                            title='Mark as completed'
-                          >
-                            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => handleCancel(item._id)}
-                            className='p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
-                            title='Cancel appointment'
-                          >
-                            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
-                            </svg>
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
+      {/* Stats Cards */}
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+        <Card className='border-l-4 border-l-green-500'>
+          <CardContent className='p-6'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-sm font-medium text-gray-600'>Earnings</p>
+                <p className='text-3xl font-bold text-gray-900 mt-2'>
+                  {currency}{dashData?.earnings || 0}
+                </p>
+                <p className='text-xs text-gray-500 mt-1 flex items-center gap-1'>
+                  <TrendingUp className='w-3 h-3' />
+                  Total revenue
+                </p>
               </div>
-            ))
+              <div className='w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center'>
+                <DollarSign className='w-6 h-6 text-green-600' />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className='border-l-4 border-l-blue-500'>
+          <CardContent className='p-6'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-sm font-medium text-gray-600'>Appointments</p>
+                <p className='text-3xl font-bold text-gray-900 mt-2'>
+                  {dashData?.appointments || 0}
+                </p>
+                <p className='text-xs text-gray-500 mt-1 flex items-center gap-1'>
+                  <TrendingUp className='w-3 h-3' />
+                  Total bookings
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center'>
+                <Calendar className='w-6 h-6 text-blue-600' />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className='border-l-4 border-l-purple-500'>
+          <CardContent className='p-6'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-sm font-medium text-gray-600'>Patients</p>
+                <p className='text-3xl font-bold text-gray-900 mt-2'>
+                  {dashData?.patients || 0}
+                </p>
+                <p className='text-xs text-gray-500 mt-1 flex items-center gap-1'>
+                  <TrendingUp className='w-3 h-3' />
+                  Unique patients
+                </p>
+              </div>
+              <div className='w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center'>
+                <Users className='w-6 h-6 text-purple-600' />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Latest Appointments */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Latest Appointments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {dashData.latestAppointments && dashData.latestAppointments.length > 0 ? (
+            <div className='overflow-x-auto'>
+              <table className='w-full'>
+                <thead className='bg-gray-50 border-b'>
+                  <tr>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>#</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Patient</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Date & Time</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Status</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Actions</th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-gray-100'>
+                  {dashData.latestAppointments.slice(0, 5).map((item, index) => (
+                    <tr key={item._id || index} className='hover:bg-gray-50'>
+                      <td className='px-6 py-4 text-sm font-medium text-gray-900'>{index + 1}</td>
+                      <td className='px-6 py-4'>
+                        <div className='flex items-center gap-3'>
+                          <img
+                            className='w-10 h-10 rounded-full object-cover'
+                            src={item.userData?.image || assets.profile_pic}
+                            alt='Patient'
+                          />
+                          <div>
+                            <p className='text-sm font-medium text-gray-900'>
+                              {item.userData?.name || 'Patient'}
+                            </p>
+                            <p className='text-xs text-gray-500'>
+                              {item.userData?.email || '-'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className='px-6 py-4'>
+                        <p className='text-sm font-medium text-gray-900'>
+                          {slotDateFormat(item.slotDate)}
+                        </p>
+                        <p className='text-xs text-gray-500'>{item.slotTime}</p>
+                      </td>
+                      <td className='px-6 py-4'>
+                        {item.cancelled ? (
+                          <Badge variant='destructive' className='gap-1'>
+                            <XCircle className='w-3 h-3' />
+                            Cancelled
+                          </Badge>
+                        ) : item.isCompleted ? (
+                          <Badge className='bg-green-100 text-green-700 hover:bg-green-100 gap-1'>
+                            <CheckCircle className='w-3 h-3' />
+                            Completed
+                          </Badge>
+                        ) : (
+                          <Badge className='bg-blue-100 text-blue-700 hover:bg-blue-100 gap-1'>
+                            <Clock className='w-3 h-3' />
+                            Upcoming
+                          </Badge>
+                        )}
+                      </td>
+                      <td className='px-6 py-4'>
+                        {!item.cancelled && !item.isCompleted && (
+                          <div className='flex items-center gap-2'>
+                            <Button
+                              onClick={() => handleComplete(item._id)}
+                              variant='ghost'
+                              size='sm'
+                              className='text-green-600 hover:text-green-700 hover:bg-green-50'
+                            >
+                              <CheckCircle className='w-4 h-4 mr-1' />
+                              Complete
+                            </Button>
+                            <Button
+                              onClick={() => handleCancel(item._id)}
+                              variant='ghost'
+                              size='sm'
+                              className='text-red-600 hover:text-red-700 hover:bg-red-50'
+                            >
+                              <XCircle className='w-4 h-4 mr-1' />
+                              Cancel
+                            </Button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <div className='px-6 py-12 text-center'>
-              <svg className='mx-auto h-12 w-12 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' />
-              </svg>
-              <h3 className='mt-2 text-sm font-medium text-gray-900'>No appointments</h3>
-              <p className='mt-1 text-sm text-gray-500'>Appointments will appear here once patients book.</p>
+            <div className='text-center py-12'>
+              <Calendar className='mx-auto h-12 w-12 text-gray-400' />
+              <h3 className='mt-2 text-sm font-medium text-gray-900'>No appointments yet</h3>
+              <p className='mt-1 text-sm text-gray-500'>Appointments will appear here</p>
             </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
-  )
-}
+  );
+};
 
-export default DoctorDashboard
+export default DoctorDashboard;
