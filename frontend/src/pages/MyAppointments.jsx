@@ -12,16 +12,21 @@ const MyAppointments = () => {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
   const fetchAppointments = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`${backendUrl || ''}/api/users/appointments`, {
+      const res = await fetch(`${backendUrl || ''}/api/users/appointments?page=${page}&limit=5`, {
         credentials: 'include',
       })
       const data = await res.json()
       if (data.success) {
         setAppointments(data.appointments || [])
+        if (data.pagination) {
+          setTotalPages(data.pagination.pages)
+        }
       } else {
         toast.error(data.message || 'Failed to load appointments')
       }
@@ -35,7 +40,7 @@ const MyAppointments = () => {
 
   const cancelAppointment = async (id) => {
     if (!confirm('Are you sure you want to cancel this appointment?')) return
-    
+
     try {
       setCancelling(id)
       const res = await fetch(`${backendUrl || ''}/api/users/appointments/${id}/cancel`, {
@@ -44,9 +49,9 @@ const MyAppointments = () => {
         credentials: 'include',
         body: JSON.stringify({ appointmentId: id })
       })
-      
+
       const data = await res.json()
-      
+
       if (data.success) {
         toast.success(data.message || 'Appointment cancelled successfully')
         await fetchAppointments()
@@ -63,7 +68,7 @@ const MyAppointments = () => {
 
   useEffect(() => {
     fetchAppointments()
-  }, [])
+  }, [page])
 
   if (loading) {
     return (
@@ -184,6 +189,26 @@ const MyAppointments = () => {
               </CardContent>
             </Card>
           ))}
+
+          {totalPages > 1 && (
+            <div className='flex justify-center gap-4 mt-6'>
+              <Button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                variant='outline'
+              >
+                Previous
+              </Button>
+              <span className='flex items-center'>Page {page} of {totalPages}</span>
+              <Button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                variant='outline'
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <Card className='border-gray-200'>

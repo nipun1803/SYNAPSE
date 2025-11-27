@@ -94,7 +94,7 @@ const AppContextProvider = ({ children }) => {
     setUserData,
     loading,
     fetchDoctors,
-    refreshDoctors, 
+    refreshDoctors,
     loadUserProfileData,
     slotDateFormat,
     calculateAge

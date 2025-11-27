@@ -27,7 +27,7 @@ const Appointment = () => {
     const adjusted = new Date(d.getTime() - offset * 60 * 1000)
     return adjusted.toISOString().split('T')[0]
   }
-  
+
   const minDateStr = useMemo(() => toLocalDateInputValue(new Date()), [])
   const maxDateStr = useMemo(() => {
     const maxDate = new Date()
@@ -38,9 +38,9 @@ const Appointment = () => {
   const makeSlotDateKey = (date) => `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
 
   const isSameDay = (date1, date2) => {
-    return date1.getFullYear() === date2.getFullYear() && 
-           date1.getMonth() === date2.getMonth() && 
-           date1.getDate() === date2.getDate()
+    return date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
   }
 
   const generateSlotsForDate = (date, bookedTimes = []) => {
@@ -53,7 +53,7 @@ const Appointment = () => {
     if (isSameDay(date, now)) {
       const adjustedTime = new Date(now)
       const minutes = adjustedTime.getMinutes()
-      
+
       if (minutes > 0 && minutes <= 30) {
         adjustedTime.setMinutes(30, 0, 0)
       } else if (minutes > 30) {
@@ -61,22 +61,22 @@ const Appointment = () => {
       } else {
         adjustedTime.setMinutes(0, 0, 0)
       }
-      
+
       if (adjustedTime < startTime) adjustedTime.setHours(10, 0, 0, 0)
       if (adjustedTime >= endTime) return []
-      
+
       startTime.setTime(adjustedTime.getTime())
     }
 
     const slots = []
     const currentSlot = new Date(startTime)
-    
+
     while (currentSlot < endTime) {
       const timeStr = currentSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       slots.push({ time: timeStr, disabled: bookedTimes.includes(timeStr) })
       currentSlot.setMinutes(currentSlot.getMinutes() + 30)
     }
-    
+
     return slots
   }
 
@@ -88,19 +88,47 @@ const Appointment = () => {
 
   useEffect(() => {
     if (!docInfo) return
-    
-    setLoadingSlots(true)
-    setSlotTime('')
 
-    const dateKey = makeSlotDateKey(selectedDate)
-    const bookedTimes = 
-      (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
-      (docInfo.slots_booked && docInfo.slots_booked[dateKey]) || []
-    
-    const slots = generateSlotsForDate(selectedDate, bookedTimes)
-    setTimeSlots(slots)
-    setLoadingSlots(false)
-  }, [docInfo, selectedDate])
+    const fetchSlots = async () => {
+      setLoadingSlots(true)
+      setSlotTime('')
+
+      try {
+        const res = await fetch(`${backendUrl || ''}/api/doctors/${docId}/available`, {
+          credentials: 'include'
+        });
+        const data = await res.json();
+
+        const dateKey = makeSlotDateKey(selectedDate)
+        let bookedTimes = []
+
+        if (data.success && data.slots_booked) {
+          bookedTimes = (data.slots_booked && Array.isArray(data.slots_booked[dateKey]) && data.slots_booked[dateKey]) || []
+        } else {
+          // Fallback to docInfo if API fails or not implemented fully yet
+          bookedTimes =
+            (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
+            (docInfo.slots_booked && docInfo.slots_booked[dateKey]) || []
+        }
+
+        const slots = generateSlotsForDate(selectedDate, bookedTimes)
+        setTimeSlots(slots)
+      } catch (error) {
+        console.error("Error fetching slots", error);
+        // Fallback
+        const dateKey = makeSlotDateKey(selectedDate)
+        const bookedTimes =
+          (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
+          (docInfo.slots_booked && docInfo.slots_booked[dateKey]) || []
+        const slots = generateSlotsForDate(selectedDate, bookedTimes)
+        setTimeSlots(slots)
+      } finally {
+        setLoadingSlots(false)
+      }
+    }
+
+    fetchSlots()
+  }, [docInfo, selectedDate, backendUrl, docId])
 
   const handleDateChange = (e) => {
     const [year, month, day] = e.target.value.split('-').map(num => parseInt(num, 10))
@@ -117,16 +145,16 @@ const Appointment = () => {
     try {
       setBooking(true)
       const slotDate = makeSlotDateKey(selectedDate)
-      
+
       const response = await fetch(`${backendUrl || ''}/api/users/appointments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ docId, slotDate, slotTime })
       })
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         toast.success('Appointment booked successfully!')
         if (refreshDoctors) await refreshDoctors()
@@ -156,13 +184,13 @@ const Appointment = () => {
     <div className='max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8'>
       <div className='flex flex-col sm:flex-row gap-6 mb-8'>
         <div className='flex-shrink-0'>
-          <img 
-            className='w-full sm:w-72 h-auto rounded-2xl object-cover shadow-lg' 
-            src={docInfo.image} 
+          <img
+            className='w-full sm:w-72 h-auto rounded-2xl object-cover shadow-lg'
+            src={docInfo.image}
             alt={docInfo.name}
           />
         </div>
-        
+
         <Card className='flex-1 border-gray-200 shadow-lg'>
           <CardContent className='p-6 sm:p-8'>
             <div className='flex items-start justify-between gap-4 mb-4'>
@@ -176,8 +204,8 @@ const Appointment = () => {
                   <Badge variant='outline' className='text-xs'>{docInfo.experience}</Badge>
                 </div>
               </div>
-              
-              <Badge 
+
+              <Badge
                 variant={docInfo.available ? 'default' : 'destructive'}
                 className={docInfo.available ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
               >
@@ -185,7 +213,7 @@ const Appointment = () => {
                 {docInfo.available ? 'Available' : 'Not Available'}
               </Badge>
             </div>
-            
+
             <div className='space-y-4'>
               <div>
                 <p className='flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2'>
@@ -194,7 +222,7 @@ const Appointment = () => {
                 </p>
                 <p className='text-sm text-gray-600 leading-relaxed'>{docInfo.about}</p>
               </div>
-              
+
               <div className='pt-4 border-t border-gray-200'>
                 <p className='text-gray-600 text-sm'>
                   Appointment fee: <span className='text-lg font-semibold text-gray-900'>{currencySymbol}{docInfo.fees}</span>
@@ -226,8 +254,8 @@ const Appointment = () => {
               max={maxDateStr}
             />
             <p className='mt-2 text-sm text-gray-500 font-medium'>
-              {daysOfWeek[selectedDate.getDay()]}, {selectedDate.toLocaleDateString('en-US', { 
-                month: 'long', day: 'numeric', year: 'numeric' 
+              {daysOfWeek[selectedDate.getDay()]}, {selectedDate.toLocaleDateString('en-US', {
+                month: 'long', day: 'numeric', year: 'numeric'
               })}
             </p>
           </div>
@@ -252,7 +280,7 @@ const Appointment = () => {
               <Clock className='w-5 h-5' />
               Select Time
             </h3>
-            
+
             {loadingSlots ? (
               <div className='flex items-center gap-2 text-gray-500 p-4'>
                 <Loader2 className='w-5 h-5 animate-spin' />
@@ -271,13 +299,12 @@ const Appointment = () => {
                     onClick={() => !slot.disabled && setSlotTime(slot.time)}
                     disabled={slot.disabled}
                     variant={slotTime === slot.time ? 'default' : 'outline'}
-                    className={`h-12 font-medium transition-all ${
-                      slot.disabled 
-                        ? 'bg-red-100 text-red-400 border-red-200 cursor-not-allowed hover:bg-red-100' 
-                        : slotTime === slot.time 
-                        ? 'bg-green-600 hover:bg-green-700 text-white border-green-600 shadow-md' 
-                        : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
-                    }`}
+                    className={`h-12 font-medium transition-all ${slot.disabled
+                        ? 'bg-red-100 text-red-400 border-red-200 cursor-not-allowed hover:bg-red-100'
+                        : slotTime === slot.time
+                          ? 'bg-green-600 hover:bg-green-700 text-white border-green-600 shadow-md'
+                          : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                      }`}
                     title={slot.disabled ? 'Already booked' : 'Click to select'}
                   >
                     {slot.time}
@@ -292,11 +319,10 @@ const Appointment = () => {
               onClick={bookAppointment}
               disabled={!slotTime || !docInfo.available || booking}
               size='lg'
-              className={`px-8 h-12 rounded-xl font-semibold text-lg transition-all ${
-                slotTime && docInfo.available && !booking
+              className={`px-8 h-12 rounded-xl font-semibold text-lg transition-all ${slotTime && docInfo.available && !booking
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
                   : 'bg-gray-200 text-gray-500 cursor-not-allowed hover:bg-gray-200'
-              }`}
+                }`}
             >
               {booking ? (
                 <>
