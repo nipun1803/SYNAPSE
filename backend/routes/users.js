@@ -4,7 +4,9 @@ import {
   cancelAppointment,
   getProfile,
   listAppointment,
-  updateProfile
+  updateProfile,
+  getAppointmentById,
+  rescheduleAppointment
 } from '../controllers/userController.js';
 import authUser from '../middleware/authUser.js';
 import upload from '../middleware/multer.js';
@@ -25,5 +27,11 @@ router.post('/appointments', authUser, bookAppointment);
 
 // /api/users/appointments/:id/cancel
 router.patch('/appointments/:id/cancel', authUser, cancelAppointment);
+
+// /api/users/appointments/:id/reschedule
+router.patch('/appointments/:id/reschedule', authUser, rescheduleAppointment);
+
+// /api/users/appointments/:id
+router.get('/appointments/:id', authUser, getAppointmentById);
 
 export default router;

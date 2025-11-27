@@ -5,30 +5,22 @@ import bcrypt from "bcrypt";
 import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
 import userModel from "../models/usermodel.js";
-
-
-
-const getCookieOptions = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  return {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: '/',
-  };
-};
+import getCookieOptions from "../utils/cookieUtil.js";
 
 const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-      const token = jwt.sign({ email, type: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1d' });
-      res.cookie('aToken', token, getCookieOptions());
-      
-      res.status(200).json({ success: true, userType: 'admin' });
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      const token = jwt.sign({ email, type: "admin" }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+      res.cookie("aToken", token, getCookieOptions());
+
+      res.status(200).json({ success: true, userType: "admin" });
     } else {
       res.status(401).json({ success: false, message: "Invalid credentials" });
     }
@@ -40,13 +32,13 @@ const loginAdmin = async (req, res) => {
 
 const logoutAdmin = async (req, res) => {
   try {
-    res.clearCookie('aToken', {
+    res.clearCookie("aToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      path: '/'
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
     });
-    
+
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.log(error);
@@ -70,12 +62,50 @@ const emitCounts = async (emit) => {
 
 const appointmentsAdmin = async (req, res) => {
   try {
-    const appointments = await appointmentModel.find({}).sort({ date: -1, _id: -1 });
-    
-    res.status(200).json({ success: true, appointments });
+    const { page = 1, limit = 10, status, search } = req.query;
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {};
+    if (status === "upcoming") {
+      query.cancelled = false;
+      query.isCompleted = false;
+    } else if (status === "completed") {
+      query.isCompleted = true;
+    } else if (status === "cancelled") {
+      query.cancelled = true;
+    }
+
+    let appointments = await appointmentModel
+      .find(query)
+      .sort({ date: -1, _id: -1 });
+    if (search) {
+      const searchLower = search.toLowerCase();
+      appointments = appointments.filter((apt) => {
+        const patientName = apt.userData?.name?.toLowerCase() || "";
+        const doctorName = apt.docData?.name?.toLowerCase() || "";
+        return (
+          patientName.includes(searchLower) || doctorName.includes(searchLower)
+        );
+      });
+    }
+
+    const total = appointments.length;
+    const paginatedAppointments = appointments.slice(skip, skip + limitNum);
+
+    res.status(200).json({
+      success: true,
+      appointments: paginatedAppointments,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        pages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (error) {
     console.log(error);
-
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -83,27 +113,48 @@ const appointmentsAdmin = async (req, res) => {
 const appointmentCancel = async (req, res) => {
   try {
     const { appointmentId } = req.body;
-    
+
     if (!appointmentId) {
-      return res.status(400).json({ success: false, message: "Appointment ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Appointment ID is required" });
     }
-    
+
     const appointment = await appointmentModel.findById(appointmentId);
-    
+
     if (!appointment) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
     }
-    
-    await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
+
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      cancelled: true,
+    });
+    const { docId, slotDate, slotTime } = appointment;
+    const doctorData = await doctorModel.findById(docId);
+
+    if (doctorData) {
+      const slots_booked = doctorData.slots_booked || {};
+      if (Array.isArray(slots_booked[slotDate])) {
+        slots_booked[slotDate] = slots_booked[slotDate].filter(
+          (e) => e !== slotTime
+        );
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+      }
+    }
 
     const emit = req.app?.locals?.emitToAdmins;
     const updated = await appointmentModel.findById(appointmentId).lean();
     if (emit && updated) {
-      emit("appointment:updated", { type: "appointment:updated", appointment: updated });
+      emit("appointment:updated", {
+        type: "appointment:updated",
+        appointment: updated,
+      });
       await emitCounts(emit);
     }
 
-    res.status(200).json({ success: true, message: 'Appointment Cancelled' });
+    res.status(200).json({ success: true, message: "Appointment Cancelled" });
   } catch (error) {
     console.log(error);
 
@@ -113,37 +164,68 @@ const appointmentCancel = async (req, res) => {
 
 const addDoctor = async (req, res) => {
   try {
-    const { name, email, password, speciality, degree, experience, about, fees, address } = req.body;
+    const {
+      name,
+      email,
+      password,
+      speciality,
+      degree,
+      experience,
+      about,
+      fees,
+      address,
+    } = req.body;
     const imageFile = req.file;
 
-    if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address) {
-      return res.status(400).json({ success: false, message: "Missing Details" });
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !speciality ||
+      !degree ||
+      !experience ||
+      !about ||
+      !fees ||
+      !address
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing Details" });
     }
 
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ success: false, message: "Please enter a valid email" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Please enter a valid email" });
     }
 
     if (password.length < 8) {
-      return res.status(400).json({ success: false, message: "Please enter a strong password" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Please enter a strong password" });
     }
 
     const exists = await doctorModel.findOne({ email });
-  
-    if (exists) {
-      return res.status(409).json({ success: false, message: "Doctor already exists with this email" });
-    }
 
+    if (exists) {
+      return res.status(409).json({
+        success: false,
+        message: "Doctor already exists with this email",
+      });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let imageUrl = "";
     if (imageFile) {
-      const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
       imageUrl = imageUpload.secure_url;
     }
 
-    let parsedAddress = typeof address === "string" ? JSON.parse(address) : address;
+    let parsedAddress =
+      typeof address === "string" ? JSON.parse(address) : address;
 
     const doctorData = {
       name,
@@ -170,7 +252,7 @@ const addDoctor = async (req, res) => {
       emit("doctor:created", { type: "doctor:created", doctor: doc });
       await emitCounts(emit);
     }
-    res.status(201).json({ success: true, message: 'Doctor Added' });
+    res.status(201).json({ success: true, message: "Doctor Added" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
@@ -179,8 +261,8 @@ const addDoctor = async (req, res) => {
 
 const allDoctors = async (req, res) => {
   try {
-    const doctors = await doctorModel.find().select('-password');
-    
+    const doctors = await doctorModel.find().select("-password");
+
     res.status(200).json({ success: true, doctors });
   } catch (error) {
     console.log(error);
@@ -198,7 +280,7 @@ const adminDashboard = async (req, res) => {
       doctors: doctors.length,
       appointments: appointments.length,
       patients: users.length,
-      latestAppointments: appointments.slice().reverse()
+      latestAppointments: appointments.slice().reverse(),
     };
     res.status(200).json({ success: true, dashData });
   } catch (error) {
@@ -207,12 +289,97 @@ const adminDashboard = async (req, res) => {
   }
 };
 
+const deleteAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Appointment ID is required" });
+    }
+
+    const appointment = await appointmentModel.findById(id);
+    if (!appointment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
+    }
+
+    await appointmentModel.findByIdAndDelete(id);
+
+    // Also free up the slot if it wasn't cancelled
+    if (!appointment.cancelled) {
+      const { docId, slotDate, slotTime } = appointment;
+      const doctorData = await doctorModel.findById(docId);
+      if (doctorData) {
+        const slots_booked = doctorData.slots_booked || {};
+        if (Array.isArray(slots_booked[slotDate])) {
+          slots_booked[slotDate] = slots_booked[slotDate].filter(
+            (e) => e !== slotTime
+          );
+          await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+        }
+      }
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Appointment deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const deleteDoctor = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Doctor ID is required" });
+    }
+
+    const doctor = await doctorModel.findById(id);
+
+    if (!doctor) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
+    }
+
+    // Check if doctor has any appointments
+    const appointmentCount = await appointmentModel.countDocuments({
+      docId: id,
+    });
+
+    if (appointmentCount > 0) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot delete doctor with ${appointmentCount} appointment(s). Please cancel or complete them first.`,
+      });
+    }
+
+    await doctorModel.findByIdAndDelete(id);
+
+    res
+      .status(200)
+      .json({ success: true, message: "Doctor deleted successfully" });
+  } catch (error) {
+    console.log("deleteDoctor error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export {
+  addDoctor,
   loginAdmin,
   logoutAdmin,
+  allDoctors,
   appointmentsAdmin,
   appointmentCancel,
-  addDoctor,
-  allDoctors,
-  adminDashboard
+  adminDashboard,
+  deleteAppointment,
+  deleteDoctor,
 };

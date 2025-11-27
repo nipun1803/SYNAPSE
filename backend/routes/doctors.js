@@ -8,7 +8,8 @@ import {
   doctorDashboard,
   doctorList,
   doctorProfile,
-  updateDoctorProfile
+  updateDoctorProfile,
+  getDoctorAvailableSlots
 } from '../controllers/doctorController.js';
 import authAdmin from '../middleware/authAdmin.js';
 import authDoctor from '../middleware/authDoctor.js';
@@ -20,7 +21,10 @@ const router = express.Router();
 router.get('/', doctorList);
 
 //  /api/doctors/:id 
-router.get('/:id', doctorList); 
+router.get('/:id', doctorList);
+
+// /api/doctors/:id/available
+router.get('/:id/available', getDoctorAvailableSlots);
 
 // Doctor's own profile
 router.get('/me/profile', authDoctor, doctorProfile);
