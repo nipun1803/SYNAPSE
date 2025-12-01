@@ -10,8 +10,8 @@ import Appointment from './pages/Appointment'
 import Contact from './pages/Contact'
 import Doctors from './pages/Doctors'
 import Home from './pages/Home'
-import MyAppointments from './pages/MyAppointments'
-import MyProfile from './pages/MyProfile'
+import MyAppointments from './pages/Appointments'
+import MyProfile from './pages/Profile'
 import UnifiedLogin from './pages/UnifiedLogin'
 
 
@@ -55,7 +55,7 @@ const PublicOnlyRoute = ({ children }) => {
 const App = () => {
   return (
     <div className='min-h-screen bg-gray-50'>
-      <ToastContainer 
+      <ToastContainer
         position='top-right'
         autoClose={3000}
         hideProgressBar={false}
@@ -79,7 +79,7 @@ const App = () => {
               <UnifiedLogin />
             </PublicOnlyRoute>
           } />
-          
+
           <Route path='/appointment/:docId' element={
             <ProtectedRoute>
               <Appointment />

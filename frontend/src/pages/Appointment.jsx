@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Info } from 'lucide-react'
+import { doctorService, userService } from '../api/services'
 
 const Appointment = () => {
   const { docId } = useParams()
@@ -94,10 +95,7 @@ const Appointment = () => {
       setSlotTime('')
 
       try {
-        const res = await fetch(`${backendUrl || ''}/api/doctors/${docId}/available`, {
-          credentials: 'include'
-        });
-        const data = await res.json();
+        const data = await doctorService.getAvailability(docId)
 
         const dateKey = makeSlotDateKey(selectedDate)
         let bookedTimes = []
@@ -105,7 +103,6 @@ const Appointment = () => {
         if (data.success && data.slots_booked) {
           bookedTimes = (data.slots_booked && Array.isArray(data.slots_booked[dateKey]) && data.slots_booked[dateKey]) || []
         } else {
-          // Fallback to docInfo if API fails or not implemented fully yet
           bookedTimes =
             (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
             (docInfo.slots_booked && docInfo.slots_booked[dateKey]) || []
@@ -115,7 +112,6 @@ const Appointment = () => {
         setTimeSlots(slots)
       } catch (error) {
         console.error("Error fetching slots", error);
-        // Fallback
         const dateKey = makeSlotDateKey(selectedDate)
         const bookedTimes =
           (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
@@ -146,14 +142,7 @@ const Appointment = () => {
       setBooking(true)
       const slotDate = makeSlotDateKey(selectedDate)
 
-      const response = await fetch(`${backendUrl || ''}/api/users/appointments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ docId, slotDate, slotTime })
-      })
-
-      const data = await response.json()
+      const data = await userService.bookAppointment({ docId, slotDate, slotTime })
 
       if (data.success) {
         toast.success('Appointment booked successfully!')
@@ -300,10 +289,10 @@ const Appointment = () => {
                     disabled={slot.disabled}
                     variant={slotTime === slot.time ? 'default' : 'outline'}
                     className={`h-12 font-medium transition-all ${slot.disabled
-                        ? 'bg-red-100 text-red-400 border-red-200 cursor-not-allowed hover:bg-red-100'
-                        : slotTime === slot.time
-                          ? 'bg-green-600 hover:bg-green-700 text-white border-green-600 shadow-md'
-                          : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                      ? 'bg-red-100 text-red-400 border-red-200 cursor-not-allowed hover:bg-red-100'
+                      : slotTime === slot.time
+                        ? 'bg-green-600 hover:bg-green-700 text-white border-green-600 shadow-md'
+                        : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
                       }`}
                     title={slot.disabled ? 'Already booked' : 'Click to select'}
                   >
@@ -320,8 +309,8 @@ const Appointment = () => {
               disabled={!slotTime || !docInfo.available || booking}
               size='lg'
               className={`px-8 h-12 rounded-xl font-semibold text-lg transition-all ${slotTime && docInfo.available && !booking
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                  : 'bg-gray-200 text-gray-500 cursor-not-allowed hover:bg-gray-200'
+                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed hover:bg-gray-200'
                 }`}
             >
               {booking ? (

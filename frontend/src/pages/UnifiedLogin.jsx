@@ -4,14 +4,14 @@ import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { 
-  User, Mail, Lock, Eye, EyeOff, Loader2, 
-  Activity, CheckCircle2, ShieldCheck, Sparkles, HelpCircle, AlertCircle 
+import {
+  User, Mail, Lock, Eye, EyeOff, Loader2,
+  Activity, CheckCircle2, ShieldCheck, Sparkles, HelpCircle, AlertCircle
 } from "lucide-react";
 
 import { AppContext } from "../context/AppContext";
+import { authService } from "../api/services";
 
-// SHADCN UI COMPONENTS
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,7 +24,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-// Config
 const ADMIN_URL = import.meta.env.VITE_ADMIN_URL;
 const DOCTOR_URL = import.meta.env.VITE_DOCTOR_URL || ADMIN_URL;
 
@@ -35,14 +34,13 @@ const AuthSchema = z.object({
 });
 
 const UnifiedLogin = () => {
-  const navigate = useNavigate();
-  const { backendUrl, loadUserProfileData } = useContext(AppContext);
+  const { backendUrl, loadUserProfileData: loadProfile } = useContext(AppContext);
 
   const [authMode, setAuthMode] = useState("login");
   const [userRole, setUserRole] = useState("user");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Form setup
   const form = useForm({
     resolver: zodResolver(AuthSchema),
@@ -62,17 +60,10 @@ const UnifiedLogin = () => {
         return;
       }
 
-      const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
       const payload = { ...values, userType: userRole };
-
-      const response = await fetch(`${backendUrl}${endpoint}`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
+      const data = authMode === "login"
+        ? await authService.login(payload)
+        : await authService.register(payload);
 
       if (!data.success) throw new Error(data.message || "Auth failed");
 
@@ -83,11 +74,11 @@ const UnifiedLogin = () => {
         if (data.userType === "admin") window.location.href = `${ADMIN_URL}/admin-dashboard`;
         else if (data.userType === "doctor") window.location.href = `${DOCTOR_URL}/doctor-dashboard`;
         else {
-          if (loadUserProfileData) await loadUserProfileData();
+          if (loadProfile) await loadProfile();
           navigate("/");
         }
       } else {
-        if (loadUserProfileData) await loadUserProfileData();
+        if (loadProfile) await loadProfile();
         navigate("/my-profile");
       }
     } catch (error) {
@@ -110,16 +101,16 @@ const UnifiedLogin = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 font-sans text-slate-800">
-      
+
       {/* Main Card */}
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 lg:gap-8 overflow-hidden rounded-3xl shadow-2xl bg-white border border-blue-100">
-        
+
         {/* Left Side: Brand */}
         <div className="hidden lg:flex flex-col relative text-white">
           <div className="absolute inset-0">
-            <img 
-              src="https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80" 
-              alt="Medical Tech" 
+            <img
+              src="https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80"
+              alt="Medical Tech"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-blue-700/90 to-blue-900/90 mix-blend-multiply" />
@@ -140,8 +131,8 @@ const UnifiedLogin = () => {
               </h2>
               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl max-w-md shadow-lg">
                 <div className="flex items-center gap-3 mb-3">
-                   <ShieldCheck className="text-blue-200 h-5 w-5" />
-                   <span className="font-semibold text-sm">Bank-Grade Security</span>
+                  <ShieldCheck className="text-blue-200 h-5 w-5" />
+                  <span className="font-semibold text-sm">Bank-Grade Security</span>
                 </div>
                 <p className="text-sm text-blue-50 leading-relaxed font-light opacity-90">
                   Synapse protects your medical data with end-to-end encryption, ensuring your privacy is never compromised.
@@ -159,14 +150,14 @@ const UnifiedLogin = () => {
         {/* Right Side: Form */}
         <div className="flex flex-col justify-center p-8 lg:p-16 bg-white relative">
           <div className="max-w-[400px] mx-auto w-full space-y-8">
-            
+
             <div className="text-center space-y-2">
               <h1 className="text-3xl font-bold tracking-tight text-slate-900">
                 {authMode === "login" ? "Welcome Back" : "Join Synapse"}
               </h1>
               <p className="text-sm text-slate-500">
-                {authMode === "login" 
-                  ? "Sign in to access your portal." 
+                {authMode === "login"
+                  ? "Sign in to access your portal."
                   : "Create an account to manage your health."}
               </p>
             </div>
@@ -183,7 +174,7 @@ const UnifiedLogin = () => {
             {/* Form */}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleAuthSubmit)} className="space-y-4">
-                
+
                 {authMode === "signup" && (
                   <FormField
                     control={form.control}
@@ -193,10 +184,10 @@ const UnifiedLogin = () => {
                         <FormControl>
                           <div className="relative">
                             <User className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
-                            <Input 
-                              placeholder="Full Name" 
+                            <Input
+                              placeholder="Full Name"
                               className="pl-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
-                              {...field} 
+                              {...field}
                             />
                           </div>
                         </FormControl>
@@ -214,10 +205,10 @@ const UnifiedLogin = () => {
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
-                          <Input 
-                            placeholder="Email Address" 
+                          <Input
+                            placeholder="Email Address"
                             className="pl-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
-                            {...field} 
+                            {...field}
                           />
                         </div>
                       </FormControl>
@@ -234,15 +225,15 @@ const UnifiedLogin = () => {
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
-                          <Input 
+                          <Input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Password" 
+                            placeholder="Password"
                             className="pl-10 pr-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
-                            {...field} 
+                            {...field}
                           />
-                          <button 
-                            type="button" 
-                            onClick={() => setShowPassword(!showPassword)} 
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-3.5 text-blue-300 hover:text-blue-500 transition-colors"
                           >
                             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -254,8 +245,8 @@ const UnifiedLogin = () => {
                   )}
                 />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all hover:-translate-y-0.5 mt-2"
                 >
                   {isSubmitting ? <Loader2 className="animate-spin" /> : (authMode === "login" ? "Sign In" : "Create Account")}
@@ -266,39 +257,39 @@ const UnifiedLogin = () => {
 
             {/* Demo Section */}
             {authMode === 'login' && (
-               <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mt-4 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                     <p className="text-xs font-semibold text-blue-700 flex items-center gap-2">
-                        <Sparkles size={14} className="text-blue-500"/> 
-                        Demo Access
-                     </p>
-                     <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Test Mode</span>
-                  </div>
-                  <Button 
-                     variant="outline" 
-                     onClick={fillDemo} 
-                     className="w-full h-9 bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium"
-                  >
-                    Auto-Fill {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Credentials
-                  </Button>
-               </div>
+              <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mt-4 transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-blue-700 flex items-center gap-2">
+                    <Sparkles size={14} className="text-blue-500" />
+                    Demo Access
+                  </p>
+                  <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Test Mode</span>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={fillDemo}
+                  className="w-full h-9 bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium"
+                >
+                  Auto-Fill {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Credentials
+                </Button>
+              </div>
             )}
 
             <div className="text-center pt-2">
               <p className="text-sm text-slate-600">
                 {authMode === "login" ? "New to Synapse?" : "Already have an account?"}{" "}
-                <button 
-                  onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")} 
+                <button
+                  onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}
                   className="text-blue-600 font-bold hover:text-blue-700 hover:underline transition-all"
                 >
                   {authMode === "login" ? "Create an account" : "Log in"}
                 </button>
               </p>
             </div>
-            
+
             <div className="mt-8 flex justify-center gap-6 text-[10px] text-slate-400">
-               <a href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</a>
-               <a href="#" className="hover:text-blue-600 transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-blue-600 transition-colors">Terms of Service</a>
             </div>
 
           </div>

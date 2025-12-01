@@ -2,34 +2,32 @@ import React, { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
-import { resolveImageUrl } from '../utils/resolveImageUrl'
+import { resolveImageUrl } from '../lib/resolveImageUrl'
+import { userService } from '../api/services'
 
 const MyProfile = () => {
-  const { backendUrl, loadUserProfileData } = useContext(AppContext) // for loading user data
-  
+  const { backendUrl, loadUserProfileData: loadProfile } = useContext(AppContext)
+
 
   const [isEdit, setIsEdit] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [userData, setUserData] = useState(null)
-  
+
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
 
   const fetchProfile = async () => {
     try {
-
       if (!userData) setLoading(true)
-      
-      const res = await fetch(`${backendUrl || ''}/api/users/profile`, { credentials: 'include' })
-      const data = await res.json()
+
+      const data = await userService.getProfile()
 
       if (data.success) {
-
         setUserData({
           ...data.userData,
           address: data.userData.address || { line1: '', line2: '' },
-          gender: data.userData.gender || '', 
+          gender: data.userData.gender || '',
           phone: data.userData.phone || '',
           dob: data.userData.dob || ''
         })
@@ -46,7 +44,7 @@ const MyProfile = () => {
 
   useEffect(() => {
     fetchProfile()
-    
+
 
     return () => {
       if (imagePreview) {
@@ -73,7 +71,7 @@ const MyProfile = () => {
 
   const onSave = async () => {
     const { name, phone, gender, dob } = userData
-    
+
     if (!name || !phone || !gender) {
       return toast.error('Please fill all required fields')
     }
@@ -86,31 +84,25 @@ const MyProfile = () => {
       form.append('gender', gender)
       form.append('dob', dob || '')
       form.append('address', JSON.stringify(userData.address))
-      
+
       if (imageFile) form.append('image', imageFile)
 
-      const res = await fetch(`${backendUrl || ''}/api/users/profile`, {
-        method: 'PUT',
-        credentials: 'include',
-        body: form
-      })
-      
-      const data = await res.json()
-      
+      const data = await userService.updateProfile(form)
+
       if (data.success) {
         toast.success('Profile updated successfully!')
         setIsEdit(false)
-        
+
         if (imagePreview) {
           URL.revokeObjectURL(imagePreview)
         }
         setImageFile(null)
         setImagePreview(null)
-        
+
         await fetchProfile()
-        
-        if (loadUserProfileData) {
-          await loadUserProfileData()
+
+        if (loadProfile) {
+          await loadProfile()
         }
       } else {
         toast.error(data.message || 'Failed to update profile')
@@ -128,7 +120,7 @@ const MyProfile = () => {
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview)
     }
-    
+
     setIsEdit(false)
     setImageFile(null)
     setImagePreview(null)
@@ -157,8 +149,8 @@ const MyProfile = () => {
           <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
         </svg>
         <p className='text-gray-500'>Failed to load profile data</p>
-        <button 
-          onClick={() => fetchProfile()} 
+        <button
+          onClick={() => fetchProfile()}
           className='mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
         >
           Retry
@@ -170,15 +162,13 @@ const MyProfile = () => {
   return (
     <div className='min-h-screen bg-gray-50 py-8'>
       <div className='max-w-4xl mx-auto px-4'>
-        
-        {/* Profile Header */}
+
         <div className='bg-white rounded-lg shadow-sm mb-6 overflow-hidden'>
           <div className='h-32 bg-gradient-to-r from-blue-500 to-indigo-600'></div>
-          
+
           <div className='px-6 pb-6'>
             <div className='flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-12'>
-              
-              {/* Avatar Section */}
+
               <div className='relative mb-4 sm:mb-0'>
                 <img
                   src={getDisplayImage()}
@@ -186,8 +176,7 @@ const MyProfile = () => {
                   className='w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg bg-white'
                   onError={(e) => { e.target.src = assets.profile_pic }}
                 />
-                
-                {/* Edit Image Overlay */}
+
                 {isEdit && (
                   <div className='absolute bottom-0 right-0'>
                     <label className='flex items-center justify-center w-10 h-10 bg-white hover:bg-gray-50 rounded-full shadow-md cursor-pointer border border-gray-200 transition-colors'>
@@ -218,7 +207,6 @@ const MyProfile = () => {
           </div>
         </div>
 
-        {/* Form Section */}
         <div className='bg-white rounded-lg shadow-sm p-6'>
           <div className='flex items-center justify-between mb-6'>
             <h2 className='text-lg font-semibold text-gray-900'>Personal Information</h2>
@@ -226,13 +214,13 @@ const MyProfile = () => {
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            
+
             <Field label="Full Name" required={isEdit}>
               {isEdit ? (
                 <input
                   type='text'
                   value={userData.name}
-                  onChange={(e) => setUserData({...userData, name: e.target.value})}
+                  onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                   className='form-input'
                   placeholder='Enter your full name'
                 />
@@ -249,7 +237,7 @@ const MyProfile = () => {
                 <input
                   type='tel'
                   value={userData.phone}
-                  onChange={(e) => setUserData({...userData, phone: e.target.value})}
+                  onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
                   className='form-input'
                   placeholder='Enter phone number'
                 />
@@ -260,7 +248,7 @@ const MyProfile = () => {
               {isEdit ? (
                 <select
                   value={userData.gender}
-                  onChange={(e) => setUserData({...userData, gender: e.target.value})}
+                  onChange={(e) => setUserData({ ...userData, gender: e.target.value })}
                   className='form-input'
                 >
                   <option value=''>Select Gender</option>
@@ -276,16 +264,16 @@ const MyProfile = () => {
                 <input
                   type='date'
                   value={userData.dob ? userData.dob.split('T')[0] : ''}
-                  onChange={(e) => setUserData({...userData, dob: e.target.value})}
+                  onChange={(e) => setUserData({ ...userData, dob: e.target.value })}
                   max={new Date().toISOString().split('T')[0]}
                   className='form-input'
                 />
               ) : (
                 <p className='text-gray-900'>
-                  {userData.dob ? new Date(userData.dob).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {userData.dob ? new Date(userData.dob).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                   }) : '-'}
                 </p>
               )}
@@ -299,14 +287,14 @@ const MyProfile = () => {
                       type='text'
                       placeholder='Address Line 1'
                       value={userData.address.line1}
-                      onChange={(e) => setUserData({...userData, address: {...userData.address, line1: e.target.value}})}
+                      onChange={(e) => setUserData({ ...userData, address: { ...userData.address, line1: e.target.value } })}
                       className='form-input'
                     />
                     <input
                       type='text'
                       placeholder='Address Line 2 (Optional)'
                       value={userData.address.line2}
-                      onChange={(e) => setUserData({...userData, address: {...userData.address, line2: e.target.value}})}
+                      onChange={(e) => setUserData({ ...userData, address: { ...userData.address, line2: e.target.value } })}
                       className='form-input'
                     />
                   </div>
@@ -339,7 +327,7 @@ const MyProfile = () => {
           )}
         </div>
       </div>
-      
+
       {/* CSS Utility classes */}
       <style>{`
         .form-input {

@@ -51,7 +51,11 @@ export const userService = {
     credentials: 'include',
     body: formData
   }).then(r => r.json()),
-  getAppointments: () => fetchAPI(API.USERS.APPOINTMENTS),
+  getAppointments: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `${API.USERS.APPOINTMENTS}?${queryString}` : API.USERS.APPOINTMENTS;
+    return fetchAPI(url);
+  },
   bookAppointment: (payload) => fetchAPI(API.USERS.APPOINTMENTS, {
     method: 'POST',
     body: JSON.stringify(payload)
@@ -63,6 +67,7 @@ export const userService = {
 export const doctorService = {
   getList: () => fetchAPI(API.DOCTORS.LIST),
   getById: (id) => fetchAPI(API.DOCTORS.BY_ID(id)),
+  getAvailability: (id) => fetchAPI(API.DOCTORS.AVAILABILITY(id)),
   getProfile: () => fetchAPI(API.DOCTORS.ME_PROFILE),
   updateProfile: (formData) => fetch(API.DOCTORS.ME_PROFILE, {
     method: 'PUT',

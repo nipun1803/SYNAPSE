@@ -6,9 +6,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Calendar, DollarSign, Loader2, ClipboardList } from 'lucide-react'
+import { userService } from '../api/services'
 
 const MyAppointments = () => {
-  const { backendUrl, currencySymbol, slotDateFormat } = useContext(AppContext)
+  const { currencySymbol, slotDateFormat } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(null)
@@ -18,10 +19,8 @@ const MyAppointments = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`${backendUrl || ''}/api/users/appointments?page=${page}&limit=5`, {
-        credentials: 'include',
-      })
-      const data = await res.json()
+      const data = await userService.getAppointments({ page, limit: 5 })
+
       if (data.success) {
         setAppointments(data.appointments || [])
         if (data.pagination) {
@@ -30,8 +29,8 @@ const MyAppointments = () => {
       } else {
         toast.error(data.message || 'Failed to load appointments')
       }
-    } catch (err) {
-      console.error('Appointments fetch error:', err)
+    } catch (error) {
+      console.error('Appointments fetch error:', error)
       toast.error('Failed to load appointments.')
     } finally {
       setLoading(false)
@@ -43,14 +42,7 @@ const MyAppointments = () => {
 
     try {
       setCancelling(id)
-      const res = await fetch(`${backendUrl || ''}/api/users/appointments/${id}/cancel`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ appointmentId: id })
-      })
-
-      const data = await res.json()
+      const data = await userService.cancelAppointment(id)
 
       if (data.success) {
         toast.success(data.message || 'Appointment cancelled successfully')
@@ -58,8 +50,8 @@ const MyAppointments = () => {
       } else {
         toast.error(data.message || 'Failed to cancel appointment')
       }
-    } catch (err) {
-      console.error('Cancel error:', err)
+    } catch (error) {
+      console.error('Cancel error:', error)
       toast.error('Failed to cancel appointment.')
     } finally {
       setCancelling(null)
@@ -157,16 +149,6 @@ const MyAppointments = () => {
                   </div>
 
                   <div className='flex md:flex-col gap-3 justify-end md:justify-start md:min-w-[140px]'>
-                    {item.payment ? (
-                      <Button disabled variant='outline' className='bg-gray-100 text-gray-400 cursor-not-allowed'>
-                        Paid
-                      </Button>
-                    ) : (
-                      <Button className='bg-blue-600 hover:bg-blue-700 text-white'>
-                        Pay Now
-                      </Button>
-                    )}
-
                     {!item.cancelled && !item.isCompleted && (
                       <Button
                         onClick={() => cancelAppointment(item._id)}

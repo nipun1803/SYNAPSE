@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { createContext, useEffect, useState } from 'react'
+import { doctorService, userService } from '../api/services'
 
 export const AppContext = createContext()
 
@@ -11,17 +11,9 @@ const AppContextProvider = ({ children }) => {
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const api = axios.create({
-    baseURL: backendUrl,
-    withCredentials: true,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-
   const fetchDoctors = async () => {
     try {
-      const { data } = await api.get('/api/doctors')
+      const data = await doctorService.getList()
       if (data.success) {
         setDoctors(data.doctors)
       }
@@ -33,7 +25,7 @@ const AppContextProvider = ({ children }) => {
 
   const refreshDoctors = async () => {
     try {
-      const { data } = await api.get('/api/doctors')
+      const data = await doctorService.getList()
       if (data.success) {
         setDoctors(data.doctors)
       }
@@ -42,10 +34,10 @@ const AppContextProvider = ({ children }) => {
     }
   }
 
-  const loadUserProfileData = async () => {
+  const loadProfile = async () => {
     try {
       setLoading(true)
-      const { data } = await api.get('/api/users/profile')
+      const data = await userService.getProfile()
       if (data.success) {
         setUserData(data.userData)
       } else {
@@ -82,7 +74,7 @@ const AppContextProvider = ({ children }) => {
 
   useEffect(() => {
     fetchDoctors()
-    loadUserProfileData()
+    loadProfile()
   }, [])
 
   const value = {
@@ -95,7 +87,7 @@ const AppContextProvider = ({ children }) => {
     loading,
     fetchDoctors,
     refreshDoctors,
-    loadUserProfileData,
+    loadProfile,
     slotDateFormat,
     calculateAge
   }
