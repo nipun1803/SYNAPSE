@@ -1,373 +1,344 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import { assets } from '../assets/assets'
-import { AppContext } from '../context/AppContext'
-import { authService } from '../api/services'
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import {
+  Home,
+  Users,
+  Info,
+  MessageCircle,
+  ChevronDown,
+  UserCircle,
+  Calendar,
+  LogOut,
+  Menu,
+  X,
+  ArrowRight,
+} from "lucide-react";
+
+import { assets } from "../assets/assets";
+import { AppContext } from "../context/AppContext";
+import { authService } from "../api/services";
+
+const NAV_ITEMS = [
+  { to: "/", label: "Home", Icon: Home },
+  { to: "/doctors", label: "Find Doctors", Icon: Users },
+  { to: "/about", label: "About Us", Icon: Info },
+  { to: "/contact", label: "Get in Touch", Icon: MessageCircle },
+];
 
 const Navbar = () => {
-  const navigate = useNavigate()
-  const { userData, backendUrl, loadProfile, loading } = useContext(AppContext) || {}
+  const navigate = useNavigate();
+  const { userData, backendUrl, loadProfile, loading } =
+    useContext(AppContext) || {};
 
-  const user = userData || null
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [profileImg, setProfileImg] = useState(assets.profile_pic)
+  const user = userData;
+  const isLoggedIn = !!user;
 
-  useEffect(() => {
-    setIsLoggedIn(Boolean(user))
-  }, [user])
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileImg, setProfileImg] = useState(assets.profile_pic);
 
-  useEffect(() => {
-    if (user?.image) {
-      updateImg(user.image)
-    } else {
-      setProfileImg(assets.profile_pic)
-    }
-  }, [user, backendUrl])
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const hoverTimeout = useRef(null);
 
   useEffect(() => {
-    if (isLoggedIn && loadProfile) {
-      loadProfile()
-    }
-  }, [isLoggedIn])
+    if (user?.image) updateImg(user.image);
+    else setProfileImg(assets.profile_pic);
+  }, [user, backendUrl]);
 
-  const updateImg = (imgPath) => {
+  useEffect(() => {
+    if (isLoggedIn) loadProfile?.();
+  }, [isLoggedIn]);
+
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "unset";
+    return () => (document.body.style.overflow = "unset");
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const closeOnScroll = () => setDropdownOpen(false);
+    window.addEventListener("scroll", closeOnScroll);
+    return () => window.removeEventListener("scroll", closeOnScroll);
+  }, []);
+
+  const updateImg = (img) => {
     try {
-      if (!imgPath) return setProfileImg(assets.profile_pic)
-      if (imgPath.startsWith('http')) return setProfileImg(imgPath)
-      if (imgPath.includes('cloudinary.com')) return setProfileImg(`https://${imgPath}`)
-      const prefix = imgPath.startsWith('/') ? '' : '/'
-      setProfileImg(backendUrl + prefix + imgPath)
+      if (!img) return setProfileImg(assets.profile_pic);
+      if (img.startsWith("http")) return setProfileImg(img);
+      if (img.includes("cloudinary.com")) return setProfileImg(`https://${img}`);
+
+      setProfileImg(backendUrl + (img.startsWith("/") ? "" : "/") + img);
     } catch {
-      setProfileImg(assets.profile_pic)
+      setProfileImg(assets.profile_pic);
     }
-  }
+  };
 
   const logout = async () => {
     try {
-      await authService.logoutUser()
-      toast.success('Logged out successfully')
-      setTimeout(() => (window.location.href = '/unified-login'), 400)
-    } catch (err) {
-      toast.error('Failed to logout')
+      await authService.logoutUser();
+      toast.success("Take care! See you soon 👋");
+      setTimeout(() => (window.location.href = "/unified-login"), 400);
+    } catch {
+      toast.error("Oops! Something went wrong");
     }
-  }
-
-  const fallback = () => setProfileImg(assets.profile_pic)
+  };
 
   return (
-    <div className="bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* logo */}
-          <div className="logo-container relative overflow-hidden">
+          {/* LOGO */}
+          <div className="relative overflow-hidden group cursor-pointer">
             <img
               src={assets.logo}
-              alt="Synapse Logo"
-              className="w-44 cursor-pointer hover:opacity-90 duration-300"
-              onClick={() => navigate('/')}
+              className="w-36 md:w-44 transition group-hover:brightness-110"
+              onClick={() => navigate("/")}
             />
             <div className="shimmer-overlay" />
           </div>
 
-          {/* main nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 nav-main ${isActive ? 'text-blue-600 bg-blue-50 font-semibold nav-main-active' : ''}`
-              }
-            >
-              Home
-            </NavLink>
-
-            <NavLink
-              to="/doctors"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 nav-main ${isActive ? 'text-blue-600 bg-blue-50 font-semibold nav-main-active' : ''}`
-              }
-            >
-              All Doctors
-            </NavLink>
-
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 nav-main ${isActive ? 'text-blue-600 bg-blue-50 font-semibold nav-main-active' : ''}`
-              }
-            >
-              About
-            </NavLink>
-
-            <NavLink
-              to="/contact"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 nav-main ${isActive ? 'text-blue-600 bg-blue-50 font-semibold nav-main-active' : ''}`
-              }
-            >
-              Contact
-            </NavLink>
+          {/* DESKTOP NAV */}
+          <nav className="hidden md:flex items-center gap-1">
+            {NAV_ITEMS.map(({ to, label, Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${
+                    isActive
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`
+                }
+              >
+                <Icon size={16} />
+                <span>{label}</span>
+              </NavLink>
+            ))}
           </nav>
 
-          {/* right */}
-          <div className="flex items-center gap-4">
+          {/* RIGHT SECTION */}
+          <div className="flex items-center gap-3">
 
             {loading && (
-              <div className="hidden md:block w-24 h-9 rounded-lg shimmer-bg animate-shimmer" />
+              <div className="hidden md:block w-24 h-9 rounded-full shimmer-bg animate-shimmer" />
             )}
 
-            {/* profile menu */}
-            {!loading && isLoggedIn && (
-              <div className="relative group cursor-pointer">
-                <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition">
+            {/* PROFILE MENU */}
+            {isLoggedIn && !loading && (
+              <div
+                className="relative hidden md:block"
+                onMouseEnter={() => {
+                  clearTimeout(hoverTimeout.current);
+                  setDropdownOpen(true);
+                }}
+                onMouseLeave={() => {
+                  hoverTimeout.current = setTimeout(() => setDropdownOpen(false), 150);
+                }}
+                ref={dropdownRef}
+              >
+                <div
+                  className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 cursor-pointer pt-3 pb-3"
+                >
                   <img
                     src={profileImg}
-                    onError={fallback}
-                    className="w-8 h-8 rounded-full border object-cover ring-2 ring-white/40"
+                    onError={() => setProfileImg(assets.profile_pic)}
+                    className="w-8 h-8 object-cover rounded-full border"
                   />
-                  <span className="hidden lg:block text-sm text-gray-800">
-                    {user?.name?.split(' ')[0] || ''}
+                  <span className="text-sm text-gray-700 hidden xl:block">
+                    Hey, {user?.name?.split(" ")[0]}!
                   </span>
-                  <img src={assets.dropdown_icon} className="w-4 h-4" />
+                  <ChevronDown size={16} className="text-gray-500" />
                 </div>
 
-                {/* dropdown */}
-                <div className="absolute hidden group-hover:block top-12 right-0 w-56 bg-white rounded-xl shadow-xl border border-gray-200 z-20 transition-all duration-200 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                  <div className="py-2">
-                    <div className="px-4 py-2 border-b">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={profileImg}
-                          onError={fallback}
-                          className="w-10 h-10 rounded-full border object-cover"
-                        />
-                        <div>
-                          <p className="text-sm font-semibold text-gray-700">{user?.name}</p>
-                          <p className="text-xs text-gray-700 truncate">{user?.email}</p>
-                        </div>
+                {/* DROPDOWN */}
+                <div
+                  className={`absolute right-0 top-full mt-3 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl transition-all duration-200 transform ${
+                    dropdownOpen
+                      ? "opacity-100 visible translate-y-0"
+                      : "opacity-0 invisible -translate-y-2"
+                  }`}
+                >
+                  <div className="p-4 border-b bg-gray-50">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={profileImg}
+                        className="w-12 h-12 rounded-full object-cover border shadow-sm"
+                      />
+                      <div>
+                        <p className="text-sm font-semibold">{user?.name}</p>
+                        <p className="text-xs text-gray-500">{user?.email}</p>
                       </div>
                     </div>
-
-                    <button
-                      onClick={() => navigate('/my-profile')}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
-                    >
-                      My Profile
-                    </button>
-
-                    <button
-                      onClick={() => navigate('/my-appointments')}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
-                    >
-                      My Appointments
-                    </button>
-
-                    <hr className="my-1" />
-
-                    <button
-                      onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Logout
-                    </button>
                   </div>
+
+                  {[["/my-profile", "My Profile", UserCircle],
+                    ["/my-appointments", "My Appointments", Calendar]].map(
+                    ([to, label, Icon]) => (
+                      <button
+                        key={to}
+                        onClick={() => navigate(to)}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        <Icon size={16} />
+                        {label}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    onClick={logout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-2xl"
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* login */}
-            {!loading && !isLoggedIn && (
+            {/* LOGIN BUTTON */}
+            {!isLoggedIn && !loading && (
               <button
-                onClick={() => navigate('/unified-login')}
-                className="hidden md:block px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => navigate("/unified-login")}
+                className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm hover:bg-blue-700 shadow"
               >
-                Login / Sign Up
+                Get Started <ArrowRight size={16} />
               </button>
             )}
 
+            {/* MOBILE MENU BUTTON */}
             <button
               onClick={() => setMenuOpen(true)}
-              className="md:hidden p-2 rounded-lg hover:bg-white/10"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
             >
-              <img src={assets.menu_icon} className="w-6 h-6" />
+              <Menu size={24} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* mobile menu */}
+      {/* MOBILE MENU (FULLY OPAQUE NOW) */}
       <div
-        className={`md:hidden fixed inset-0 bg-white text-gray-800 backdrop-blur-md z-50 transition-all duration-300 ${
-          menuOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`md:hidden fixed inset-0 bg-white z-50 transition duration-300 ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
           <img src={assets.logo} className="w-36" />
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="p-2 rounded-lg hover:bg-white/10"
-          >
-            <img src={assets.cross_icon} className="w-6 h-6" />
+          <button onClick={() => setMenuOpen(false)} className="p-2 rounded hover:bg-gray-100">
+            <X size={24} />
           </button>
         </div>
 
-        <nav className="px-6 py-4">
+        {/* CONTENT */}
+        <nav className="px-6 py-6 overflow-y-auto h-[calc(100vh-72px)] bg-white">
           {isLoggedIn && (
-            <div className="mb-6 p-4 bg-white/10 rounded-md">
+            <div className="mb-6 p-4 bg-blue-50/80 rounded-xl border border-blue-100">
               <div className="flex items-center gap-3">
-                <img
-                  src={profileImg}
-                  onError={fallback}
-                  className="w-12 h-12 rounded-full border object-cover"
-                />
+                <img src={profileImg} className="w-14 h-14 rounded-full object-cover border" />
                 <div>
-                  <p className="font-semibold text-gray-800">{user?.name}</p>
-                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                  <p className="text-sm text-blue-600">Welcome back,</p>
+                  <p className="font-semibold text-gray-900">{user?.name}</p>
                 </div>
               </div>
             </div>
           )}
 
-          <NavLink
-            to="/"
-            onClick={() => setMenuOpen(false)}
-            className="block px-4 py-3 text-lg text-gray-600 hover:bg-gray-50 rounded-lg"
-          >
-            Home
-          </NavLink>
+          {/* NAV LINKS */}
+          <div className="space-y-2">
+            {NAV_ITEMS.map(({ to, label, Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                  }`
+                }
+              >
+                <Icon size={20} />
+                {label}
+              </NavLink>
+            ))}
+          </div>
 
-          <NavLink
-            to="/doctors"
-            onClick={() => setMenuOpen(false)}
-            className="block px-4 py-3 text-lg text-gray-600 hover:bg-gray-50 rounded-lg"
-          >
-            All Doctors
-          </NavLink>
-
-          <NavLink
-            to="/about"
-            onClick={() => setMenuOpen(false)}
-            className="block px-4 py-3 text-lg text-gray-600 hover:bg-gray-50 rounded-lg"
-          >
-            About
-          </NavLink>
-
-          <NavLink
-            to="/contact"
-            onClick={() => setMenuOpen(false)}
-            className="block px-4 py-3 text-lg text-gray-600 hover:bg-gray-50 rounded-lg"
-          >
-            Contact
-          </NavLink>
-
-          {isLoggedIn && (
+          {/* USER ACTIONS */}
+          {isLoggedIn ? (
             <>
-              <hr className="my-2" />
+              <div className="my-5 border-t"></div>
 
-              <NavLink
-                to="/my-profile"
-                onClick={() => setMenuOpen(false)}
-                className="block px-4 py-3 text-lg text-gray-600 hover:bg-gray-50 rounded-lg"
-              >
-                My Profile
-              </NavLink>
-
-              <NavLink
-                to="/my-appointments"
-                onClick={() => setMenuOpen(false)}
-                className="block px-4 py-3 textlg text-gray-600 hover:bg-gray-50 rounded-lg"
-              >
-                My Appointments
-              </NavLink>
+              {[["/my-profile", "My Profile", UserCircle],
+                ["/my-appointments", "My Appointments", Calendar]].map(
+                ([to, label, Icon]) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 hover:bg-gray-100"
+                  >
+                    <Icon size={20} />
+                    {label}
+                  </NavLink>
+                )
+              )}
 
               <button
                 onClick={() => {
-                  logout()
-                  setMenuOpen(false)
+                  logout();
+                  setMenuOpen(false);
                 }}
-                className="w-full text-left px-4 py-3 text-lg text-red-600 hover:bg-red-50 rounded-lg"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 bg-red-50 hover:bg-red-100"
               >
-                Logout
+                <LogOut size={20} />
+                Sign Out
               </button>
             </>
+          ) : (
+            <button
+              onClick={() => {
+                navigate("/unified-login");
+                setMenuOpen(false);
+              }}
+              className="w-full mt-8 flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-blue-600 text-white text-base shadow hover:bg-blue-700"
+            >
+              Get Started <ArrowRight size={20} />
+            </button>
           )}
         </nav>
       </div>
+
+      {/* SHIMMER EFFECT */}
       <style>{`
         .shimmer-bg {
-          background: linear-gradient(
-            90deg,
-            #e5e7eb 0%,
-            #f3f4f6 50%,
-            #e5e7eb 100%
-          );
+          background: linear-gradient(90deg,#dbeafe,#bfdbfe,#dbeafe);
           background-size: 200% 100%;
+          animation: shimmerMove 1.8s infinite;
         }
-
         @keyframes shimmerMove {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+          from { background-position: -200% 0; }
+          to { background-position: 200% 0; }
         }
-
-        .animate-shimmer {
-          animation: shimmerMove 1.2s ease-in-out infinite;
-        }
-
-        .logo-container {
-          position: relative;
-          display: inline-block;
-        }
-
         .shimmer-overlay {
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(59, 130, 246, 0.3) 50%,
-            transparent 100%
-          );
-          pointer-events: none;
-          transition: left 0.6s ease-in-out;
+          position:absolute; top:0; left:-100%; width:100%; height:100%;
+          background:linear-gradient(90deg,transparent,rgba(96,165,250,.25),transparent);
         }
-
         .logo-container:hover .shimmer-overlay {
-          animation: shimmer 1.5s ease-in-out infinite;
+          animation: shimmer 1s;
         }
-
         @keyframes shimmer {
-          0% { left: -100%; }
-          100% { left: 100%; }
-        }
-
-        .nav-main {
-          position: relative;
-        }
-        .nav-main::after {
-          content: "";
-          position: absolute;
-          left: 50%;
-          bottom: -6px;
-          width: 0%;
-          height: 2px;
-          background: #2563EB;
-          transform: translateX(-50%);
-          transition: width .25s ease;
-        }
-        .nav-main:hover::after {
-          width: 45%;
-        }
-        .nav-main-active::after {
-          width: 60%;
+          from { left:-100%; }
+          to { left:100%; }
         }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
