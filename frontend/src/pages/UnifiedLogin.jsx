@@ -34,7 +34,8 @@ const AuthSchema = z.object({
 });
 
 const UnifiedLogin = () => {
-  const { backendUrl, loadUserProfileData: loadProfile } = useContext(AppContext);
+  const navigate = useNavigate();
+  const { backendUrl, loadProfile } = useContext(AppContext);
 
   const [authMode, setAuthMode] = useState("login");
   const [userRole, setUserRole] = useState("user");

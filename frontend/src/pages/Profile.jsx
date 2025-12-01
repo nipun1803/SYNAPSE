@@ -6,7 +6,7 @@ import { resolveImageUrl } from '../lib/resolveImageUrl'
 import { userService } from '../api/services'
 
 const MyProfile = () => {
-  const { backendUrl, loadUserProfileData: loadProfile } = useContext(AppContext)
+  const { backendUrl, loadProfile } = useContext(AppContext)
 
 
   const [isEdit, setIsEdit] = useState(false)

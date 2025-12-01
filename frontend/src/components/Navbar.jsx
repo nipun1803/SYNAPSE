@@ -11,7 +11,7 @@ const Navbar = () => {
 
   const user = context?.userData || null
   const backendUrl = context?.backendUrl || ''
-  const loadUserProfileData = context?.loadUserProfileData
+  const loadProfile = context?.loadProfile
   const isLoading = context?.loading
 
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -32,8 +32,8 @@ const Navbar = () => {
   }, [user, user?.image, backendUrl])
 
   useEffect(() => {
-    if (isAuthenticated && loadUserProfileData) {
-      loadUserProfileData()
+    if (isAuthenticated && loadProfile) {
+      loadProfile()
     }
   }, [isAuthenticated])
 
