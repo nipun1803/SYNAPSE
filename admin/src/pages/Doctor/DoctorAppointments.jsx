@@ -52,19 +52,31 @@ const DoctorAppointments = () => {
 
   const getRowNumber = (index) => startIndex + index + 1;
 
+  const [actionLoading, setActionLoading] = useState({ id: null, type: null });
+
   const onCancel = async (id) => {
-    const ok = window.confirm('Cancel this appointment?');
-    if (ok) {
+    if (!window.confirm('Cancel this appointment?')) return;
+    try {
+      setActionLoading({ id, type: 'cancel' });
       await cancelAppointment(id);
       await getAppointments();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setActionLoading({ id: null, type: null });
     }
   };
 
   const onComplete = async (id) => {
-    const ok = window.confirm('Mark as completed?');
-    if (ok) {
+    if (!window.confirm('Mark as completed?')) return;
+    try {
+      setActionLoading({ id, type: 'complete' });
       await completeAppointment(id);
       await getAppointments();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setActionLoading({ id: null, type: null });
     }
   };
 
@@ -140,6 +152,7 @@ const DoctorAppointments = () => {
             <Button
               onClick={() => setFilter('all')}
               variant={filter === 'all' ? 'default' : 'outline'}
+              className={filter === 'all' ? 'bg-gray-900 text-white hover:bg-gray-800' : ''}
               size='sm'
             >
               All
@@ -147,6 +160,7 @@ const DoctorAppointments = () => {
             <Button
               onClick={() => setFilter('upcoming')}
               variant={filter === 'upcoming' ? 'default' : 'outline'}
+              className={filter === 'upcoming' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
               size='sm'
             >
               <Clock className='w-4 h-4 mr-1' />
@@ -155,6 +169,7 @@ const DoctorAppointments = () => {
             <Button
               onClick={() => setFilter('completed')}
               variant={filter === 'completed' ? 'default' : 'outline'}
+              className={filter === 'completed' ? 'bg-green-600 text-white hover:bg-green-700' : ''}
               size='sm'
             >
               <CheckCircle className='w-4 h-4 mr-1' />
@@ -163,6 +178,7 @@ const DoctorAppointments = () => {
             <Button
               onClick={() => setFilter('cancelled')}
               variant={filter === 'cancelled' ? 'default' : 'outline'}
+              className={filter === 'cancelled' ? 'bg-red-600 text-white hover:bg-red-700' : ''}
               size='sm'
             >
               <XCircle className='w-4 h-4 mr-1' />
@@ -246,21 +262,35 @@ const DoctorAppointments = () => {
                           <div className='flex items-center gap-2'>
                             <Button
                               onClick={() => onComplete(item._id)}
+                              disabled={actionLoading.id === item._id}
                               variant='ghost'
                               size='sm'
                               className='text-green-600 hover:text-green-700 hover:bg-green-50'
                             >
-                              <CheckCircle className='w-4 h-4 mr-1' />
-                              Complete
+                              {actionLoading.id === item._id && actionLoading.type === 'complete' ? (
+                                <div className='w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin' />
+                              ) : (
+                                <>
+                                  <CheckCircle className='w-4 h-4 mr-1' />
+                                  Complete
+                                </>
+                              )}
                             </Button>
                             <Button
                               onClick={() => onCancel(item._id)}
+                              disabled={actionLoading.id === item._id}
                               variant='ghost'
                               size='sm'
                               className='text-red-600 hover:text-red-700 hover:bg-red-50'
                             >
-                              <XCircle className='w-4 h-4 mr-1' />
-                              Cancel
+                              {actionLoading.id === item._id && actionLoading.type === 'cancel' ? (
+                                <div className='w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin' />
+                              ) : (
+                                <>
+                                  <XCircle className='w-4 h-4 mr-1' />
+                                  Cancel
+                                </>
+                              )}
                             </Button>
                           </div>
                         )}

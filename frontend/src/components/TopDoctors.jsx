@@ -24,7 +24,7 @@ const TopDoctors = () => {
     <section className='py-16 bg-white'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
 
-        {/* Header */}
+
         <div className='text-center mb-12'>
           <h1 className='text-4xl font-bold text-gray-900 mb-4'>
             Top Doctors to Book
@@ -35,7 +35,7 @@ const TopDoctors = () => {
           </p>
         </div>
 
-        {/* Doctor Grid */}
+        {/* Grid */}
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12'>
           {doctors.filter(doctor => doctor.available).slice(0, 8).map((doctor) => (
             <Card
@@ -43,7 +43,7 @@ const TopDoctors = () => {
               onClick={() => handleDoctorClick(doctor._id)}
               className='overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group border-gray-200'
             >
-              {/* Doctor Image */}
+
               <div className='relative overflow-hidden'>
                 <img
                   className='w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300'
@@ -51,7 +51,6 @@ const TopDoctors = () => {
                   alt={`Dr. ${doctor.name}`}
                 />
 
-                {/* Available Badge */}
                 {doctor.available && (
                   <div className='absolute top-4 right-4'>
                     <Badge
@@ -65,7 +64,6 @@ const TopDoctors = () => {
                 )}
               </div>
 
-              {/* Doctor Info */}
               <CardContent className='p-6'>
                 <h3 className='text-xl font-semibold text-gray-900 mb-1'>
                   {doctor.name}
@@ -84,7 +82,6 @@ const TopDoctors = () => {
           ))}
         </div>
 
-        {/* View All Button */}
         <div className='text-center'>
           <Button
             onClick={handleViewAll}

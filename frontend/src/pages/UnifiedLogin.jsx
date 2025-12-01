@@ -103,10 +103,10 @@ const UnifiedLogin = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 font-sans text-slate-800">
 
-      {/* Main Card */}
+
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 lg:gap-8 overflow-hidden rounded-3xl shadow-2xl bg-white border border-blue-100">
 
-        {/* Left Side: Brand */}
+
         <div className="hidden lg:flex flex-col relative text-white">
           <div className="absolute inset-0">
             <img
@@ -148,7 +148,6 @@ const UnifiedLogin = () => {
           </div>
         </div>
 
-        {/* Right Side: Form */}
         <div className="flex flex-col justify-center p-8 lg:p-16 bg-white relative">
           <div className="max-w-[400px] mx-auto w-full space-y-8">
 
@@ -162,8 +161,6 @@ const UnifiedLogin = () => {
                   : "Create an account to manage your health."}
               </p>
             </div>
-
-            {/* Tabs */}
             <Tabs value={userRole} onValueChange={setUserRole} className="w-full">
               <TabsList className="w-full grid grid-cols-3 bg-blue-50/80 p-1.5 rounded-xl h-12 border border-blue-100/50">
                 <TabsTrigger value="user" className="rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">Patient</TabsTrigger>
@@ -172,7 +169,6 @@ const UnifiedLogin = () => {
               </TabsList>
             </Tabs>
 
-            {/* Form */}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleAuthSubmit)} className="space-y-4">
 
@@ -256,7 +252,7 @@ const UnifiedLogin = () => {
               </form>
             </Form>
 
-            {/* Demo Section */}
+
             {authMode === 'login' && (
               <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mt-4 transition-all">
                 <div className="flex items-center justify-between mb-2">

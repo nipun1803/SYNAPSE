@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { assets } from '../../assets/assets'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
-import { resolveImageUrl } from '../../utils/resolveImageUrl'
+import { resolveImageUrl } from '../../lib/resolveImageUrl'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -191,6 +191,7 @@ const Dashboard = () => {
               <Button
                 onClick={() => setFilter('all')}
                 variant={filter === 'all' ? 'default' : 'outline'}
+                className={filter === 'all' ? 'bg-gray-900 text-white hover:bg-gray-800' : ''}
                 size='sm'
               >
                 All
@@ -198,6 +199,7 @@ const Dashboard = () => {
               <Button
                 onClick={() => setFilter('upcoming')}
                 variant={filter === 'upcoming' ? 'default' : 'outline'}
+                className={filter === 'upcoming' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
                 size='sm'
               >
                 <Clock className='w-4 h-4 mr-1' />
@@ -206,6 +208,7 @@ const Dashboard = () => {
               <Button
                 onClick={() => setFilter('completed')}
                 variant={filter === 'completed' ? 'default' : 'outline'}
+                className={filter === 'completed' ? 'bg-green-600 text-white hover:bg-green-700' : ''}
                 size='sm'
               >
                 <CheckCircle className='w-4 h-4 mr-1' />
@@ -214,6 +217,7 @@ const Dashboard = () => {
               <Button
                 onClick={() => setFilter('cancelled')}
                 variant={filter === 'cancelled' ? 'default' : 'outline'}
+                className={filter === 'cancelled' ? 'bg-red-600 text-white hover:bg-red-700' : ''}
                 size='sm'
               >
                 <XCircle className='w-4 h-4 mr-1' />

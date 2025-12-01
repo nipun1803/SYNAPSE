@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { assets } from '../../assets/assets'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
-import { resolveImageUrl } from '../../utils/resolveImageUrl'
+import { resolveImageUrl } from '../../lib/resolveImageUrl'
 import { toast } from 'react-toastify'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -43,9 +43,18 @@ const AllAppointments = () => {
     return src && !/^data:\s*$/i.test(src) ? src : fallback
   }
 
+  const [cancelling, setCancelling] = useState(null)
+
   const handleCancel = async (id) => {
     if (!confirm('Are you sure you want to cancel this appointment?')) return
-    await cancelAppointment(id)
+    try {
+      setCancelling(id)
+      await cancelAppointment(id)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setCancelling(null)
+    }
   }
 
   const handleDelete = async (id) => {
@@ -171,6 +180,7 @@ const AllAppointments = () => {
               <Button
                 onClick={() => setFilter('all')}
                 variant={filter === 'all' ? 'default' : 'outline'}
+                className={filter === 'all' ? 'bg-gray-900 text-white hover:bg-gray-800' : ''}
                 size='sm'
               >
                 All
@@ -178,6 +188,7 @@ const AllAppointments = () => {
               <Button
                 onClick={() => setFilter('upcoming')}
                 variant={filter === 'upcoming' ? 'default' : 'outline'}
+                className={filter === 'upcoming' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
                 size='sm'
               >
                 <Clock className='w-4 h-4 mr-1' />
@@ -186,6 +197,7 @@ const AllAppointments = () => {
               <Button
                 onClick={() => setFilter('completed')}
                 variant={filter === 'completed' ? 'default' : 'outline'}
+                className={filter === 'completed' ? 'bg-green-600 text-white hover:bg-green-700' : ''}
                 size='sm'
               >
                 <CheckCircle className='w-4 h-4 mr-1' />
@@ -194,6 +206,7 @@ const AllAppointments = () => {
               <Button
                 onClick={() => setFilter('cancelled')}
                 variant={filter === 'cancelled' ? 'default' : 'outline'}
+                className={filter === 'cancelled' ? 'bg-red-600 text-white hover:bg-red-700' : ''}
                 size='sm'
               >
                 <XCircle className='w-4 h-4 mr-1' />
@@ -296,12 +309,19 @@ const AllAppointments = () => {
                             {!item?.cancelled && !item?.isCompleted && (
                               <Button
                                 onClick={() => handleCancel(item?._id)}
+                                disabled={cancelling === item?._id}
                                 variant='ghost'
                                 size='sm'
                                 className='text-red-600 hover:text-red-700 hover:bg-red-50'
                               >
-                                <XCircle className='w-4 h-4 mr-1' />
-                                Cancel
+                                {cancelling === item?._id ? (
+                                  <div className='w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin' />
+                                ) : (
+                                  <>
+                                    <XCircle className='w-4 h-4 mr-1' />
+                                    Cancel
+                                  </>
+                                )}
                               </Button>
                             )}
                             <Button

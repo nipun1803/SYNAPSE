@@ -25,14 +25,13 @@ const About = () => {
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       
-      {/* Page Title */}
+
       <div className="text-center mb-12">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
           About <span className="text-blue-600">Us</span>
         </h1>
       </div>
 
-      {/* Main Content Section */}
       <div className="my-16 flex flex-col md:flex-row gap-12 items-center">
         <img
           className="w-full md:max-w-[360px] rounded-2xl shadow-lg"
@@ -70,7 +69,7 @@ const About = () => {
         </div>
       </div>
 
-      {/* Why Choose Us Section */}
+
       <div className="mt-20">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
           Why <span className="text-blue-600">Choose Us</span>

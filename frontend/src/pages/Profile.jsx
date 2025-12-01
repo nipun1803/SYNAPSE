@@ -116,7 +116,7 @@ const MyProfile = () => {
   }
 
   const handleCancel = () => {
-    // Cleanup preview
+
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview)
     }
@@ -124,10 +124,10 @@ const MyProfile = () => {
     setIsEdit(false)
     setImageFile(null)
     setImagePreview(null)
-    fetchProfile() // Reset changes by re-fetching
+    fetchProfile() 
   }
 
-  // Helper to determine which image to show
+
   const getDisplayImage = () => {
     if (imagePreview) return imagePreview
     if (userData?.image) return resolveImageUrl(userData.image, backendUrl)
@@ -352,7 +352,6 @@ const MyProfile = () => {
   )
 }
 
-// Simple wrapper component to clean up the render return
 const Field = ({ label, required, children }) => (
   <div>
     <label className='block text-sm font-medium text-gray-700 mb-2'>
