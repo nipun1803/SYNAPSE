@@ -7,6 +7,7 @@ import {
   changeAvailability,
   doctorDashboard,
   doctorList,
+  getDoctorById,
   doctorProfile,
   updateDoctorProfile,
   getDoctorAvailableSlots
@@ -17,16 +18,7 @@ import upload from '../middleware/multer.js';
 
 const router = express.Router();
 
-//  /api/doctors
-router.get('/', doctorList);
-
-//  /api/doctors/:id 
-router.get('/:id', doctorList);
-
-// /api/doctors/:id/available
-router.get('/:id/available', getDoctorAvailableSlots);
-
-// Doctor's own profile
+// Doctor's own profile (must come before /:id routes)
 router.get('/me/profile', authDoctor, doctorProfile);
 router.put('/me/profile', authDoctor, upload.single('image'), updateDoctorProfile);
 
@@ -42,5 +34,15 @@ router.patch('/me/appointments/:id/cancel', authDoctor, appointmentCancel);
 // Admin management
 router.post('/', authAdmin, upload.single('image'), addDoctor);
 router.get('/all', authAdmin, allDoctors);
+
+
+//  /api/doctors
+router.get('/', doctorList);
+
+// /api/doctors/:id/available
+router.get('/:id/available', getDoctorAvailableSlots);
+
+//  /api/doctors/:id 
+router.get('/:id', getDoctorById);
 
 export default router;

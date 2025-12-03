@@ -134,11 +134,71 @@ const appointmentComplete = async (req, res) => {
 
 const doctorList = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({}).select("-password -email");
+    const { page = 1, limit = 10, search, speciality, sort } = req.query;
 
-    res.status(200).json({ success: true, doctors });
+    const query = {};
+
+    if (search && search.trim()) {
+      query.name = { $regex: search.trim(), $options: "i" };
+    }
+
+    if (speciality && speciality.trim()) {
+      query.speciality = speciality.trim();
+    }
+
+    let sortOptions = {};
+    if (sort === "fees_asc") {
+      sortOptions.fees = 1;
+    } else if (sort === "fees_desc") {
+      sortOptions.fees = -1;
+    } else if (sort === "experience_asc") {
+      sortOptions.experience = 1;
+    } else if (sort === "experience_desc") {
+      sortOptions.experience = -1;
+    } else {
+
+      sortOptions.name = 1;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const doctors = await doctorModel
+      .find(query)
+      .select("-password -email")
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await doctorModel.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      doctors,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+    });
   } catch (error) {
-    console.error(error);
+    console.error("doctorList error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getDoctorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doctor = await doctorModel.findById(id).select("-password -email");
+
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
+
+    res.status(200).json({ success: true, doctor });
+  } catch (error) {
+    console.error("getDoctorById error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -176,9 +236,8 @@ const changeAvailability = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Doctor is now ${
-        doctor.available ? "available" : "unavailable"
-      }`,
+      message: `Doctor is now ${doctor.available ? "available" : "unavailable"
+        }`,
       doctor: {
         _id: doctor._id,
         available: doctor.available,
@@ -330,6 +389,7 @@ export {
   appointmentCancel,
   appointmentComplete,
   doctorList,
+  getDoctorById,
   changeAvailability,
   doctorDashboard,
   doctorProfile,

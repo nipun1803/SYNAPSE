@@ -35,9 +35,6 @@ async function fetchAPI(url, options = {}) {
 }
 
 
-/**
- * Authentication Service
- */
 export const authService = {
     login: (payload) => fetchAPI(`${BASE_URL}/api/auth/login`, {
         method: 'POST',
@@ -95,7 +92,13 @@ export const userService = {
 
 export const doctorService = {
     // GET /api/doctors
-    getList: () => fetchAPI(`${BASE_URL}/api/doctors`),
+    getList: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = queryString
+            ? `${BASE_URL}/api/doctors?${queryString}`
+            : `${BASE_URL}/api/doctors`;
+        return fetchAPI(url);
+    },
 
     // GET /api/doctors/:id
     getById: (id) => fetchAPI(`${BASE_URL}/api/doctors/${id}`),
