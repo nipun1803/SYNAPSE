@@ -13,11 +13,11 @@ For healthcare providers:
 Manual appointment management is time-consuming
 No real-time visibility into daily schedules
 Difficulty managing cancellations and filling empty slots
-💡 Solution: SYNAPSE
-SYNAPSE is a full-stack web application that digitizes the healthcare appointment booking process, providing:
+##💡 Solution: SYNAPSE
+## SYNAPSE is a full-stack web application that digitizes the healthcare appointment booking process, providing:
 
-For Patients: Search doctors, book appointments, manage bookings online
-For Admins: Manage doctors, view all appointments, track system statistics
+# For Patients: Search doctors, book appointments, manage bookings online
+# For Admins: Manage doctors, view all appointments, track system statistics
 
 ## 🔗 Live URLs
 - **Frontend:** http://synapse-seven-theta.vercel.app/
