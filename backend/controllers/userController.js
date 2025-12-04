@@ -250,8 +250,7 @@ const getProfile = async (req, res) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      // Return 200 with success: false to avoid console 401 errors
-      return res.json({ success: false, message: "Not logged in" });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const userData = await userModel.findById(userId).select("-password");

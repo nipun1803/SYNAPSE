@@ -8,14 +8,13 @@ import {
   getAppointmentById,
   rescheduleAppointment
 } from '../controllers/userController.js';
-import authUserOptional from '../middleware/authUserOptional.js';
 import authUser from '../middleware/authUser.js';
 import upload from '../middleware/multer.js';
 
 const router = express.Router();
 
 // /api/users/profile
-router.get('/profile', authUserOptional, getProfile);
+router.get('/profile', authUser, getProfile);
 
 // /api/users/profile
 router.put('/profile', authUser, upload.single('image'), updateProfile);
