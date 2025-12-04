@@ -1,6 +1,23 @@
-# Synapse – Doctor Appointment System
+# Synapse –  Healthcare Appointment Management System
 
-A simple and modern platform for booking doctor appointments online.
+🎯 Problem Statement
+In today's healthcare landscape, patients face significant challenges:
+
+Long waiting times at clinics and hospitals
+Difficulty finding specialists based on location, speciality, or availability
+No transparency in doctor availability and consultation fees
+Cumbersome booking process requiring phone calls or in-person visits
+No centralized platform to manage appointments, cancellations, and rescheduling
+For healthcare providers:
+
+Manual appointment management is time-consuming
+No real-time visibility into daily schedules
+Difficulty managing cancellations and filling empty slots
+💡 Solution: SYNAPSE
+SYNAPSE is a full-stack web application that digitizes the healthcare appointment booking process, providing:
+
+For Patients: Search doctors, book appointments, manage bookings online
+For Admins: Manage doctors, view all appointments, track system statistics
 
 ## 🔗 Live URLs
 - **Frontend:** http://synapse-seven-theta.vercel.app/
@@ -9,9 +26,9 @@ A simple and modern platform for booking doctor appointments online.
 
 **Stack:**
 - **Frontend:** React.js with React Router for navigation, Axios for API requests, TailwindCSS for UI styling
-- **Backend:** Node.js + Express.js to build RESTful APIs and manage logic
+- **Backend:** Node.js + Express.js to build RESTful APIs and manage logic (used Socket.io for real time monitoring)
 - **Database:** MongoDB (NoSQL) managed via MongoDB Atlas
-- **Authentication:** JWT-based login/signup for all user roles (Admin, Doctor, Patient)
+- **Authentication:** JWT-based login/signup for all user roles (Admin, Patient)
 
 **Hosting:**
 - **Frontend:** Vercel
