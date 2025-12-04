@@ -7,12 +7,14 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
  * @param {object} options
  */
 async function fetchAPI(url, options = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+    };
+
     const res = await fetch(url, {
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-        },
+        headers,
         ...options
     });
 

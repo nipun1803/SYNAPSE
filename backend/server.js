@@ -12,6 +12,7 @@ import userRouter from './routes/users.js';
 const app = express();
 const port = process.env.PORT || 4000;
 
+app.set('trust proxy', 1);
 connectDB();
 connectCloudinary();
 
@@ -22,10 +23,7 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:5174'
   ].filter(Boolean),
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], 
-  exposedHeaders: ['Set-Cookie']
+  credentials: true
 }));
 
 app.use(express.json());
@@ -35,7 +33,7 @@ app.use(cookieParser());
 // routes
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
-app.use('/api/doctors', doctorRouter); 
+app.use('/api/doctors', doctorRouter);
 app.use('/api/users', userRouter);
 
 

@@ -44,8 +44,13 @@ const AppContextProvider = ({ children }) => {
         setUserData(null)
       }
     } catch (error) {
-      console.error('Profile fetch error:', error)
-      setUserData(null)
+      if (error.status === 401) {
+        // Not logged in - this is expected for guests
+        setUserData(null)
+      } else {
+        console.error('Profile fetch error:', error)
+        setUserData(null)
+      }
     } finally {
       setLoading(false)
     }
