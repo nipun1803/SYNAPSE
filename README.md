@@ -1,41 +1,46 @@
-# Synapse –  Healthcare Appointment Management System
+# Synapse – Healthcare Appointment Management System
 
-🎯 Problem Statement
+## 🎯 Problem Statement
+
+### For Patients
 In today's healthcare landscape, patients face significant challenges:
+- Long waiting times at clinics and hospitals
+- Difficulty finding specialists based on location, speciality, or availability
+- No transparency in doctor availability and consultation fees
+- Cumbersome booking process requiring phone calls or in-person visits
+- No centralized platform to manage appointments, cancellations, and rescheduling
 
-Long waiting times at clinics and hospitals
-Difficulty finding specialists based on location, speciality, or availability
-No transparency in doctor availability and consultation fees
-Cumbersome booking process requiring phone calls or in-person visits
-No centralized platform to manage appointments, cancellations, and rescheduling
-For healthcare providers:
+### For Healthcare Providers
+- Manual appointment management is time-consuming
+- No real-time visibility into daily schedules
+- Difficulty managing cancellations and filling empty slots
 
-Manual appointment management is time-consuming
-No real-time visibility into daily schedules
-Difficulty managing cancellations and filling empty slots
-##💡 Solution: SYNAPSE
-## SYNAPSE is a full-stack web application that digitizes the healthcare appointment booking process, providing:
+## 💡 Solution: SYNAPSE
 
-# For Patients: Search doctors, book appointments, manage bookings online
-# For Admins: Manage doctors, view all appointments, track system statistics
+**SYNAPSE** is a full-stack web application that digitizes the healthcare appointment booking process, providing:
+
+- **For Patients:** Search doctors, book appointments, manage bookings online
+- **For Admins:** Manage doctors, view all appointments, track system statistics
 
 ## 🔗 Live URLs
+
 - **Frontend:** http://synapse-seven-theta.vercel.app/
 - **Backend:** https://synapse-backend-tz3v.onrender.com
 
+## 🏗️ Architecture
 
-**Stack:**
+### Stack
 - **Frontend:** React.js with React Router for navigation, Axios for API requests, TailwindCSS for UI styling
-- **Backend:** Node.js + Express.js to build RESTful APIs and manage logic (used Socket.io for real time monitoring)
+- **Backend:** Node.js + Express.js to build RESTful APIs and manage logic (used Socket.io for real-time monitoring)
 - **Database:** MongoDB (NoSQL) managed via MongoDB Atlas
-- **Authentication:** JWT-based login/signup for all user roles (Admin, Patient)
+- **Authentication:** JWT-based login/signup for all user roles (Admin, Patient, Doctor)
 
-**Hosting:**
+### Hosting
 - **Frontend:** Vercel
 - **Backend:** Render
 - **Database:** MongoDB Atlas
 
-## 3. Key Features
+## ✨ Key Features
 
 | Category | Features |
 |----------|----------|
@@ -48,20 +53,21 @@ Difficulty managing cancellations and filling empty slots
 | **Admin Panel** | Admin can manage doctors, appointments, and view dashboard statistics |
 | **Frontend Routing** | Pages: Home, Login, Signup, Doctor List, Book Appointment, Profile, Dashboard |
 | **Notifications/Toasts** | Simple toast messages for success/error actions |
+| **Real-time Updates** | Socket.io integration for live appointment monitoring |
 | **Hosting** | Fully deployed frontend, backend, and database integration |
 
-## 4. Tech Stack
+## 🛠️ Tech Stack
 
 | Layer | Technologies |
 |-------|-------------|
 | **Frontend** | React.js, React Router, Axios, TailwindCSS |
-| **Backend** | Node.js, Express.js |
+| **Backend** | Node.js, Express.js, Socket.io |
 | **Database** | MongoDB Atlas |
 | **Authentication** | JWT (JSON Web Tokens) |
 | **File Upload** | Multer, Cloudinary |
 | **Hosting** | Vercel (Frontend), Render (Backend), MongoDB Atlas (Database) |
 
-## 5. API Overview
+## 📡 API Overview
 
 ### 🔐 Authentication Routes (`/api/auth`)
 
@@ -138,7 +144,7 @@ Difficulty managing cancellations and filling empty slots
 | `/` | GET | API status check | Public |
 | `/api/health` | GET | Health check endpoint | Public |
 
-## 6. Setup Instructions
+## 🚀 Setup Instructions
 
 ### Prerequisites
 - Node.js (v14 or higher)
@@ -146,19 +152,45 @@ Difficulty managing cancellations and filling empty slots
 - Cloudinary account (for image uploads)
 
 ### Backend Setup
+
 ```bash
+# Navigate to backend directory
 cd backend
+
+# Install dependencies
 npm install
 
-## 🛠️ Setup Instructions
+# Create .env file with the following variables:
+# MONGODB_URI=your_mongodb_connection_string
+# JWT_SECRET=your_jwt_secret
+# CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+# CLOUDINARY_API_KEY=your_cloudinary_api_key
+# CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+# PORT=5000
 
-### Backend Setup
-```sh
-cd backend
-npm install
+# Start the backend server
 npm start
+```
+
 ### Frontend Setup
-```sh
+
+```bash
+# Navigate to frontend directory
 cd frontend
+
+# Install dependencies
 npm install
+
+# Create .env file with the following variables:
+# VITE_API_URL=http://localhost:5000
+# (or your deployed backend URL)
+
+# Start the development server
 npm run dev
+```
+
+
+
+- Built with React.js and Node.js
+- Styled with TailwindCSS
+- Deployed on Vercel and Render
