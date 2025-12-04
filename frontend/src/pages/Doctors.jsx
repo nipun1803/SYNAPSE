@@ -17,8 +17,8 @@ const Doctors = () => {
   const [error, setError] = useState(null)
 
 
-  const [searchInput, setSearchInput] = useState('') 
-  const [searchQuery, setSearchQuery] = useState('') 
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [sort, setSort] = useState('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -55,7 +55,7 @@ const Doctors = () => {
 
       const params = {
         page,
-        limit: 9,
+        limit: 6,
       }
 
       if (searchQuery && searchQuery.trim()) {
