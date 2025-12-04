@@ -35,15 +35,24 @@ const Navbar = () => {
   const isLoggedIn = !!user;
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [profileImg, setProfileImg] = useState(assets.profile_pic);
+  const [profileImg, setProfileImg] = useState(null);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const hoverTimeout = useRef(null);
 
+  const getInitials = (name) => {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  };
+
   useEffect(() => {
     if (user?.image) updateImg(user.image);
-    else setProfileImg(assets.profile_pic);
+    else setProfileImg(null);
   }, [user, backendUrl]);
 
   useEffect(() => {
@@ -64,13 +73,13 @@ const Navbar = () => {
 
   const updateImg = (img) => {
     try {
-      if (!img) return setProfileImg(assets.profile_pic);
+      if (!img) return setProfileImg(null);
       if (img.startsWith("http")) return setProfileImg(img);
       if (img.includes("cloudinary.com")) return setProfileImg(`https://${img}`);
 
       setProfileImg(backendUrl + (img.startsWith("/") ? "" : "/") + img);
     } catch {
-      setProfileImg(assets.profile_pic);
+      setProfileImg(null);
     }
   };
 
@@ -106,10 +115,9 @@ const Navbar = () => {
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${
-                    isActive
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   }`
                 }
               >
@@ -142,11 +150,17 @@ const Navbar = () => {
                 <div
                   className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 cursor-pointer pt-3 pb-3"
                 >
-                  <img
-                    src={profileImg}
-                    onError={() => setProfileImg(assets.profile_pic)}
-                    className="w-8 h-8 object-cover rounded-full border"
-                  />
+                  {profileImg ? (
+                    <img
+                      src={profileImg}
+                      onError={() => setProfileImg(null)}
+                      className="w-8 h-8 object-cover rounded-full border"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+                      {getInitials(user?.name)}
+                    </div>
+                  )}
                   <span className="text-sm text-gray-700 hidden xl:block">
                     Hey, {user?.name?.split(" ")[0]}!
                   </span>
@@ -155,18 +169,23 @@ const Navbar = () => {
 
                 {/* DROPDOWN */}
                 <div
-                  className={`absolute right-0 top-full mt-3 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl transition-all duration-200 transform ${
-                    dropdownOpen
-                      ? "opacity-100 visible translate-y-0"
-                      : "opacity-0 invisible -translate-y-2"
-                  }`}
+                  className={`absolute right-0 top-full mt-3 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl transition-all duration-200 transform ${dropdownOpen
+                    ? "opacity-100 visible translate-y-0"
+                    : "opacity-0 invisible -translate-y-2"
+                    }`}
                 >
                   <div className="p-4 border-b bg-gray-50">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={profileImg}
-                        className="w-12 h-12 rounded-full object-cover border shadow-sm"
-                      />
+                      {profileImg ? (
+                        <img
+                          src={profileImg}
+                          className="w-12 h-12 rounded-full object-cover border shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg font-semibold shadow-sm">
+                          {getInitials(user?.name)}
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-semibold">{user?.name}</p>
                         <p className="text-xs text-gray-500">{user?.email}</p>
@@ -175,7 +194,7 @@ const Navbar = () => {
                   </div>
 
                   {[["/my-profile", "My Profile", UserCircle],
-                    ["/my-appointments", "My Appointments", Calendar]].map(
+                  ["/my-appointments", "My Appointments", Calendar]].map(
                     ([to, label, Icon]) => (
                       <button
                         key={to}
@@ -222,9 +241,8 @@ const Navbar = () => {
 
       {/* MOBILE MENU (FULLY OPAQUE NOW) */}
       <div
-        className={`md:hidden fixed inset-0 bg-white z-50 transition duration-300 ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`md:hidden fixed inset-0 bg-white z-50 transition duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
@@ -239,7 +257,13 @@ const Navbar = () => {
           {isLoggedIn && (
             <div className="mb-6 p-4 bg-blue-50/80 rounded-xl border border-blue-100">
               <div className="flex items-center gap-3">
-                <img src={profileImg} className="w-14 h-14 rounded-full object-cover border" />
+                {profileImg ? (
+                  <img src={profileImg} className="w-14 h-14 rounded-full object-cover border" />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-semibold">
+                    {getInitials(user?.name)}
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-blue-600">Welcome back,</p>
                   <p className="font-semibold text-gray-900">{user?.name}</p>
@@ -256,10 +280,9 @@ const Navbar = () => {
                 to={to}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow"
-                      : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                  `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium ${isActive
+                    ? "bg-blue-600 text-white shadow"
+                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }`
                 }
               >
@@ -275,7 +298,7 @@ const Navbar = () => {
               <div className="my-5 border-t"></div>
 
               {[["/my-profile", "My Profile", UserCircle],
-                ["/my-appointments", "My Appointments", Calendar]].map(
+              ["/my-appointments", "My Appointments", Calendar]].map(
                 ([to, label, Icon]) => (
                   <NavLink
                     key={to}

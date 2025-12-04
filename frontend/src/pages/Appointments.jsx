@@ -13,6 +13,7 @@ const MyAppointments = () => {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(null)
+  const [deleting, setDeleting] = useState(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
@@ -55,6 +56,27 @@ const MyAppointments = () => {
       toast.error('Failed to cancel appointment.')
     } finally {
       setCancelling(null)
+    }
+  }
+
+  const deleteAppointment = async (id) => {
+    if (!confirm('Are you sure you want to delete this appointment? This action cannot be undone.')) return
+
+    try {
+      setDeleting(id)
+      const data = await userService.deleteAppointment(id)
+
+      if (data.success) {
+        toast.success(data.message || 'Appointment deleted successfully')
+        await fetchAppointments()
+      } else {
+        toast.error(data.message || 'Failed to delete appointment')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast.error('Failed to delete appointment.')
+    } finally {
+      setDeleting(null)
     }
   }
 
@@ -166,6 +188,23 @@ const MyAppointments = () => {
                         )}
                       </Button>
                     )}
+
+                    {/* Delete button - shown for all appointments */}
+                    <Button
+                      onClick={() => deleteAppointment(item._id)}
+                      disabled={deleting === item._id}
+                      variant='outline'
+                      className='border-2 border-gray-400 text-gray-600 hover:bg-gray-50 hover:border-gray-500'
+                    >
+                      {deleting === item._id ? (
+                        <>
+                          <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                          Deleting...
+                        </>
+                      ) : (
+                        'Delete'
+                      )}
+                    </Button>
                   </div>
                 </div>
               </CardContent>

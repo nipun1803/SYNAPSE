@@ -86,6 +86,16 @@ export const userService = {
     // PATCH /api/users/appointments/:id/cancel
     cancelAppointment: (id) => fetchAPI(`${BASE_URL}/api/users/appointments/${id}/cancel`, {
         method: 'PATCH'
+    }),
+
+    // DELETE /api/users/profile
+    deleteAccount: () => fetchAPI(`${BASE_URL}/api/users/profile`, {
+        method: 'DELETE'
+    }),
+
+    // DELETE /api/users/appointments/:id
+    deleteAppointment: (id) => fetchAPI(`${BASE_URL}/api/users/appointments/${id}`, {
+        method: 'DELETE'
     })
 };
 

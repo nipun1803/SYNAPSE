@@ -275,7 +275,7 @@ const updateProfile = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const { name, phone, address, dob, gender } = req.body || {};
+    const { name, phone, address, dob, gender, weight } = req.body || {};
     const imageFile = req.file;
     if (!name || !phone || !gender) {
       return res.status(400).json({ success: false, message: "Data Missing" });
@@ -288,6 +288,9 @@ const updateProfile = async (req, res) => {
     if (dob) {
       const d = new Date(dob);
       update.dob = isNaN(d.getTime()) ? null : d;
+    }
+    if (weight) {
+      update.weight = parseFloat(weight) || null;
     }
 
     await userModel.findByIdAndUpdate(userId, update);
@@ -642,6 +645,103 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Delete all appointments associated with the user
+    await appointmentModel.deleteMany({ userId });
+
+    // Delete the user
+    await userModel.findByIdAndDelete(userId);
+
+    // Clear cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+    });
+
+    res.status(200).json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    console.log("deleteAccount error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const deleteAppointment = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const appointmentId = req.params.id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    if (!appointmentId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing appointmentId" });
+    }
+
+    const appointment = await appointmentModel.findById(appointmentId);
+
+    if (!appointment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
+    }
+
+    if (appointment.userId.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized action" });
+    }
+
+    // Free the slot if appointment is not cancelled
+    if (!appointment.cancelled) {
+      const { docId, slotDate, slotTime } = appointment;
+      const doctorData = await doctorModel.findById(docId);
+
+      if (doctorData) {
+        const slots_booked = doctorData.slots_booked || {};
+        if (Array.isArray(slots_booked[slotDate])) {
+          slots_booked[slotDate] = slots_booked[slotDate].filter(
+            (e) => e !== slotTime
+          );
+          await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+        }
+      }
+    }
+
+    await appointmentModel.findByIdAndDelete(appointmentId);
+
+    const emit = req.app?.locals?.emitToAdmins;
+    if (emit) {
+      emit("appointment:deleted", {
+        type: "appointment:deleted",
+        appointmentId,
+      });
+    }
+
+    res.status(200).json({ success: true, message: "Appointment deleted successfully" });
+  } catch (error) {
+    console.log("deleteAppointment error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export {
   loginUser,
   registerUser,
@@ -654,4 +754,6 @@ export {
   cancelAppointment,
   rescheduleAppointment,
   getAppointmentById,
+  deleteAccount,
+  deleteAppointment,
 };
