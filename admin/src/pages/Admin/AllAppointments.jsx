@@ -18,12 +18,7 @@ const AllAppointments = () => {
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
   const [deleting, setDeleting] = useState(null)
-  const [cancelling, setCancelling] = useState(null)
-
-  // Stats - will be calculated from all appointments if we have all data
-  const [stats, setStats] = useState({ total: 0, upcoming: 0, completed: 0, cancelled: 0 })
 
   const fetchAppointments = async () => {
     if (!aToken) return
@@ -93,7 +88,11 @@ const AllAppointments = () => {
       setDeleting(id)
       const res = await fetch(`${backendUrl}/api/admin/appointment/${id}`, {
         method: 'DELETE',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${aToken}`
+        }
       })
       const data = await res.json()
       if (data.success) {
@@ -107,6 +106,33 @@ const AllAppointments = () => {
       toast.error('Failed to delete appointment')
     } finally {
       setDeleting(null)
+    }
+  }
+
+  const handleRefund = async (id) => {
+    if (!confirm('Are you sure you want to refund this appointment? This action cannot be undone.')) return
+    try {
+      setRefunding(id)
+      const res = await fetch(`${backendUrl}/api/payment/refund/${id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${aToken}`
+        }
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success('Appointment refunded successfully')
+        getAllAppointments()
+      } else {
+        toast.error(data.message || 'Failed to refund appointment')
+      }
+    } catch (error) {
+      console.error('Refund error:', error)
+      toast.error('Failed to refund appointment')
+    } finally {
+      setRefunding(null)
     }
   }
 
@@ -136,28 +162,16 @@ const AllAppointments = () => {
   ]
 
   return (
-    <div className='p-4 md:p-6 max-w-7xl mx-auto space-y-6'>
+    <div className='p-6 max-w-7xl mx-auto space-y-6'>
       {/* Header */}
-      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-        <div>
-          <h1 className='text-2xl md:text-3xl font-bold text-gray-900'>All Appointments</h1>
-          <p className='text-gray-600 mt-1 text-sm md:text-base'>Manage and track all patient appointments</p>
-        </div>
-        <Button
-          onClick={fetchAppointments}
-          variant='outline'
-          size='sm'
-          disabled={loading}
-          className='self-start sm:self-auto'
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+      <div>
+        <h1 className='text-3xl font-bold text-gray-900'>All Appointments</h1>
+        <p className='text-gray-600 mt-1'>Manage and track all patient appointments</p>
       </div>
 
       {/* Stats Cards */}
-      <div className='grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4'>
-        <Card className='border-0 shadow-sm bg-gradient-to-br from-gray-50 to-gray-100'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+        <Card>
           <CardContent className='p-4'>
             <div className='flex items-center gap-3'>
               <div className='w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center'>
@@ -214,8 +228,8 @@ const AllAppointments = () => {
         </Card>
       </div>
 
-      {/* Filters & Search */}
-      <Card className='border-0 shadow-sm'>
+      {/* Filters */}
+      <Card>
         <CardContent className='p-4'>
           <div className='flex flex-col gap-4'>
             {/* Filter Buttons */}
@@ -250,16 +264,9 @@ const AllAppointments = () => {
       </Card>
 
       {/* Appointments Table */}
-      <Card className='border-0 shadow-sm overflow-hidden'>
-        <CardHeader className='bg-gray-50 border-b py-4'>
-          <CardTitle className='text-base font-semibold'>
-            Appointments List
-            {filter !== 'all' && (
-              <span className='ml-2 text-sm font-normal text-gray-500'>
-                (Showing {filter} only)
-              </span>
-            )}
-          </CardTitle>
+      <Card>
+        <CardHeader>
+          <CardTitle>Appointments List</CardTitle>
         </CardHeader>
         <CardContent className='p-0'>
           {loading ? (
@@ -330,20 +337,21 @@ const AllAppointments = () => {
                             </div>
                           </div>
                         </td>
-                        <td className='px-4 py-4'>
-                          <span className='text-sm font-semibold text-gray-900'>{currency}{amount}</span>
-                        </td>
-                        <td className='px-4 py-4'>
+                        <td className='px-6 py-4 text-sm font-semibold text-gray-900'>{currency}{amount}</td>
+                        <td className='px-6 py-4'>
                           {item?.cancelled ? (
-                            <Badge className='bg-red-100 text-red-700 hover:bg-red-100 border-0'>
+                            <Badge variant='destructive' className='gap-1'>
+                              <XCircle className='w-3 h-3' />
                               Cancelled
                             </Badge>
                           ) : item?.isCompleted ? (
-                            <Badge className='bg-green-100 text-green-700 hover:bg-green-100 border-0'>
+                            <Badge className='bg-green-100 text-green-700 hover:bg-green-100 gap-1'>
+                              <CheckCircle className='w-3 h-3' />
                               Completed
                             </Badge>
                           ) : (
-                            <Badge className='bg-blue-100 text-blue-700 hover:bg-blue-100 border-0'>
+                            <Badge className='bg-blue-100 text-blue-700 hover:bg-blue-100 gap-1'>
+                              <Clock className='w-3 h-3' />
                               Upcoming
                             </Badge>
                           )}
@@ -364,6 +372,23 @@ const AllAppointments = () => {
                                   <>
                                     <XCircle className='w-4 h-4' />
                                     <span className='ml-1 hidden sm:inline'>Cancel</span>
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                            {item?.cancelled && item?.payment && item?.paymentStatus === 'completed' && (
+                              <Button
+                                onClick={() => handleRefund(item?._id)}
+                                disabled={refunding === item?._id}
+                                variant='ghost'
+                                size='sm'
+                                className='text-orange-600 hover:text-orange-700 hover:bg-orange-50'
+                              >
+                                {refunding === item?._id ? (
+                                  <div className='w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin' />
+                                ) : (
+                                  <>
+                                    Refund
                                   </>
                                 )}
                               </Button>
@@ -418,54 +443,27 @@ const AllAppointments = () => {
       </Card>
 
       {/* Pagination */}
-      {totalPages > 1 && !loading && (
-        <div className='flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-lg p-4 shadow-sm'>
-          <p className='text-sm text-gray-600'>
-            Showing page {page} of {totalPages}
-          </p>
-          <div className='flex gap-2'>
-            <Button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              variant='outline'
-              size='sm'
-            >
-              Previous
-            </Button>
-            <div className='flex items-center gap-1'>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum
-                if (totalPages <= 5) {
-                  pageNum = i + 1
-                } else if (page <= 3) {
-                  pageNum = i + 1
-                } else if (page >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i
-                } else {
-                  pageNum = page - 2 + i
-                }
-                return (
-                  <Button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    variant={page === pageNum ? 'default' : 'outline'}
-                    size='sm'
-                    className={`w-9 ${page === pageNum ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
-                  >
-                    {pageNum}
-                  </Button>
-                )
-              })}
-            </div>
-            <Button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              variant='outline'
-              size='sm'
-            >
-              Next
-            </Button>
-          </div>
+      {totalPages > 1 && (
+        <div className='flex justify-center gap-4'>
+          <Button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            variant='outline'
+            size='sm'
+          >
+            Previous
+          </Button>
+          <span className='flex items-center px-4 py-2 text-sm font-medium text-gray-700'>
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            variant='outline'
+            size='sm'
+          >
+            Next
+          </Button>
         </div>
       )}
     </div>

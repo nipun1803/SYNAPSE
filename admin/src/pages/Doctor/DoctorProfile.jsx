@@ -112,14 +112,14 @@ const DoctorProfile = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Profile Header Card */}
+
         <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
-          {/* Cover Image */}
+
           <div className="h-32 bg-gradient-to-r from-green-500 to-teal-600"></div>
 
           <div className="px-6 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-12">
-              {/* Profile Picture */}
+              {/* profile pic*/}
               <div className="mb-4 sm:mb-0">
                 <img
                   src={profileData.image}
@@ -128,7 +128,7 @@ const DoctorProfile = () => {
                 />
               </div>
 
-              {/* Edit Button */}
+
               {!isEdit && (
                 <button
                   onClick={() => setIsEdit(true)}
@@ -140,7 +140,7 @@ const DoctorProfile = () => {
               )}
             </div>
 
-            {/* Profile Info */}
+            {/* profile info */}
             <div className="mt-4">
               <h1 className="text-2xl font-bold text-gray-900">
                 {profileData.name}
@@ -167,14 +167,12 @@ const DoctorProfile = () => {
           </div>
         </div>
 
-        {/* Professional Information Card */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Professional Information
           </h2>
 
           <div className="space-y-6">
-            {/* About */}
             <div>
               <Label className="block text-sm font-medium text-gray-700 mb-2">
                 About {isEdit && <span className="text-red-500">*</span>}
@@ -199,7 +197,7 @@ const DoctorProfile = () => {
               )}
             </div>
 
-            {/* Name Field */}
+
             <div>
               <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <User className="h-4 w-4" />
@@ -223,7 +221,7 @@ const DoctorProfile = () => {
               )}
             </div>
 
-            {/* Phone Field */}
+
             <div>
               <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <Phone className="h-4 w-4" />
@@ -249,7 +247,7 @@ const DoctorProfile = () => {
               )}
             </div>
 
-            {/* Consultation Fee */}
+
             <div>
               <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <DollarSign className="h-4 w-4" />
@@ -283,7 +281,6 @@ const DoctorProfile = () => {
               )}
             </div>
 
-            {/* Clinic Address */}
             <div>
               <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <MapPin className="h-4 w-4" />
@@ -327,7 +324,7 @@ const DoctorProfile = () => {
               )}
             </div>
 
-            {/* Availability Toggle */}
+
             <div className="border-t pt-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -364,7 +361,7 @@ const DoctorProfile = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
+
           {isEdit && (
             <div className="flex gap-3 mt-6 pt-6 border-t">
               <Button
@@ -397,7 +394,7 @@ const DoctorProfile = () => {
           )}
         </div>
 
-        {/* Info Banner */}
+
         {!isEdit && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex gap-3">

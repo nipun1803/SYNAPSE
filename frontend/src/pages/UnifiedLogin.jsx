@@ -55,26 +55,37 @@ const UnifiedLogin = () => {
 
   const handleAuthSubmit = async (values) => {
     setIsSubmitting(true);
+
+    // Prevent unauthorized signups
+    if (authMode === "signup" && userRole !== "user") {
+      toast.error("Doctors and admins need to be invited by an admin.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      if (authMode === "signup" && userRole !== "user") {
-        toast.error("Doctors and admins need to be invited by an admin.");
-        return;
+      const payload = { ...values, userType: userRole };
+      let data;
+
+      if (authMode === "login") {
+        data = await authService.login(payload);
+      } else {
+        data = await authService.register(payload);
       }
 
-      const payload = { ...values, userType: userRole };
-      const data = authMode === "login"
-        ? await authService.login(payload)
-        : await authService.register(payload);
-
-      if (!data.success) throw new Error(data.message || "Auth failed");
+      if (!data.success) {
+        throw new Error(data.message || "Auth failed");
+      }
 
       toast.success(authMode === "login" ? "Welcome back!" : "Account created!");
 
-      // Redirects
+      // Handle redirects based on role
       if (authMode === "login") {
-        if (data.userType === "admin") window.location.href = `${ADMIN_URL}/admin-dashboard`;
-        else if (data.userType === "doctor") window.location.href = `${DOCTOR_URL}/doctor-dashboard`;
-        else {
+        if (data.userType === "admin") {
+          window.location.href = `${ADMIN_URL}/admin-dashboard`;
+        } else if (data.userType === "doctor") {
+          window.location.href = `${DOCTOR_URL}/doctor-dashboard`;
+        } else {
           if (loadProfile) await loadProfile();
           navigate("/");
         }
@@ -83,21 +94,28 @@ const UnifiedLogin = () => {
         navigate("/my-profile");
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Auth error:", error);
+      toast.error(error.message || "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const fillDemo = () => {
+    // Demo credentials for testing
+    // FIXME: Remove these hardcoded values before production deployment!
     const demos = {
       user: { email: "test@gmail.com", password: "12345678" },
       doctor: { email: "testdoc@gmail.com", password: "doctor123" },
       admin: { email: "admin@gmail.com", password: "admin123" },
     };
-    form.setValue("email", demos[userRole].email);
-    form.setValue("password", demos[userRole].password);
-    toast.info(`Filled ${userRole} demo creds`);
+
+    const creds = demos[userRole];
+    if (creds) {
+      form.setValue("email", creds.email);
+      form.setValue("password", creds.password);
+      toast.info(`Filled ${userRole} demo creds`);
+    }
   };
 
   return (

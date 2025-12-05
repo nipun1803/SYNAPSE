@@ -13,6 +13,8 @@ import DoctorsList from './pages/Admin/DoctorsList'
 import DoctorAppointments from './pages/Doctor/DoctorAppointments'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard'
 import DoctorProfile from './pages/Doctor/DoctorProfile'
+import CreatePrescription from './pages/Doctor/CreatePrescription'
+import ViewPrescription from './pages/Doctor/ViewPrescription'
 
 
 const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || 'http://localhost:5173/unified-login'
@@ -130,6 +132,16 @@ const App = () => {
             <Route path='/doctor-profile' element={
               <DoctorRoute>
                 <DoctorProfile />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/create-prescription' element={
+              <DoctorRoute>
+                <CreatePrescription />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/view-prescription' element={
+              <DoctorRoute>
+                <ViewPrescription />
               </DoctorRoute>
             } />
           </Routes>

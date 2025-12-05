@@ -75,13 +75,13 @@ const Dashboard = () => {
 
   return (
     <div className='p-6 max-w-7xl mx-auto space-y-6'>
-      {/* Header */}
+
       <div>
         <h1 className='text-3xl font-bold text-gray-900'>Dashboard</h1>
         <p className='text-gray-600 mt-1'>Welcome back! Here's what's happening today.</p>
       </div>
 
-      {/* Stats Cards */}
+
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <Card className='border-l-4 border-l-blue-500'>
           <CardContent className='p-6'>
@@ -138,7 +138,6 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Quick Stats */}
       <div className='grid grid-cols-3 gap-4'>
         <Card>
           <CardContent className='p-4'>
@@ -183,7 +182,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* filtering */}
       <Card>
         <CardContent className='p-4'>
           <div className='flex flex-col sm:flex-row gap-4'>
@@ -238,7 +237,7 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Appointments Table */}
+      {/* appointment table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Appointments</CardTitle>

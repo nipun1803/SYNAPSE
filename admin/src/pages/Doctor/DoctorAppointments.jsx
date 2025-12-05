@@ -14,42 +14,38 @@ const DoctorAppointments = () => {
   const { slotDateFormat, calculateAge, currency } = useContext(AppContext);
 
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
+
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     if (!dToken) return;
     const fetchData = async () => {
       setLoading(true);
-      await getAppointments();
+      const pagination = await getAppointments(page, itemsPerPage, filter, search);
+      if (pagination) {
+        setTotalPages(pagination.pages);
+      }
       setLoading(false);
     };
-    fetchData();
-  }, [dToken]);
 
+    // Debounce search
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [dToken, page, filter, search]);
+
+  // Reset page when filter or search changes
   useEffect(() => {
     setPage(1);
-  }, [filter]);
+  }, [filter, search]);
 
-  const filteredList = appointments.filter(appt => {
-    switch (filter) {
-      case 'upcoming':
-        return !appt.cancelled && !appt.isCompleted;
-      case 'completed':
-        return appt.isCompleted;
-      case 'cancelled':
-        return appt.cancelled;
-      default:
-        return true;
-    }
-  });
-
-  const totalPages = Math.ceil(filteredList.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedList = filteredList.slice(startIndex, endIndex);
-
   const getRowNumber = (index) => startIndex + index + 1;
 
   const [actionLoading, setActionLoading] = useState({ id: null, type: null });
@@ -59,7 +55,10 @@ const DoctorAppointments = () => {
     try {
       setActionLoading({ id, type: 'cancel' });
       await cancelAppointment(id);
-      await getAppointments();
+      await cancelAppointment(id);
+
+      const pagination = await getAppointments(page, itemsPerPage, filter, search);
+      if (pagination) setTotalPages(pagination.pages);
     } catch (error) {
       console.error(error);
     } finally {
@@ -72,7 +71,10 @@ const DoctorAppointments = () => {
     try {
       setActionLoading({ id, type: 'complete' });
       await completeAppointment(id);
-      await getAppointments();
+      await completeAppointment(id);
+
+      const pagination = await getAppointments(page, itemsPerPage, filter, search);
+      if (pagination) setTotalPages(pagination.pages);
     } catch (error) {
       console.error(error);
     } finally {
@@ -94,13 +96,13 @@ const DoctorAppointments = () => {
 
   return (
     <div className='p-6 max-w-7xl mx-auto space-y-6'>
-      {/* Header */}
+
       <div>
         <h1 className='text-3xl font-bold text-gray-900'>My Appointments</h1>
         <p className='text-gray-600 mt-1'>Manage your patient appointments</p>
       </div>
 
-      {/* Stats Cards */}
+
       <div className='grid grid-cols-3 gap-4'>
         <Card>
           <CardContent className='p-4'>
@@ -145,7 +147,7 @@ const DoctorAppointments = () => {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* filtering */}
       <Card>
         <CardContent className='p-4'>
           <div className='flex gap-2 flex-wrap'>
@@ -188,13 +190,25 @@ const DoctorAppointments = () => {
         </CardContent>
       </Card>
 
-      {/* Appointments Table */}
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search patients by name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* appointment table */}
       <Card>
         <CardHeader>
           <CardTitle>Appointments List</CardTitle>
         </CardHeader>
         <CardContent>
-          {paginatedList.length > 0 ? (
+          {appointments.length > 0 ? (
             <div className='overflow-x-auto'>
               <table className='w-full'>
                 <thead className='bg-gray-50 border-b'>
@@ -210,7 +224,7 @@ const DoctorAppointments = () => {
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-gray-100'>
-                  {paginatedList.map((item, index) => (
+                  {appointments.map((item, index) => (
                     <tr key={item._id || index} className='hover:bg-gray-50'>
                       <td className='px-6 py-4 text-sm font-medium text-gray-900'>{getRowNumber(index)}</td>
                       <td className='px-6 py-4'>
@@ -234,9 +248,28 @@ const DoctorAppointments = () => {
                         <p className='text-xs text-gray-500'>{item.slotTime}</p>
                       </td>
                       <td className='px-6 py-4'>
-                        <Badge variant={item.payment ? 'default' : 'outline'} className='gap-1'>
-                          {item.payment ? 'Online' : 'Cash'}
-                        </Badge>
+                        <div className='flex flex-col gap-1'>
+                          {item.payment ? (
+                            item.paymentStatus === 'completed' ? (
+                              <Badge className='bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100 gap-1'>
+                                <CheckCircle className='w-3 h-3' />
+                                Paid Online
+                              </Badge>
+                            ) : item.paymentStatus === 'refunded' ? (
+                              <Badge className='bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100 gap-1'>
+                                Refunded
+                              </Badge>
+                            ) : (
+                              <Badge variant='outline' className='gap-1'>
+                                Payment Pending
+                              </Badge>
+                            )
+                          ) : (
+                            <Badge className='bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100 gap-1'>
+                              Cash (Pending)
+                            </Badge>
+                          )}
+                        </div>
                       </td>
                       <td className='px-6 py-4 text-sm font-semibold text-gray-900'>{currency}{item.amount}</td>
                       <td className='px-6 py-4'>
@@ -294,6 +327,24 @@ const DoctorAppointments = () => {
                             </Button>
                           </div>
                         )}
+                        {item.isCompleted && !item.prescriptionId && (
+                          <Button
+                            size='sm'
+                            onClick={() => window.location.href = `/doctor/create-prescription?appointmentId=${item._id}&patientId=${item.userId}`}
+                            className='bg-blue-600 hover:bg-blue-700 text-white'
+                          >
+                            Create Prescription
+                          </Button>
+                        )}
+                        {item.prescriptionId && (
+                          <Button
+                            size='sm'
+                            onClick={() => window.location.href = `/doctor/view-prescription?appointmentId=${item._id}`}
+                            className='bg-green-600 hover:bg-green-700 text-white'
+                          >
+                            View Prescription
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -312,31 +363,33 @@ const DoctorAppointments = () => {
         </CardContent>
       </Card>
 
-      {/* Pagination */}
-      {totalPages > 1 && filteredList.length > 0 && (
-        <div className='flex justify-center gap-4'>
-          <Button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            variant='outline'
-            size='sm'
-          >
-            Previous
-          </Button>
-          <span className='flex items-center px-4 py-2 text-sm font-medium text-gray-700'>
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            variant='outline'
-            size='sm'
-          >
-            Next
-          </Button>
-        </div>
-      )}
-    </div>
+
+      {
+        totalPages > 1 && (
+          <div className='flex justify-center gap-4'>
+            <Button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              variant='outline'
+              size='sm'
+            >
+              Previous
+            </Button>
+            <span className='flex items-center px-4 py-2 text-sm font-medium text-gray-700'>
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              variant='outline'
+              size='sm'
+            >
+              Next
+            </Button>
+          </div>
+        )
+      }
+    </div >
   );
 };
 

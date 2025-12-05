@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 
 export function createSocketServer(httpServer, { jwtSecret } = {}) {
   const io = new Server(httpServer, {
-    cors: { origin: ["http://localhost:5173", "http://localhost:5174"], credentials: true },
+    cors: { origin: ["http://localhost:5173", "http://localhost:5174",'https://synapse-seven-theta.vercel.app','https://synapse-cma3.vercel.app'], credentials: true },
     transports: ["websocket", "polling"],
   });
 
@@ -15,7 +15,6 @@ export function createSocketServer(httpServer, { jwtSecret } = {}) {
       const token = socket.handshake.auth?.token || socket.handshake.query?.token;
       if (!token) return next(new Error("Unauthorized"));
       const payload = jwt.verify(token, jwtSecret);
-      // Your tokens use `type: 'admin'`
       if (payload?.type !== "admin") return next(new Error("Forbidden"));
       socket.user = payload;
       next();

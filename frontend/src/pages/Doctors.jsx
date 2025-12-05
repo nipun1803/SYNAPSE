@@ -10,9 +10,9 @@ import { Filter, Stethoscope, Users } from 'lucide-react'
 const Doctors = () => {
   const { speciality } = useParams()
   const navigate = useNavigate()
+  const { doctors } = useContext(AppContext)
 
-  const [doctors, setDoctors] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [filteredDoctors, setFilteredDoctors] = useState([])
   const [showFilter, setShowFilter] = useState(false)
   const [error, setError] = useState(null)
 
@@ -107,14 +107,6 @@ const Doctors = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleClearFilters = () => {
-    setSearchInput('')
-    setSearchQuery('')
-    setSort('')
-    setPage(1)
-    navigate('/doctors')
-  }
-
   return (
     <section className='py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'>
       <div className='mb-8'>
@@ -142,72 +134,25 @@ const Doctors = () => {
 
         <aside className={`w-full sm:w-64 flex-shrink-0 ${showFilter ? 'block' : 'hidden sm:block'}`}>
           <Card className='border-gray-200 shadow-md sticky top-4'>
-            <CardContent className='p-4 space-y-6'>
-
-              {/* search */}
-              <div>
-                <h3 className='text-sm font-semibold text-gray-900 mb-3'>Search</h3>
-                <input
-                  type="text"
-                  placeholder="Search doctor..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                {searchInput !== searchQuery && (
-                  <p className="text-xs text-gray-500 mt-1">Searching...</p>
-                )}
-              </div>
-
-              {/* sort */}
-              <div>
-                <h3 className='text-sm font-semibold text-gray-900 mb-3'>Sort By</h3>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                >
-                  <option value="">Default</option>
-                  <option value="fees_asc">Fees: Low to High</option>
-                  <option value="fees_desc">Fees: High to Low</option>
-                  <option value="experience_asc">Experience: Low to High</option>
-                  <option value="experience_desc">Experience: High to Low</option>
-                </select>
-              </div>
-
-              {/* categories */}
-              <div>
-                <h3 className='text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2'>
-                  <Filter className='w-4 h-4' />
-                  Specialties
-                </h3>
-                <div className='space-y-2'>
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => handleCategoryClick(category)}
-                      className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${speciality === category
+            <CardContent className='p-4'>
+              <h3 className='text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+                <Filter className='w-4 h-4' />
+                Specialties
+              </h3>
+              <div className='space-y-2'>
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryClick(category)}
+                    className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${speciality === category
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
-                        }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
+                      }`}
+                  >
+                    {category}
+                  </button>
+                ))}
               </div>
-
-
-              {(searchQuery || sort || speciality) && (
-                <Button
-                  onClick={handleClearFilters}
-                  variant="outline"
-                  className="w-full text-sm"
-                >
-                  Clear All Filters
-                </Button>
-              )}
-
             </CardContent>
           </Card>
         </aside>

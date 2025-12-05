@@ -11,8 +11,28 @@ const appointmentSchema = new mongoose.Schema({
     date: { type: Number, required: true },
     cancelled: { type: Boolean, default: false },
     payment: { type: Boolean, default: false },
-    isCompleted: { type: Boolean, default: false }
-})
+    isCompleted: { type: Boolean, default: false },
+    // Razorpay payment fields
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
+    razorpaySignature: { type: String },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'completed', 'failed', 'refunded'],
+        default: 'pending'
+    },
+    refundId: { type: String },
+    refundAmount: { type: Number },
+    refundStatus: {
+        type: String,
+        default: null
+    },
+    prescriptionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'prescription',
+        default: null
+    }
+}, { timestamps: true });
 
 const appointmentModel = mongoose.models.appointment || mongoose.model("appointment", appointmentSchema)
 export default appointmentModel

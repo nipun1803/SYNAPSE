@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// FIXME: Consider adding specialization subcategories
 const doctorSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -12,8 +13,9 @@ const doctorSchema = new mongoose.Schema({
   fees: { type: Number, required: true },
   address: { type: Object, required: true },
   available: { type: Boolean, default: true },
+  // Slots stored as: { "DD_MM_YYYY": ["10:00 AM", "11:30 AM"] }
   slots_booked: { type: Object, default: {} },
-  date: { type: Number, required: true },
+  date: { type: Number, required: true }, 
 });
 
 const doctorModel = mongoose.models.doctor || mongoose.model("doctor", doctorSchema);

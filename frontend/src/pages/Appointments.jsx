@@ -1,14 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Calendar, DollarSign, Loader2, ClipboardList } from 'lucide-react'
+import { MapPin, Calendar, Clock, DollarSign, CreditCard, Loader2, ClipboardList, CheckCircle, FileText, X } from 'lucide-react'
 import { userService } from '../api/services'
+import prescriptionService from '../api/prescriptionService'
 
 const MyAppointments = () => {
+  const navigate = useNavigate()
   const { currencySymbol, slotDateFormat } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -16,6 +19,25 @@ const MyAppointments = () => {
   const [deleting, setDeleting] = useState(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [selectedPrescription, setSelectedPrescription] = useState(null)
+  const [loadingPrescription, setLoadingPrescription] = useState(false)
+
+  const handleViewPrescription = async (prescriptionId) => {
+    try {
+      setLoadingPrescription(true)
+      const data = await prescriptionService.getPrescriptionById(prescriptionId)
+      if (data.success) {
+        setSelectedPrescription(data.prescription)
+      } else {
+        toast.error('Prescription not found')
+      }
+    } catch (error) {
+      console.error('Error fetching prescription:', error)
+      toast.error('Failed to load prescription')
+    } finally {
+      setLoadingPrescription(false)
+    }
+  }
 
   const fetchAppointments = async () => {
     try {
@@ -102,154 +124,279 @@ const MyAppointments = () => {
       {appointments.length > 0 ? (
         <div className='space-y-4'>
           {appointments.map((item) => (
-            <Card key={item._id} className='border-gray-200 shadow-sm hover:shadow-md transition-shadow'>
-              <CardContent className='p-6'>
-                <div className='flex flex-col md:flex-row gap-6'>
-                  <div className='flex-shrink-0'>
+            <Card key={item._id} className='group border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden'>
+              <CardContent className='p-0'>
+                <div className='flex flex-col md:flex-row'>
+                  {/* Doctor Image Section */}
+                  <div className='w-full md:w-48 h-48 md:h-auto relative bg-indigo-50 flex-shrink-0'>
                     <img
-                      className='w-32 h-32 rounded-lg object-cover bg-indigo-50'
+                      className='w-full h-full object-cover object-top'
                       src={item.docData?.image || assets.doctor_icon}
                       alt={item.docData?.name}
                       onError={(e) => { e.target.src = assets.doctor_icon }}
                     />
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity' />
                   </div>
 
-                  <div className='flex-1 space-y-3'>
-                    <div className='flex items-start justify-between'>
-                      <div>
-                        <h3 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
-                          {item.docData?.name}
-                          {item.docData?.verified && (
-                            <img src={assets.verified_icon} className='w-5 h-5' alt='Verified' />
+                  {/* Content Section */}
+                  <div className='flex-1 p-6 flex flex-col justify-between'>
+                    <div>
+                      <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4'>
+                        <div>
+                          <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2 group-hover:text-blue-600 transition-colors'>
+                            {item.docData?.name}
+                            {item.docData?.verified && (
+                              <img src={assets.verified_icon} className='w-5 h-5' alt='Verified' title='Verified Doctor' />
+                            )}
+                          </h3>
+                          <p className='text-gray-600 font-medium'>{item.docData?.speciality}</p>
+                          <p className='text-sm text-gray-500'>{item.docData?.degree}</p>
+                        </div>
+
+                        <div className='flex flex-wrap gap-2'>
+                          {item.cancelled ? (
+                            <Badge variant='destructive' className='bg-red-50 text-red-700 border-red-200 hover:bg-red-100'>
+                              Cancelled
+                            </Badge>
+                          ) : item.isCompleted ? (
+                            <Badge className='bg-green-50 text-green-700 border-green-200 hover:bg-green-100'>
+                              Completed
+                            </Badge>
+                          ) : (
+                            <Badge className='bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'>
+                              Upcoming
+                            </Badge>
                           )}
-                        </h3>
-                        <p className='text-gray-600 mt-1'>{item.docData?.speciality}</p>
-                        <p className='text-sm text-gray-500 mt-1'>{item.docData?.degree}</p>
+
+                          {/* Payment Status Badges */}
+                          {item.payment ? (
+                            item.paymentStatus === 'completed' ? (
+                              <Badge className='bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 gap-1'>
+                                <CheckCircle className='w-3 h-3' />
+                                Paid
+                              </Badge>
+                            ) : item.paymentStatus === 'refunded' ? (
+                              <Badge className='bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'>
+                                Refunded
+                              </Badge>
+                            ) : (
+                              <Badge variant='outline' className='text-gray-600 border-gray-300'>
+                                Payment Pending
+                              </Badge>
+                            )
+                          ) : !item.cancelled && (
+                            <Badge className='bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 gap-1'>
+                              <DollarSign className='w-3 h-3' />
+                              Pay at Clinic
+                            </Badge>
+                          )}
+                        </div>
                       </div>
 
-                      <div>
-                        {item.cancelled ? (
-                          <Badge variant='destructive' className='bg-red-100 text-red-700 border-red-200'>
-                            Cancelled
-                          </Badge>
-                        ) : item.isCompleted ? (
-                          <Badge className='bg-green-100 text-green-700 border-green-200 hover:bg-green-100'>
-                            Completed
-                          </Badge>
-                        ) : (
-                          <Badge className='bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100'>
-                            Upcoming
-                          </Badge>
+                      <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 mb-6'>
+                        <div className='flex items-center gap-3 text-sm text-gray-700'>
+                          <div className='w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0'>
+                            <Calendar className='w-4 h-4 text-blue-600' />
+                          </div>
+                          <div>
+                            <p className='text-xs text-gray-500 font-medium uppercase tracking-wide'>Date & Time</p>
+                            <p className='font-semibold'>{slotDateFormat(item.slotDate)} | {item.slotTime}</p>
+                          </div>
+                        </div>
+
+                        <div className='flex items-center gap-3 text-sm text-gray-700'>
+                          <div className='w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0'>
+                            <MapPin className='w-4 h-4 text-green-600' />
+                          </div>
+                          <div>
+                            <p className='text-xs text-gray-500 font-medium uppercase tracking-wide'>Location</p>
+                            <p className='font-medium truncate max-w-[200px]' title={item.docData?.address?.line1}>
+                              {item.docData?.address?.line1}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className='pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4'>
+                      <div className='flex items-center gap-2'>
+                        <div className='p-2 bg-gray-50 rounded-lg'>
+                          <CreditCard className='w-5 h-5 text-gray-600' />
+                        </div>
+                        <div>
+                          <p className='text-xs text-gray-500 font-medium uppercase'>Amount</p>
+                          <p className='text-lg font-bold text-gray-900'>{currencySymbol}{item.amount || item.docData?.fees}</p>
+                        </div>
+                      </div>
+
+                      <div className='flex md:flex-col gap-3 justify-end md:justify-start md:min-w-[140px]'>
+                        {!item.cancelled && !item.isCompleted && (
+                          <Button
+                            onClick={() => cancelAppointment(item._id)}
+                            disabled={cancelling === item._id}
+                            variant='outline'
+                            className='border-2 border-red-500 text-red-600 hover:bg-red-50'
+                          >
+                            {cancelling === item._id ? (
+                              <>
+                                <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                                Cancelling...
+                              </>
+                            ) : (
+                              'Cancel'
+                            )}
+                          </Button>
                         )}
                       </div>
                     </div>
-
-                    <div className='flex items-start gap-2 text-sm text-gray-600'>
-                      <MapPin className='w-5 h-5 text-gray-400 mt-0.5' />
-                      <div>
-                        <p className='font-medium text-gray-700'>Address:</p>
-                        <p>{item.docData?.address?.line1}</p>
-                        {item.docData?.address?.line2 && <p>{item.docData?.address?.line2}</p>}
-                      </div>
-                    </div>
-
-                    <div className='flex items-center gap-2 text-sm'>
-                      <Calendar className='w-5 h-5 text-gray-400' />
-                      <span className='font-medium text-gray-700'>Date & Time:</span>
-                      <span className='text-gray-900'>
-                        {slotDateFormat ? slotDateFormat(item.slotDate) : item.slotDate} at {item.slotTime}
-                      </span>
-                    </div>
-
-                    <div className='flex items-center gap-2 text-sm'>
-                      <DollarSign className='w-5 h-5 text-gray-400' />
-                      <span className='font-medium text-gray-700'>Consultation Fee:</span>
-                      <span className='text-gray-900 font-semibold'>
-                        {currencySymbol}{item.amount || item.docData?.fees}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className='flex md:flex-col gap-3 justify-end md:justify-start md:min-w-[140px]'>
-                    {!item.cancelled && !item.isCompleted && (
-                      <Button
-                        onClick={() => cancelAppointment(item._id)}
-                        disabled={cancelling === item._id}
-                        variant='outline'
-                        className='border-2 border-red-500 text-red-600 hover:bg-red-50'
-                      >
-                        {cancelling === item._id ? (
-                          <>
-                            <Loader2 className='w-4 h-4 mr-2 animate-spin' />
-                            Cancelling...
-                          </>
-                        ) : (
-                          'Cancel'
-                        )}
-                      </Button>
-                    )}
-
-                    {/* Delete button - shown for all appointments */}
-                    <Button
-                      onClick={() => deleteAppointment(item._id)}
-                      disabled={deleting === item._id}
-                      variant='outline'
-                      className='border-2 border-gray-400 text-gray-600 hover:bg-gray-50 hover:border-gray-500'
-                    >
-                      {deleting === item._id ? (
-                        <>
-                          <Loader2 className='w-4 h-4 mr-2 animate-spin' />
-                          Deleting...
-                        </>
-                      ) : (
-                        'Delete'
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
           ))}
 
-          {totalPages > 1 && (
-            <div className='flex justify-center gap-4 mt-6'>
-              <Button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                variant='outline'
-              >
-                Previous
-              </Button>
-              <span className='flex items-center'>Page {page} of {totalPages}</span>
-              <Button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                variant='outline'
-              >
-                Next
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <Card className='border-gray-200'>
-          <CardContent className='text-center py-16'>
-            <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <ClipboardList className='w-8 h-8 text-gray-400' />
-            </div>
-            <h3 className='text-lg font-medium text-gray-900'>No appointments yet</h3>
-            <p className='mt-2 text-sm text-gray-500'>Start by booking an appointment with a doctor.</p>
-            <Button
-              onClick={() => window.location.href = '/doctors'}
-              className='mt-6 bg-blue-600 hover:bg-blue-700 text-white'
-            >
-              Browse Doctors
-            </Button>
-          </CardContent>
-        </Card>
+                {totalPages > 1 && (
+                  <div className='flex justify-center gap-4 mt-6'>
+                    <Button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      variant='outline'
+                    >
+                      Previous
+                    </Button>
+                    <span className='flex items-center'>Page {page} of {totalPages}</span>
+                    <Button
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      variant='outline'
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
+              ) : (
+              <Card className='border-gray-200'>
+                <CardContent className='text-center py-16'>
+                  <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+                    <ClipboardList className='w-8 h-8 text-gray-400' />
+                  </div>
+                  <h3 className='text-lg font-medium text-gray-900'>No appointments yet</h3>
+                  <p className='mt-2 text-sm text-gray-500'>Start by booking an appointment with a doctor.</p>
+                  <Button
+                    onClick={() => window.location.href = '/doctors'}
+                    className='mt-6 bg-blue-600 hover:bg-blue-700 text-white'
+                  >
+                    Browse Doctors
+                  </Button>
+                </CardContent>
+              </Card>
       )}
-    </div>
-  )
+
+
+              {/* Prescription Modal */}
+              {selectedPrescription && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Prescription Details</h2>
+                        <p className="text-sm text-gray-500">#{selectedPrescription.prescriptionNumber || selectedPrescription._id}</p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedPrescription(null)}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <X className="w-6 h-6 text-gray-500" />
+                      </button>
+                    </div>
+
+                    <div className="p-6 space-y-6">
+                      {/* Doctor & Date Info */}
+                      <div className="flex flex-col sm:flex-row justify-between gap-4 bg-blue-50 p-4 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+                            <img
+                              src={selectedPrescription.doctorId?.image || assets.doctor_icon}
+                              alt="Doctor"
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => { e.target.src = assets.doctor_icon }}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">Dr. {selectedPrescription.doctorId?.name}</p>
+                            <p className="text-sm text-gray-600">{selectedPrescription.doctorId?.speciality}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">Date</p>
+                          <p className="font-medium text-gray-900">{slotDateFormat(selectedPrescription.createdAt)}</p>
+                        </div>
+                      </div>
+
+                      {/* Diagnosis */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Diagnosis</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                          <p className="text-gray-700">{selectedPrescription.diagnosis}</p>
+                        </div>
+                      </div>
+
+                      {/* Medications */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Medications</h3>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-50 text-gray-700 font-medium border-b border-gray-200">
+                              <tr>
+                                <th className="px-4 py-3">Drug Name</th>
+                                <th className="px-4 py-3">Dosage</th>
+                                <th className="px-4 py-3">Frequency</th>
+                                <th className="px-4 py-3">Duration</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {selectedPrescription.medications?.map((med, index) => (
+                                <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                  <td className="px-4 py-3 font-medium text-gray-900">{med.drugName}</td>
+                                  <td className="px-4 py-3 text-gray-600">{med.dosage}</td>
+                                  <td className="px-4 py-3">
+                                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                                      {med.frequency}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-600">{med.duration}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      {selectedPrescription.notes && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">Doctor's Notes</h3>
+                          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 text-yellow-800">
+                            <p>{selectedPrescription.notes}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                      <Button
+                        onClick={() => window.print()}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Print Prescription
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
 }
 
-export default MyAppointments
+          export default MyAppointments

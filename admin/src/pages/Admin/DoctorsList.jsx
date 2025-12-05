@@ -84,13 +84,13 @@ const DoctorsList = () => {
   return (
     <div className='p-6 max-w-7xl mx-auto'>
 
-      {/* Page Header */}
+
       <div className='mb-6'>
         <h1 className='text-2xl font-bold text-gray-900'>Doctors List</h1>
         <p className='text-gray-600 mt-1'>Manage all registered doctors</p>
       </div>
 
-      {/* Stats Cards - Simple white cards */}
+
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6'>
         <div className='bg-white border border-gray-200 rounded-xl p-5'>
           <div className='flex items-center justify-between'>
@@ -135,7 +135,7 @@ const DoctorsList = () => {
         </div>
       </div>
 
-      {/* Filtering and search*/}
+
       <div className='bg-white border border-gray-200 rounded-xl p-5 mb-5'>
         <div className='space-y-4'>
           <div className='flex gap-2'>
@@ -179,7 +179,7 @@ const DoctorsList = () => {
         </div>
       </div>
 
-      {/* Doctors menu */}
+
       <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
         <div className='px-6 py-4 border-b border-gray-200 bg-gray-50'>
           <div className='flex items-center justify-between'>
@@ -218,7 +218,7 @@ const DoctorsList = () => {
                   </div>
                 </div>
 
-                {/* doc inf */}
+                {/* doc info */}
                 <div className='p-4'>
                   <h3 className='text-base font-semibold text-gray-900 mb-1'>
                     Dr. {item.name}
@@ -246,7 +246,7 @@ const DoctorsList = () => {
                     </label>
                   </div>
 
-                  {/* Delete Button */}
+                  {/* Delete  */}
                   <button
                     onClick={() => handleDeleteDoctor(item._id, item.name)}
                     disabled={deleting === item._id}

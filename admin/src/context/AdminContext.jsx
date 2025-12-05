@@ -23,6 +23,8 @@ const AdminContextProvider = ({ children }) => {
       }
     });
 
+    // Interceptor to handle session expiry automatically
+    // This is a bit complex but ensures we don't get stuck with invalid tokens
     instance.interceptors.response.use(
       (res) => res,
       (error) => {
@@ -90,23 +92,25 @@ const AdminContextProvider = ({ children }) => {
 
 
   const getAllDoctors = async () => {
-    try {
-      const { data } = await api.get(`/api/admin/doctors`);
-      if (data?.success) {
-        setDoctors(data.doctors || []);
-      } else {
-        toast.error(data?.message || "Failed to load doctors");
-      }
-    } catch (err) {
-      toast.error(err?.response?.data?.message || err.message || "Failed to load doctors");
-    }
+    // Using promise chain here for variety
+    api.get(`/api/admin/doctors`)
+      .then(({ data }) => {
+        if (data?.success) {
+          setDoctors(data.doctors || []);
+        } else {
+          toast.error(data?.message || "Failed to load doctors");
+        }
+      })
+      .catch(err => {
+        toast.error(err?.response?.data?.message || err.message || "Failed to load doctors");
+      })
   };
 
 
   const changeAvailability = async (docId) => {
     try {
-      ('Changing availability for doctor:', docId);
-
+      // DEBUG: Tracking availability changes
+      console.log('DEBUG: Changing availability for doctor:', docId);
 
       const { data } = await api.patch(
         `/api/admin/doctors/${docId}/availability`,
@@ -131,7 +135,7 @@ const AdminContextProvider = ({ children }) => {
       const { data } = await api.get(`/api/admin/appointments?page=${page}&limit=${limit}`);
       if (data?.success) {
         setAppointments([...data.appointments].reverse());
-        return data.pagination; // Return pagination info
+        return data.pagination; 
       } else {
         toast.error(data?.message || "Failed to load appointments");
       }

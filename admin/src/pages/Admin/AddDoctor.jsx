@@ -161,7 +161,6 @@ const AddDoctor = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
           <UserPlus className="w-7 h-7 text-blue-600" />
@@ -171,7 +170,7 @@ const AddDoctor = () => {
       </div>
 
       <form onSubmit={onSubmitHandler} className="space-y-6">
-        {/* Photo Upload Section */}
+        {/* upload section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -227,7 +226,7 @@ const AddDoctor = () => {
           </CardContent>
         </Card>
 
-        {/* Basic Information */}
+
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
@@ -293,7 +292,7 @@ const AddDoctor = () => {
           </CardContent>
         </Card>
 
-        {/* Professional Details */}
+
         <Card>
           <CardHeader>
             <CardTitle>Professional Details</CardTitle>
@@ -355,7 +354,7 @@ const AddDoctor = () => {
           </CardContent>
         </Card>
 
-        {/* Clinic Address */}
+
         <Card>
           <CardHeader>
             <CardTitle>Clinic Address</CardTitle>
@@ -392,7 +391,7 @@ const AddDoctor = () => {
           </CardContent>
         </Card>
 
-        {/* About Doctor */}
+
         <Card>
           <CardHeader>
             <CardTitle>About Doctor</CardTitle>
@@ -409,7 +408,7 @@ const AddDoctor = () => {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
+
         <div className="flex gap-4">
           <Button
             type="submit"

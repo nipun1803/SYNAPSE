@@ -12,6 +12,8 @@ import Doctors from './pages/Doctors'
 import Home from './pages/Home'
 import MyAppointments from './pages/Appointments'
 import MyProfile from './pages/Profile'
+import PaymentHistory from './pages/PaymentHistory'
+import PrescriptionHistory from './pages/PrescriptionHistory'
 import UnifiedLogin from './pages/UnifiedLogin'
 
 
@@ -93,6 +95,16 @@ const App = () => {
           <Route path='/my-profile' element={
             <ProtectedRoute>
               <MyProfile />
+            </ProtectedRoute>
+          } />
+          <Route path='/payment-history' element={
+            <ProtectedRoute>
+              <PaymentHistory />
+            </ProtectedRoute>
+          } />
+          <Route path='/my-prescriptions' element={
+            <ProtectedRoute>
+              <PrescriptionHistory />
             </ProtectedRoute>
           } />
         </Routes>

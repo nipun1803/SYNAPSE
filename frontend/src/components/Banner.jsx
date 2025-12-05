@@ -72,7 +72,7 @@ const Banner = () => {
               <div className='relative'>
                 <img 
                   className='w-full h-auto lg:max-w-lg' 
-                  src={assets.appointment_img} 
+                  src='https://res.cloudinary.com/dvowfjsb4/image/upload/c_crop,w_600,h_700/v1764692847/doctor-with-his-arms-crossed-white-background-removebg-preview_dbsyvz.png'
                   alt="appointment" 
                 />
                 <div className='absolute inset-0 bg-gradient-to-l from-blue-900/20 to-transparent'></div>

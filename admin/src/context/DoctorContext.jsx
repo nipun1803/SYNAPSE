@@ -1,11 +1,10 @@
-import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import api, { doctorService } from "../api/doctorService";
 
 export const DoctorContext = createContext();
 
 const DoctorContextProvider = ({ children }) => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
   const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || "http://localhost:5173/unified-login";
 
   const [dToken, setDToken] = useState(null);
@@ -13,14 +12,6 @@ const DoctorContextProvider = ({ children }) => {
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
   const [profileData, setProfileData] = useState(null);
-
-  const api = axios.create({
-    baseURL: backendUrl,
-    withCredentials: true,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
 
   api.interceptors.response.use(
     (res) => res,
@@ -39,7 +30,7 @@ const DoctorContextProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       setCheckingAuth(true);
-      const { data } = await api.get(`/api/doctors/me/profile`);
+      const { data } = await doctorService.checkAuth();
       if (data.success) {
         setDToken(true);
         setProfileData(data.profileData);
@@ -67,7 +58,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const logoutDoctor = async () => {
     try {
-      const { data } = await api.post('/api/auth/logout/doctor');
+      const { data } = await doctorService.logout();
       if (data?.success) {
         setDToken(null);
         localStorage.removeItem('dToken');
@@ -85,12 +76,19 @@ const DoctorContextProvider = ({ children }) => {
   };
 
 
-  const getAppointments = async (page = 1, limit = 5) => {
+  const getAppointments = async (page = 1, limit = 5, filter = 'all', search = '') => {
     try {
-      const { data } = await api.get(`/api/doctors/me/appointments?page=${page}&limit=${limit}`);
+      const params = {
+        page,
+        limit,
+        ...(filter !== 'all' && { status: filter }),
+        ...(search && { search })
+      };
+
+      const { data } = await doctorService.getAppointments(params);
       if (data.success) {
         setAppointments([...data.appointments].reverse());
-        return data.pagination; // Return pagination info
+        return data.pagination;
       } else {
         toast.error(data.message);
       }
@@ -102,7 +100,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const getProfileData = async () => {
     try {
-      const { data } = await api.get(`/api/doctors/me/profile`);
+      const { data } = await doctorService.getProfile();
       if (data.success) {
         setProfileData(data.profileData);
       } else {
@@ -115,7 +113,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const cancelAppointment = async (appointmentId) => {
     try {
-      const { data } = await api.patch(`/api/doctors/me/appointments/${appointmentId}/cancel`, { appointmentId });
+      const { data } = await doctorService.cancelAppointment(appointmentId);
       if (data.success) {
         toast.success(data.message);
         getAppointments();
@@ -131,7 +129,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const completeAppointment = async (appointmentId) => {
     try {
-      const { data } = await api.patch(`/api/doctors/me/appointments/${appointmentId}/complete`, { appointmentId });
+      const { data } = await doctorService.completeAppointment(appointmentId);
       if (data.success) {
         toast.success(data.message);
         getAppointments();
@@ -147,7 +145,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const getDashData = async () => {
     try {
-      const { data } = await api.get(`/api/doctors/me/dashboard`);
+      const { data } = await doctorService.getDashboard();
       if (data.success) {
         setDashData(data.dashData);
       } else {
@@ -163,7 +161,6 @@ const DoctorContextProvider = ({ children }) => {
     dToken,
     setDToken,
     checkingAuth,
-    backendUrl,
     appointments,
     setAppointments,
     getAppointments,

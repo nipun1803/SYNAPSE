@@ -54,13 +54,11 @@ const DoctorDashboard = () => {
 
   return (
     <div className='p-6 max-w-7xl mx-auto space-y-6'>
-      {/* Header */}
       <div>
         <h1 className='text-3xl font-bold text-gray-900'>Doctor Dashboard</h1>
         <p className='text-gray-600 mt-1'>Welcome back! Here's your practice overview.</p>
       </div>
 
-      {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <Card className='border-l-4 border-l-green-500'>
           <CardContent className='p-6'>
@@ -123,7 +121,7 @@ const DoctorDashboard = () => {
         </Card>
       </div>
 
-      {/* Latest Appointments */}
+
       <Card>
         <CardHeader>
           <CardTitle>Latest Appointments</CardTitle>

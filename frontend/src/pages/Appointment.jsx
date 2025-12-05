@@ -7,13 +7,13 @@ import { AppContext } from '../context/AppContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Info } from 'lucide-react'
+import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Info, CreditCard } from 'lucide-react'
 import { doctorService, userService } from '../api/services'
 
 const Appointment = () => {
   const { docId } = useParams()
   const navigate = useNavigate()
-  const { doctors, currencySymbol, backendUrl, refreshDoctors } = useContext(AppContext)
+  const { doctors, currencySymbol, backendUrl, refreshDoctors, userData } = useContext(AppContext)
 
   const [docInfo, setDocInfo] = useState(null)
   const [loadingDoc, setLoadingDoc] = useState(true)
@@ -22,6 +22,7 @@ const Appointment = () => {
   const [slotTime, setSlotTime] = useState('')
   const [loadingSlots, setLoadingSlots] = useState(false)
   const [booking, setBooking] = useState(false)
+  const [paymentMode, setPaymentMode] = useState('online') // 'online' or 'cash'
 
   const toLocalDateInputValue = (d) => {
     const offset = d.getTimezoneOffset()
@@ -142,19 +143,110 @@ const Appointment = () => {
       setBooking(true)
       const slotDate = makeSlotDateKey(selectedDate)
 
-      const data = await userService.bookAppointment({ docId, slotDate, slotTime })
+      // If cash payment mode, book directly without payment
+      if (paymentMode === 'cash') {
+        const data = await userService.bookAppointment({ docId, slotDate, slotTime, paymentMode: 'cash' })
 
-      if (data.success) {
-        toast.success('Appointment booked successfully!')
-        if (refreshDoctors) await refreshDoctors()
-        setTimeout(() => navigate('/my-appointments'), 1000)
-      } else {
-        toast.error(data.message || 'Failed to book appointment')
+        if (data.success) {
+          toast.success('Appointment booked successfully! Pay at the clinic.')
+          if (refreshDoctors) await refreshDoctors()
+          setTimeout(() => navigate('/my-appointments'), 1000)
+        } else {
+          toast.error(data.message || 'Failed to book appointment')
+        }
+        setBooking(false)
+        return
       }
+
+      // Online payment mode - Create Razorpay order
+      const orderResponse = await fetch(`${backendUrl}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ docId, slotDate, slotTime })
+      })
+
+      const orderData = await orderResponse.json()
+
+      if (!orderData.success) {
+        toast.error(orderData.message || 'Failed to create order')
+        setBooking(false)
+        return
+      }
+
+      // Razorpay checkout options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.order.amount,
+        currency: orderData.order.currency,
+        name: 'SYNAPSE',
+        description: `Appointment with Dr. ${orderData.doctorName}`,
+        order_id: orderData.order.id,
+        handler: async function (response) {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await fetch(`${backendUrl}/api/payment/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                docId,
+                slotDate,
+                slotTime
+              })
+            })
+
+            const verifyData = await verifyResponse.json()
+
+            if (verifyData.success) {
+              toast.success('Payment successful! Appointment booked.')
+              if (refreshDoctors) await refreshDoctors()
+              setTimeout(() => navigate('/my-appointments'), 1500)
+            } else {
+              toast.error(verifyData.message || 'Payment verification failed')
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error)
+            toast.error('Payment verification failed. Please contact support.')
+          } finally {
+            setBooking(false)
+          }
+        },
+        prefill: {
+          name: userData?.name || '',
+          email: userData?.email || '',
+          contact: userData?.phone || ''
+        },
+        theme: {
+          color: '#2563eb'
+        },
+        modal: {
+          ondismiss: function () {
+            setBooking(false)
+            toast.info('Payment cancelled')
+          }
+        }
+      }
+
+      // Load Razorpay script and open checkout
+      const script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      script.onload = () => {
+        const razorpay = new window.Razorpay(options)
+        razorpay.open()
+      }
+      script.onerror = () => {
+        toast.error('Failed to load payment gateway')
+        setBooking(false)
+      }
+      document.body.appendChild(script)
+
     } catch (error) {
       console.error('Booking error:', error)
       toast.error('Failed to book appointment. Please try again.')
-    } finally {
       setBooking(false)
     }
   }
@@ -301,6 +393,57 @@ const Appointment = () => {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Payment Mode Selection */}
+          <div className='mb-8'>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2'>
+              <CreditCard className='w-5 h-5' />
+              Payment Mode
+            </h3>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <button
+                onClick={() => setPaymentMode('online')}
+                className={`p-4 border-2 rounded-xl transition-all ${paymentMode === 'online'
+                  ? 'border-blue-600 bg-blue-50'
+                  : 'border-gray-200 hover:border-blue-300'
+                  }`}
+              >
+                <div className='flex items-center gap-3'>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMode === 'online' ? 'border-blue-600' : 'border-gray-300'
+                    }`}>
+                    {paymentMode === 'online' && (
+                      <div className='w-3 h-3 rounded-full bg-blue-600'></div>
+                    )}
+                  </div>
+                  <div className='text-left'>
+                    <p className='font-semibold text-gray-900'>Online Payment</p>
+                    <p className='text-sm text-gray-600'>Pay securely via Razorpay</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setPaymentMode('cash')}
+                className={`p-4 border-2 rounded-xl transition-all ${paymentMode === 'cash'
+                  ? 'border-green-600 bg-green-50'
+                  : 'border-gray-200 hover:border-green-300'
+                  }`}
+              >
+                <div className='flex items-center gap-3'>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMode === 'cash' ? 'border-green-600' : 'border-gray-300'
+                    }`}>
+                    {paymentMode === 'cash' && (
+                      <div className='w-3 h-3 rounded-full bg-green-600'></div>
+                    )}
+                  </div>
+                  <div className='text-left'>
+                    <p className='font-semibold text-gray-900'>Cash Payment</p>
+                    <p className='text-sm text-gray-600'>Pay at the clinic</p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
 
           <div className='flex justify-center pt-6'>

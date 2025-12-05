@@ -13,6 +13,8 @@ import {
   Menu,
   X,
   ArrowRight,
+  CreditCard,
+  FileText,
 } from "lucide-react";
 
 import { assets } from "../assets/assets";

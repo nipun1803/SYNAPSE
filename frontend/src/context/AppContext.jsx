@@ -10,15 +10,24 @@ const AppContextProvider = ({ children }) => {
   const [doctors, setDoctors] = useState([])
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [doctorsLoading, setDoctorsLoading] = useState(true)
 
+  // Fetch doctors list - currently fetches every time
+  // TODO: Add local storage caching to reduce API calls
   const fetchDoctors = async () => {
+    setDoctorsLoading(true)
     try {
-      const data = await doctorService.getList()
-      if (data.success) {
-        setDoctors(data.doctors)
+      const res = await doctorService.getList()
+      if (res.success) {
+        setDoctorsLoading(false)
+        setDoctors(res.doctors)
+      } else {
+        setDoctorsLoading(false)
+        console.warn("Failed to fetch doctors list")
       }
-    } catch (error) {
-      console.error('Doctors fetch error:', error)
+    } catch (err) {
+      setDoctorsLoading(false)
+      console.error('Doctors fetch error:', err)
     }
   }
 
@@ -68,8 +77,11 @@ const AppContextProvider = ({ children }) => {
     if (!dob) return ''
     const today = new Date()
     const birthDate = new Date(dob)
+
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
+
+    // Adjust age if birthday hasn't occurred yet this year
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--
     }
@@ -90,6 +102,7 @@ const AppContextProvider = ({ children }) => {
     userData,
     setUserData,
     loading,
+    doctorsLoading,
     fetchDoctors,
     refreshDoctors,
     loadProfile,
