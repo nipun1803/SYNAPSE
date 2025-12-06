@@ -6,9 +6,7 @@ import {
   listAppointment,
   updateProfile,
   getAppointmentById,
-  rescheduleAppointment,
-  deleteAccount,
-  deleteAppointment
+  rescheduleAppointment
 } from '../controllers/userController.js';
 import authUser from '../middleware/authUser.js';
 import upload from '../middleware/multer.js';
@@ -20,7 +18,6 @@ router.get('/profile', authUser, getProfile);
 
 // /api/users/profile
 router.put('/profile', authUser, upload.single('image'), updateProfile);
-router.delete('/profile', authUser, deleteAccount);
 
 // /api/users/appointments
 router.get('/appointments', authUser, listAppointment);
@@ -36,6 +33,5 @@ router.patch('/appointments/:id/reschedule', authUser, rescheduleAppointment);
 
 // /api/users/appointments/:id
 router.get('/appointments/:id', authUser, getAppointmentById);
-router.delete('/appointments/:id', authUser, deleteAppointment);
 
 export default router;

@@ -13,6 +13,7 @@ import DoctorsList from './pages/Admin/DoctorsList'
 import DoctorAppointments from './pages/Doctor/DoctorAppointments'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard'
 import DoctorProfile from './pages/Doctor/DoctorProfile'
+import DoctorSlots from './pages/Doctor/DoctorSlots'
 import CreatePrescription from './pages/Doctor/CreatePrescription'
 import ViewPrescription from './pages/Doctor/ViewPrescription'
 
@@ -86,9 +87,9 @@ const App = () => {
       />
 
       <Navbar onToggleSidebar={() => setSidebarOpen(prev => !prev)} />
-      <div className='flex flex-1 overflow-hidden'>
+      <div className='flex flex-1'>
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <main className='flex-1 overflow-y-auto'>
+        <main className='flex-1 overflow-y-auto h-[calc(100vh-61px)]'>
           <Routes>
             <Route path='/' element={
               aToken ? <Navigate to='/admin-dashboard' replace /> :
@@ -132,6 +133,11 @@ const App = () => {
             <Route path='/doctor-profile' element={
               <DoctorRoute>
                 <DoctorProfile />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor-slots' element={
+              <DoctorRoute>
+                <DoctorSlots />
               </DoctorRoute>
             } />
             <Route path='/doctor/create-prescription' element={

@@ -38,9 +38,6 @@ const DoctorContextProvider = ({ children }) => {
         setDToken(null);
       }
     } catch (err) {
-      if (window.location.pathname.startsWith('/doctor')) {
-        console.error('Doctor auth check failed:', err);
-      }
       setDToken(null);
     } finally {
       setCheckingAuth(false);
@@ -67,7 +64,7 @@ const DoctorContextProvider = ({ children }) => {
         window.location.href = UNIFIED_LOGIN_URL;
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      toast.error('Logout failed');
       setDToken(null);
       localStorage.removeItem('dToken');
       localStorage.removeItem('userType');
@@ -152,7 +149,7 @@ const DoctorContextProvider = ({ children }) => {
         setDashData(false);
       }
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to fetch data');
       setDashData(false);
     }
   };

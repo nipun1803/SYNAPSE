@@ -88,6 +88,12 @@ export const userService = {
         method: 'PATCH'
     }),
 
+    // PATCH /api/users/appointments/:id/reschedule
+    rescheduleAppointment: (id, payload) => fetchAPI(`${BASE_URL}/api/users/appointments/${id}/reschedule`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+    }),
+
     // DELETE /api/users/profile
     deleteAccount: () => fetchAPI(`${BASE_URL}/api/users/profile`, {
         method: 'DELETE'

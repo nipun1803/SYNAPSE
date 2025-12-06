@@ -53,9 +53,7 @@ const AdminContextProvider = ({ children }) => {
         setAToken(null);
       }
     } catch (err) {
-      if (window.location.pathname.startsWith('/admin')) {
-        console.error('Admin auth check failed:', err);
-      }
+      toast.error('Admin auth check failed');
       setAToken(null);
     } finally {
       setCheckingAuth(false);
@@ -82,7 +80,7 @@ const AdminContextProvider = ({ children }) => {
         window.location.href = UNIFIED_LOGIN_URL;
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      toast.error('Logout failed');
       setAToken(null);
       localStorage.removeItem('aToken');
       localStorage.removeItem('userType');
@@ -110,7 +108,7 @@ const AdminContextProvider = ({ children }) => {
   const changeAvailability = async (docId) => {
     try {
       // DEBUG: Tracking availability changes
-      console.log('DEBUG: Changing availability for doctor:', docId);
+      // Debug logging removed
 
       const { data } = await api.patch(
         `/api/admin/doctors/${docId}/availability`,
@@ -124,8 +122,7 @@ const AdminContextProvider = ({ children }) => {
         toast.error(data?.message || "Failed to change availability");
       }
     } catch (err) {
-      console.error('Change availability error:', err);
-      toast.error(err?.response?.data?.message || err.message || "Failed to change availability");
+      toast.error('Failed to update availability');
     }
   };
 
@@ -135,7 +132,7 @@ const AdminContextProvider = ({ children }) => {
       const { data } = await api.get(`/api/admin/appointments?page=${page}&limit=${limit}`);
       if (data?.success) {
         setAppointments([...data.appointments].reverse());
-        return data.pagination; 
+        return data.pagination;
       } else {
         toast.error(data?.message || "Failed to load appointments");
       }
@@ -169,8 +166,7 @@ const AdminContextProvider = ({ children }) => {
         toast.error(data?.message || "Failed to load dashboard data");
       }
     } catch (err) {
-      console.error('Dashboard error:', err);
-      toast.error(err?.response?.data?.message || err.message || "Failed to load dashboard");
+      toast.error('Failed to fetch dashboard data');
     }
   };
 

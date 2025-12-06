@@ -11,7 +11,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const path = location.pathname
   const onAdminRoute = /^\/(admin-dashboard|all-appointments|add-doctor|doctor-list)(\/|$)/.test(path)
-  const onDoctorRoute = /^\/(doctor-dashboard|doctor-appointments|doctor-profile)(\/|$)/.test(path)
+  const onDoctorRoute = /^\/(doctor-dashboard|doctor-appointments|doctor-profile|doctor-slots)(\/|$)/.test(path)
 
   let showAdmin = onAdminRoute && !!aToken
   let showDoctor = onDoctorRoute && !!dToken
@@ -56,6 +56,11 @@ const Sidebar = ({ isOpen, onClose }) => {
       icon: Calendar
     },
     {
+      to: '/doctor-slots',
+      label: 'Manage Slots',
+      icon: Clock
+    },
+    {
       to: '/doctor-profile',
       label: 'Profile',
       icon: User
@@ -74,7 +79,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-white border-r border-gray-200 overflow-y-auto transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed lg:sticky top-[61px] left-0 z-40 h-[calc(100vh-61px)] w-64 bg-white border-r border-gray-200 overflow-y-auto transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
         <div className='p-5'>

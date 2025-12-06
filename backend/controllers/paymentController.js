@@ -16,7 +16,7 @@ const razorpayInstance = new Razorpay({
 // Create Razorpay order for appointment booking
 
 const createOrder = catchAsync(async (req, res) => {
-    const { docId, slotDate, slotTime } = req.body;
+    const { docId, slotDate, slotTime, purpose } = req.body;
     const userId = req.user.id;
 
     // Fetch doctor details to get fees
@@ -36,7 +36,7 @@ const createOrder = catchAsync(async (req, res) => {
     }
 
     // Create Razorpay order
-    const amount = doctor.fees * 100; 
+    const amount = doctor.fees * 100;
     const options = {
         amount,
         currency: 'INR',
@@ -46,6 +46,7 @@ const createOrder = catchAsync(async (req, res) => {
             docId,
             slotDate,
             slotTime,
+            purpose: purpose || '',
         },
     };
 
@@ -73,6 +74,7 @@ const verifyPayment = catchAsync(async (req, res) => {
         docId,
         slotDate,
         slotTime,
+        purpose,
     } = req.body;
 
     const userId = req.user.id;
@@ -106,6 +108,7 @@ const verifyPayment = catchAsync(async (req, res) => {
         slotTime,
         slotDate,
         date: Date.now(),
+        purpose: purpose || '',
         razorpayOrderId: razorpay_order_id,
         razorpayPaymentId: razorpay_payment_id,
         razorpaySignature: razorpay_signature,
@@ -117,11 +120,20 @@ const verifyPayment = catchAsync(async (req, res) => {
     await newAppointment.save();
 
     // Update doctor's booked slots
-    await doctorModel.findByIdAndUpdate(docId, {
-        $push: {
-            [`slots_booked.${slotDate}`]: slotTime,
-        },
-    });
+    const doctor = await doctorModel.findById(docId);
+    let slots_booked = doctor.slots_booked || {};
+
+    if (slots_booked[slotDate]) {
+        if (Array.isArray(slots_booked[slotDate])) {
+            slots_booked[slotDate].push(slotTime);
+        } else {
+            slots_booked[slotDate] = [slotTime];
+        }
+    } else {
+        slots_booked[slotDate] = [slotTime];
+    }
+
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
     res.json({
         success: true,

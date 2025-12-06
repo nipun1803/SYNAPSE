@@ -19,6 +19,10 @@ const AllAppointments = () => {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [deleting, setDeleting] = useState(null)
+  const [stats, setStats] = useState({ total: 0, upcoming: 0, completed: 0, cancelled: 0 })
+  const [totalCount, setTotalCount] = useState(0)
+  const [cancelling, setCancelling] = useState(null)
+  const [refunding, setRefunding] = useState(null)
 
   const fetchAppointments = async () => {
     if (!aToken) return
@@ -34,7 +38,7 @@ const AllAppointments = () => {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch appointments:', error)
+      // Error handled silently
     } finally {
       setLoading(false)
     }
@@ -75,7 +79,6 @@ const AllAppointments = () => {
       await cancelAppointment(id)
       await fetchAppointments()
     } catch (error) {
-      console.error(error)
       toast.error('Failed to cancel appointment')
     } finally {
       setCancelling(null)
@@ -102,7 +105,6 @@ const AllAppointments = () => {
         toast.error(data.message || 'Failed to delete appointment')
       }
     } catch (error) {
-      console.error('Delete error:', error)
       toast.error('Failed to delete appointment')
     } finally {
       setDeleting(null)
@@ -129,7 +131,6 @@ const AllAppointments = () => {
         toast.error(data.message || 'Failed to refund appointment')
       }
     } catch (error) {
-      console.error('Refund error:', error)
       toast.error('Failed to refund appointment')
     } finally {
       setRefunding(null)

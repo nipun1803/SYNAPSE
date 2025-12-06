@@ -2,7 +2,6 @@ import doctorModel from "../models/doctormodel.js";
 import appointmentModel from "../models/appointmentmodel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-
 import getCookieOptions from "../utils/cookieUtil.js";
 import catchAsync from "../utils/catchAsync.js";
 
@@ -128,24 +127,82 @@ const appointmentComplete = catchAsync(async (req, res) => {
       paymentStatus: 'completed'
     });
 
-      return res
-        .status(200)
-        .json({ success: true, message: "Appointment Completed" });
-    }
-    res
-      .status(403)
-      .json({ success: false, message: "Unable to complete appointment" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
+    return res
+      .status(200)
+      .json({ success: true, message: "Appointment Completed" });
   }
-};
+
+  res
+    .status(403)
+    .json({ success: false, message: "Unable to complete appointment" });
+});
 
 const doctorList = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({}).select("-password -email");
+    const { page = 1, limit = 6, search, speciality, sort } = req.query;
 
-    res.status(200).json({ success: true, doctors });
+    // Parse pagination parameters
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build query object
+    const query = {};
+
+    // Filter by speciality
+    if (speciality && speciality.trim()) {
+      query.speciality = { $regex: new RegExp(`^${speciality.trim()}$`, 'i') };
+    }
+
+    // Search by name
+    if (search && search.trim()) {
+      query.name = { $regex: search.trim(), $options: 'i' };
+    }
+
+    // Build sort object
+    let sortObj = {};
+    if (sort) {
+      switch (sort) {
+        case 'fees_asc':
+          sortObj.fees = 1;
+          break;
+        case 'fees_desc':
+          sortObj.fees = -1;
+          break;
+        case 'experience_asc':
+          sortObj.experience = 1;
+          break;
+        case 'experience_desc':
+          sortObj.experience = -1;
+          break;
+        default:
+          sortObj._id = 1; // Default sort
+      }
+    } else {
+      sortObj._id = 1; // Default sort
+    }
+
+    // Get total count for pagination
+    const total = await doctorModel.countDocuments(query);
+
+    // Fetch doctors with pagination and sorting
+    const doctors = await doctorModel
+      .find(query)
+      .select("-password -email")
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limitNum);
+
+    res.status(200).json({
+      success: true,
+      doctors,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        pages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: error.message });
@@ -182,24 +239,16 @@ const changeAvailability = catchAsync(async (req, res) => {
     });
   }
 
-    res.status(200).json({
-      success: true,
-      message: `Doctor is now ${
-        doctor.available ? "available" : "unavailable"
+  res.status(200).json({
+    success: true,
+    message: `Doctor is now ${doctor.available ? "available" : "unavailable"
       }`,
-      doctor: {
-        _id: doctor._id,
-        available: doctor.available,
-      },
-    });
-  } catch (error) {
-    console.error("Change availability error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to change availability",
-    });
-  }
-};
+    doctor: {
+      _id: doctor._id,
+      available: doctor.available,
+    },
+  });
+});
 
 // TODO: Add more detailed dashboard analytics
 const doctorDashboard = catchAsync(async (req, res) => {
@@ -258,57 +307,69 @@ const getDoctorAvailableSlots = catchAsync(async (req, res) => {
       .json({ success: false, message: "Doctor not found" });
   }
 
-  let today = new Date();
-  let allSlots = {};
+  // Return both the slots the doctor has opened (available_slots) 
+  // and the slots that are already booked (slots_booked)
+  res.status(200).json({
+    success: true,
+    slots_booked: doctor.slots_booked || {},
+    available_slots: doctor.available_slots || {}
+  });
+});
 
-  for (let i = 0; i < 7; i++) {
-    let currentDate = new Date(today);
-    currentDate.setDate(today.getDate() + i);
+// Get doctor's own available slots configuration
+const getMyAvailableSlots = catchAsync(async (req, res) => {
+  const docId = req.doctor.id;
+  const doctor = await doctorModel.findById(docId);
 
-    let endTime = new Date();
-    endTime.setDate(today.getDate() + i);
-    endTime.setHours(21, 0, 0, 0);
+  if (!doctor) {
+    return res.status(404).json({ success: false, message: "Doctor not found" });
+  }
 
-    if (today.getDate() === currentDate.getDate()) {
-      currentDate.setHours(
-        currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10
-      );
-      currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0);
-    } else {
-      currentDate.setHours(10);
-      currentDate.setMinutes(0);
-    }
+  res.status(200).json({
+    success: true,
+    available_slots: doctor.available_slots || {},
+    slots_booked: doctor.slots_booked || {}
+  });
+});
 
-    let timeSlots = [];
+// Update doctor's available slots (for one week only)
+const updateDoctorSlots = catchAsync(async (req, res) => {
+  const docId = req.doctor.id;
+  const { available_slots } = req.body;
 
-    while (currentDate < endTime) {
-      let formattedTime = currentDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+  if (!available_slots || typeof available_slots !== 'object') {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid slots data"
+    });
+  }
 
-      let day = currentDate.getDate();
-      let month = currentDate.getMonth() + 1;
-      let year = currentDate.getFullYear();
-      let slotDate = `${day}_${month}_${year}`;
+  // Validate that slots are within the next 7 days only
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + 7);
 
-      const isBooked =
-        doctor.slots_booked &&
-        doctor.slots_booked[slotDate] &&
-        doctor.slots_booked[slotDate].includes(formattedTime);
+  const validatedSlots = {};
 
-      if (!isBooked) {
-        timeSlots.push({
-          datetime: new Date(currentDate),
-          time: formattedTime,
-        });
-      }
+  for (const dateKey of Object.keys(available_slots)) {
+    // Parse date key (DD_MM_YYYY format)
+    const [day, month, year] = dateKey.split('_').map(n => parseInt(n, 10));
+    const slotDate = new Date(year, month - 1, day);
 
-      currentDate.setMinutes(currentDate.getMinutes() + 30);
+    // Only allow slots within the next 7 days
+    if (slotDate >= today && slotDate < maxDate) {
+      validatedSlots[dateKey] = available_slots[dateKey];
     }
   }
 
-  res.status(200).json({ success: true, slots_booked: doctor.slots_booked });
+  await doctorModel.findByIdAndUpdate(docId, { available_slots: validatedSlots });
+
+  res.status(200).json({
+    success: true,
+    message: "Slots updated successfully",
+    available_slots: validatedSlots
+  });
 });
 
 export {
@@ -318,10 +379,11 @@ export {
   appointmentCancel,
   appointmentComplete,
   doctorList,
-  getDoctorById,
   changeAvailability,
   doctorDashboard,
   doctorProfile,
   updateDoctorProfile,
   getDoctorAvailableSlots,
+  getMyAvailableSlots,
+  updateDoctorSlots,
 };

@@ -55,12 +55,11 @@ const DoctorAppointments = () => {
     try {
       setActionLoading({ id, type: 'cancel' });
       await cancelAppointment(id);
-      await cancelAppointment(id);
 
       const pagination = await getAppointments(page, itemsPerPage, filter, search);
       if (pagination) setTotalPages(pagination.pages);
     } catch (error) {
-      console.error(error);
+      // Error handled silently
     } finally {
       setActionLoading({ id: null, type: null });
     }
@@ -71,12 +70,11 @@ const DoctorAppointments = () => {
     try {
       setActionLoading({ id, type: 'complete' });
       await completeAppointment(id);
-      await completeAppointment(id);
 
       const pagination = await getAppointments(page, itemsPerPage, filter, search);
       if (pagination) setTotalPages(pagination.pages);
     } catch (error) {
-      console.error(error);
+      // Error handled silently
     } finally {
       setActionLoading({ id: null, type: null });
     }
@@ -103,7 +101,7 @@ const DoctorAppointments = () => {
       </div>
 
 
-      <div className='grid grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
         <Card>
           <CardContent className='p-4'>
             <div className='flex items-center gap-3'>
@@ -217,6 +215,7 @@ const DoctorAppointments = () => {
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Patient</th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Age</th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Date & Time</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Reason for Visit</th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Payment</th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Fee</th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Status</th>
@@ -246,6 +245,11 @@ const DoctorAppointments = () => {
                       <td className='px-6 py-4'>
                         <p className='text-sm font-medium text-gray-900'>{slotDateFormat(item.slotDate)}</p>
                         <p className='text-xs text-gray-500'>{item.slotTime}</p>
+                      </td>
+                      <td className='px-6 py-4'>
+                        <p className='text-sm text-gray-700 max-w-[200px] truncate' title={item.purpose || 'Not specified'}>
+                          {item.purpose ? item.purpose : <span className='text-gray-400 italic'>Not specified</span>}
+                        </p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex flex-col gap-1'>

@@ -12,6 +12,7 @@ const appointmentSchema = new mongoose.Schema({
     cancelled: { type: Boolean, default: false },
     payment: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
+    purpose: { type: String, default: '' },
     // Razorpay payment fields
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },
@@ -31,6 +32,10 @@ const appointmentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'prescription',
         default: null
+    },
+    rescheduleCount: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

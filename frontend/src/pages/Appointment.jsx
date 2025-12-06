@@ -23,6 +23,7 @@ const Appointment = () => {
   const [loadingSlots, setLoadingSlots] = useState(false)
   const [booking, setBooking] = useState(false)
   const [paymentMode, setPaymentMode] = useState('online') // 'online' or 'cash'
+  const [purpose, setPurpose] = useState('')
 
   const toLocalDateInputValue = (d) => {
     const offset = d.getTimezoneOffset()
@@ -37,7 +38,12 @@ const Appointment = () => {
     return toLocalDateInputValue(maxDate)
   }, [])
 
-  const makeSlotDateKey = (date) => `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
+  const makeSlotDateKey = (date) => {
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}_${month}_${year}`
+  }
 
   const isSameDay = (date1, date2) => {
     return date1.getFullYear() === date2.getFullYear() &&
@@ -74,7 +80,7 @@ const Appointment = () => {
     const currentSlot = new Date(startTime)
 
     while (currentSlot < endTime) {
-      const timeStr = currentSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      const timeStr = currentSlot.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
       slots.push({ time: timeStr, disabled: bookedTimes.includes(timeStr) })
       currentSlot.setMinutes(currentSlot.getMinutes() + 30)
     }
@@ -97,26 +103,57 @@ const Appointment = () => {
 
       try {
         const data = await doctorService.getAvailability(docId)
-
         const dateKey = makeSlotDateKey(selectedDate)
-        let bookedTimes = []
 
+        // Get booked slots for the date
+        let bookedTimes = []
         if (data.success && data.slots_booked) {
-          bookedTimes = (data.slots_booked && Array.isArray(data.slots_booked[dateKey]) && data.slots_booked[dateKey]) || []
-        } else {
-          bookedTimes =
-            (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
-            (docInfo.slots_booked && docInfo.slots_booked[dateKey]) || []
+          bookedTimes = Array.isArray(data.slots_booked[dateKey]) ? data.slots_booked[dateKey] : []
         }
 
-        const slots = generateSlotsForDate(selectedDate, bookedTimes)
-        setTimeSlots(slots)
+        // Get available slots the doctor has opened
+        let availableSlots = []
+        if (data.success && data.available_slots && data.available_slots[dateKey]) {
+          availableSlots = Array.isArray(data.available_slots[dateKey]) ? data.available_slots[dateKey] : []
+        }
+
+        // Check if doctor is using the slot management feature (has set slots for any day)
+        const hasManagedSlots = data.success && data.available_slots && Object.keys(data.available_slots).length > 0
+
+        if (hasManagedSlots) {
+          // If managing slots, strictly use what's available (even if empty for this day)
+          // Filter out past slots if selected date is today
+          const now = new Date()
+          const isToday = isSameDay(selectedDate, now)
+
+          const validSlots = availableSlots.filter(time => {
+            if (!isToday) return true
+
+            const [timeStr, period] = time.split(' ')
+            let [hours, minutes] = timeStr.split(':').map(Number)
+
+            if (period === 'PM' && hours !== 12) hours += 12
+            if (period === 'AM' && hours === 12) hours = 0
+
+            const slotTime = new Date(selectedDate)
+            slotTime.setHours(hours, minutes, 0, 0)
+
+            return slotTime > now
+          })
+
+          const slots = validSlots.map(time => ({
+            time,
+            disabled: bookedTimes.includes(time)
+          }))
+          setTimeSlots(slots)
+        } else {
+          // Fallback: generate all slots only if doctor hasn't set ANY slots yet
+          const slots = generateSlotsForDate(selectedDate, bookedTimes)
+          setTimeSlots(slots)
+        }
       } catch (error) {
-        console.error("Error fetching slots", error);
         const dateKey = makeSlotDateKey(selectedDate)
-        const bookedTimes =
-          (docInfo.slots_booked && Array.isArray(docInfo.slots_booked[dateKey]) && docInfo.slots_booked[dateKey]) ||
-          (docInfo.slots_booked && docInfo.slots_booked[dateKey]) || []
+        const bookedTimes = Array.isArray(docInfo.slots_booked?.[dateKey]) ? docInfo.slots_booked[dateKey] : []
         const slots = generateSlotsForDate(selectedDate, bookedTimes)
         setTimeSlots(slots)
       } finally {
@@ -145,7 +182,7 @@ const Appointment = () => {
 
       // If cash payment mode, book directly without payment
       if (paymentMode === 'cash') {
-        const data = await userService.bookAppointment({ docId, slotDate, slotTime, paymentMode: 'cash' })
+        const data = await userService.bookAppointment({ docId, slotDate, slotTime, paymentMode: 'cash', purpose })
 
         if (data.success) {
           toast.success('Appointment booked successfully! Pay at the clinic.')
@@ -163,7 +200,7 @@ const Appointment = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ docId, slotDate, slotTime })
+        body: JSON.stringify({ docId, slotDate, slotTime, purpose })
       })
 
       const orderData = await orderResponse.json()
@@ -195,7 +232,8 @@ const Appointment = () => {
                 razorpay_signature: response.razorpay_signature,
                 docId,
                 slotDate,
-                slotTime
+                slotTime,
+                purpose
               })
             })
 
@@ -368,31 +406,55 @@ const Appointment = () => {
                 <span>Loading available slots...</span>
               </div>
             ) : timeSlots.length === 0 ? (
-              <div className='text-gray-600 p-6 bg-gray-50 rounded-xl border border-gray-200 text-center'>
-                <XCircle className='w-8 h-8 text-gray-400 mx-auto mb-2' />
-                <p>No available slots for this date. Please choose another date.</p>
+              <div className='text-gray-500 p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300 text-center flex flex-col items-center justify-center'>
+                <Clock className='w-10 h-10 text-gray-300 mb-3' />
+                <p className='font-medium text-gray-600'>No slots available for this date</p>
+                <p className='text-sm mt-1'>Please try selecting another date or check back later.</p>
               </div>
             ) : (
-              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'>
+              <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3'>
                 {timeSlots.map((slot, index) => (
-                  <Button
+                  <button
                     key={index}
                     onClick={() => !slot.disabled && setSlotTime(slot.time)}
                     disabled={slot.disabled}
-                    variant={slotTime === slot.time ? 'default' : 'outline'}
-                    className={`h-12 font-medium transition-all ${slot.disabled
-                      ? 'bg-red-100 text-red-400 border-red-200 cursor-not-allowed hover:bg-red-100'
-                      : slotTime === slot.time
-                        ? 'bg-green-600 hover:bg-green-700 text-white border-green-600 shadow-md'
-                        : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
-                      }`}
+                    className={`
+                      relative py-3 px-2 rounded-xl text-sm font-medium transition-all duration-200 border
+                      ${slot.disabled
+                        ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed opacity-60'
+                        : slotTime === slot.time
+                          ? 'bg-primary text-white border-primary shadow-md transform scale-105 z-10'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-primary hover:text-primary hover:shadow-sm'
+                      }
+                    `}
                     title={slot.disabled ? 'Already booked' : 'Click to select'}
                   >
                     {slot.time}
-                  </Button>
+                    {slotTime === slot.time && (
+                      <div className='absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full flex items-center justify-center'>
+                        <div className='w-2 h-2 bg-green-500 rounded-full animate-pulse'></div>
+                      </div>
+                    )}
+                  </button>
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Appointment Purpose/Reason */}
+          <div className='mb-8'>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2'>
+              <Info className='w-5 h-5' />
+              Reason for Visit
+            </h3>
+            <textarea
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+              placeholder='Please describe your symptoms or reason for the appointment (e.g., fever, headache, regular checkup, follow-up visit...)'
+              className='w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors text-gray-900 min-h-[100px] resize-none'
+              maxLength={500}
+            />
+            <p className='text-sm text-gray-500 mt-1'>{purpose.length}/500 characters</p>
           </div>
 
           {/* Payment Mode Selection */}

@@ -7,10 +7,11 @@ import {
   changeAvailability,
   doctorDashboard,
   doctorList,
-  getDoctorById,
   doctorProfile,
   updateDoctorProfile,
-  getDoctorAvailableSlots
+  getDoctorAvailableSlots,
+  getMyAvailableSlots,
+  updateDoctorSlots
 } from '../controllers/doctorController.js';
 import authAdmin from '../middleware/authAdmin.js';
 import authDoctor from '../middleware/authDoctor.js';
@@ -21,6 +22,10 @@ const router = express.Router();
 // Doctor's own profile (must come before /:id routes)
 router.get('/me/profile', authDoctor, doctorProfile);
 router.put('/me/profile', authDoctor, upload.single('image'), updateDoctorProfile);
+
+// Doctor slot management
+router.get('/me/slots', authDoctor, getMyAvailableSlots);
+router.put('/me/slots', authDoctor, updateDoctorSlots);
 
 // Doctor appointments & dashboard
 router.get('/me/appointments', authDoctor, appointmentsDoctor);
@@ -41,8 +46,5 @@ router.get('/', doctorList);
 
 // /api/doctors/:id/available
 router.get('/:id/available', getDoctorAvailableSlots);
-
-//  /api/doctors/:id 
-router.get('/:id', getDoctorById);
 
 export default router;

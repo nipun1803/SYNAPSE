@@ -246,20 +246,20 @@ const updateProfile = catchAsync(async (req, res) => {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
-    const { name, phone, address, dob, gender } = req.body || {};
-    const imageFile = req.file;
-    if (!name || !phone || !gender) {
-      return res.status(400).json({ success: false, message: "Data Missing" });
-    }
+  const { name, phone, address, dob, gender } = req.body || {};
+  const imageFile = req.file;
+  if (!name || !phone || !gender) {
+    return res.status(400).json({ success: false, message: "Data Missing" });
+  }
 
-    const parsedAddress =
-      typeof address === "string" ? JSON.parse(address) : address;
-    const update = { name, phone, gender };
-    if (parsedAddress) update.address = parsedAddress;
-    if (dob) {
-      const d = new Date(dob);
-      update.dob = isNaN(d.getTime()) ? null : d;
-    }
+  const parsedAddress =
+    typeof address === "string" ? JSON.parse(address) : address;
+  const update = { name, phone, gender };
+  if (parsedAddress) update.address = parsedAddress;
+  if (dob) {
+    const d = new Date(dob);
+    update.dob = isNaN(d.getTime()) ? null : d;
+  }
 
   await userModel.findByIdAndUpdate(userId, update);
 
@@ -274,7 +274,7 @@ const updateProfile = catchAsync(async (req, res) => {
 
 const bookAppointment = catchAsync(async (req, res) => {
   const userId = req.user?.id;
-  const { docId, slotDate, slotTime, paymentMode } = req.body || {};
+  const { docId, slotDate, slotTime, paymentMode, purpose } = req.body || {};
 
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -349,6 +349,7 @@ const bookAppointment = catchAsync(async (req, res) => {
       slotTime,
       slotDate,
       date: Date.now(),
+      purpose: purpose || '',
       payment: false, // Cash payment - not paid yet
       paymentStatus: "pending",
     });
@@ -487,6 +488,14 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
     });
   }
 
+  // Check reschedule limit - only one reschedule allowed
+  if (appointment.rescheduleCount >= 1) {
+    return res.status(400).json({
+      success: false,
+      message: "Appointment can only be rescheduled once",
+    });
+  }
+
   const { docId, slotDate: oldSlotDate, slotTime: oldSlotTime } = appointment;
   const doctorData = await doctorModel.findById(docId);
 
@@ -523,10 +532,12 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
   }
   await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
+  // Update appointment with new slot and increment reschedule count
   await appointmentModel.findByIdAndUpdate(appointmentId, {
     slotDate,
     slotTime,
     date: Date.now(),
+    $inc: { rescheduleCount: 1 }
   });
 
   const updated = await appointmentModel.findById(appointmentId).lean();
@@ -599,12 +610,8 @@ const getAppointmentById = catchAsync(async (req, res) => {
     });
   }
 
-    res.status(200).json({ success: true, appointment });
-  } catch (error) {
-    console.log("getAppointmentById error:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+  res.status(200).json({ success: true, appointment });
+});
 
 export {
   loginUser,
@@ -618,6 +625,4 @@ export {
   cancelAppointment,
   rescheduleAppointment,
   getAppointmentById,
-  deleteAccount,
-  deleteAppointment,
 };
