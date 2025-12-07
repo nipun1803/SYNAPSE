@@ -143,7 +143,7 @@ const ChatPage = () => {
     if (!currentAppointment) return null;
 
     return (
-        <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white">
             {/* Header */}
             <div className="bg-white dark:bg-gray-800 px-4 sm:px-6 py-3 shadow-md border-b border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center max-w-6xl mx-auto">
@@ -213,7 +213,7 @@ const ChatPage = () => {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 bg-gray-100 dark:bg-gray-700 border-0 rounded-full px-5 py-3 text-sm focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-gray-600 dark:text-white transition-all outline-none placeholder:text-gray-400 dark:placeholder:text-gray-400"
+                        className="flex-1 bg-gray-100 dark:bg-gray-700 border-0 rounded-full px-5 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-gray-600 dark:text-white transition-all outline-none placeholder:text-gray-400 dark:placeholder:text-gray-400"
                     />
                     <button
                         type="submit"
