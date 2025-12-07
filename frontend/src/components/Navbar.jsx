@@ -73,6 +73,22 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", closeOnScroll);
   }, []);
 
+  /* Dark Mode Logic */
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' ||
+      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
+
   const updateImg = (img) => {
     try {
       if (!img) return setProfileImg(null);
@@ -96,7 +112,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+    <div className="sticky top-0 z-40 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 shadow-sm transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-between h-16">
 
@@ -104,7 +120,7 @@ const Navbar = () => {
           <div className="relative overflow-hidden group cursor-pointer">
             <img
               src={assets.logo}
-              className="w-36 md:w-44 transition group-hover:brightness-110"
+              className="w-36 md:w-44 transition group-hover:brightness-110 dark:invert dark:brightness-200"
               onClick={() => navigate("/")}
             />
             <div className="shimmer-overlay" />
@@ -118,8 +134,8 @@ const Navbar = () => {
                 to={to}
                 className={({ isActive }) =>
                   `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${isActive
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                   }`
                 }
               >
@@ -131,6 +147,21 @@ const Navbar = () => {
 
           {/* RIGHT SECTION */}
           <div className="flex items-center gap-3">
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
+            >
+              {darkMode ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 24.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
 
             {loading && (
               <div className="hidden md:block w-24 h-9 rounded-full shimmer-bg animate-shimmer" />
@@ -150,7 +181,7 @@ const Navbar = () => {
                 ref={dropdownRef}
               >
                 <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 cursor-pointer pt-3 pb-3"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer pt-3 pb-3"
                 >
                   {profileImg ? (
                     <img
@@ -163,20 +194,19 @@ const Navbar = () => {
                       {getInitials(user?.name)}
                     </div>
                   )}
-                  <span className="text-sm text-gray-700 hidden xl:block">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 hidden xl:block">
                     Hey, {user?.name?.split(" ")[0]}!
                   </span>
-                  <ChevronDown size={16} className="text-gray-500" />
+                  <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" />
                 </div>
 
-                {/* DROPDOWN */}
                 <div
-                  className={`absolute right-0 top-full mt-3 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl transition-all duration-200 transform ${dropdownOpen
+                  className={`absolute right-0 top-full mt-3 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl transition-all duration-200 transform ${dropdownOpen
                     ? "opacity-100 visible translate-y-0"
                     : "opacity-0 invisible -translate-y-2"
                     }`}
                 >
-                  <div className="p-4 border-b bg-gray-50">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-2xl">
                     <div className="flex items-center gap-3">
                       {profileImg ? (
                         <img
@@ -189,8 +219,8 @@ const Navbar = () => {
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-semibold">{user?.name}</p>
-                        <p className="text-xs text-gray-500">{user?.email}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
                       </div>
                     </div>
                   </div>
@@ -201,7 +231,7 @@ const Navbar = () => {
                       <button
                         key={to}
                         onClick={() => navigate(to)}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
                       >
                         <Icon size={16} />
                         {label}
@@ -211,7 +241,7 @@ const Navbar = () => {
 
                   <button
                     onClick={logout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-2xl"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-b-2xl"
                   >
                     <LogOut size={16} />
                     Sign Out
@@ -243,21 +273,21 @@ const Navbar = () => {
 
       {/* MOBILE MENU (FULLY OPAQUE NOW) */}
       <div
-        className={`md:hidden fixed inset-0 bg-white z-50 transition duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
+        className={`md:hidden fixed inset-0 bg-white dark:bg-gray-950 z-50 transition duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
         {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
-          <img src={assets.logo} className="w-36" />
-          <button onClick={() => setMenuOpen(false)} className="p-2 rounded hover:bg-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+          <img src={assets.logo} className="w-36 dark:invert dark:brightness-200" />
+          <button onClick={() => setMenuOpen(false)} className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
             <X size={24} />
           </button>
         </div>
 
         {/* CONTENT */}
-        <nav className="px-6 py-6 overflow-y-auto h-[calc(100vh-72px)] bg-white">
+        <nav className="px-6 py-6 overflow-y-auto h-[calc(100vh-72px)] bg-white dark:bg-gray-950">
           {isLoggedIn && (
-            <div className="mb-6 p-4 bg-blue-50/80 rounded-xl border border-blue-100">
+            <div className="mb-6 p-4 bg-blue-50/80 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
               <div className="flex items-center gap-3">
                 {profileImg ? (
                   <img src={profileImg} className="w-14 h-14 rounded-full object-cover border" />
@@ -267,8 +297,8 @@ const Navbar = () => {
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-blue-600">Welcome back,</p>
-                  <p className="font-semibold text-gray-900">{user?.name}</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">Welcome back,</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{user?.name}</p>
                 </div>
               </div>
             </div>
@@ -284,7 +314,7 @@ const Navbar = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium ${isActive
                     ? "bg-blue-600 text-white shadow"
-                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                    : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`
                 }
               >
@@ -297,7 +327,7 @@ const Navbar = () => {
           {/* USER ACTIONS */}
           {isLoggedIn ? (
             <>
-              <div className="my-5 border-t"></div>
+              <div className="my-5 border-t border-gray-200 dark:border-gray-700"></div>
 
               {[["/my-profile", "My Profile", UserCircle],
               ["/my-appointments", "My Appointments", Calendar]].map(
@@ -306,7 +336,7 @@ const Navbar = () => {
                     key={to}
                     to={to}
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 hover:bg-gray-100"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-2"
                   >
                     <Icon size={20} />
                     {label}
@@ -319,7 +349,7 @@ const Navbar = () => {
                   logout();
                   setMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 bg-red-50 hover:bg-red-100"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
               >
                 <LogOut size={20} />
                 Sign Out

@@ -161,11 +161,11 @@ const MyProfile = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8'>
+    <div className='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8'>
       <div className='max-w-3xl mx-auto px-4'>
 
         {/* Header Card */}
-        <div className='bg-white rounded-2xl shadow-lg overflow-hidden mb-6'>
+        <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden mb-6'>
           <div className='h-28 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600'></div>
 
           <div className='px-6 pb-6'>
@@ -202,8 +202,8 @@ const MyProfile = () => {
 
               {/* Name & Email */}
               <div className='flex-1 pt-2 sm:pt-0'>
-                <h1 className='text-2xl font-bold text-gray-900'>{userData.name}</h1>
-                <p className='text-gray-500 text-sm mt-0.5'>{userData.email}</p>
+                <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>{userData.name}</h1>
+                <p className='text-gray-500 dark:text-gray-400 text-sm mt-0.5'>{userData.email}</p>
               </div>
 
               {/* Edit Button */}
@@ -220,17 +220,17 @@ const MyProfile = () => {
         </div>
 
         {/* Personal Information Card */}
-        <div className='bg-white rounded-2xl shadow-lg p-6'>
-          <div className='flex items-center justify-between mb-6 pb-4 border-b'>
-            <h2 className='text-lg font-semibold text-gray-900'>Personal Information</h2>
-            {isEdit && <span className='text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded'>* Required fields</span>}
+        <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6'>
+          <div className='flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700'>
+            <h2 className='text-lg font-semibold text-gray-900 dark:text-white'>Personal Information</h2>
+            {isEdit && <span className='text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded'>* Required fields</span>}
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
 
             {/* Full Name */}
             <div>
-              <label className='block text-sm font-medium text-gray-600 mb-1.5'>
+              <label className='block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5'>
                 Full Name {isEdit && <span className='text-red-500'>*</span>}
               </label>
               {isEdit ? (
@@ -238,24 +238,24 @@ const MyProfile = () => {
                   type='text'
                   value={userData.name}
                   onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-                  className='w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm'
+                  className='w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                   placeholder='Enter your full name'
                 />
               ) : (
-                <p className='text-gray-900 py-2'>{userData.name}</p>
+                <p className='text-gray-900 dark:text-white py-2'>{userData.name}</p>
               )}
             </div>
 
             {/* Email */}
             <div>
-              <label className='block text-sm font-medium text-gray-600 mb-1.5'>Email Address</label>
-              <p className='text-gray-500 py-2 text-sm'>{userData.email}</p>
-              {isEdit && <p className='text-xs text-gray-400 mt-0.5'>Email cannot be changed</p>}
+              <label className='block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5'>Email Address</label>
+              <p className='text-gray-500 dark:text-gray-400 py-2 text-sm'>{userData.email}</p>
+              {isEdit && <p className='text-xs text-gray-400 dark:text-gray-500 mt-0.5'>Email cannot be changed</p>}
             </div>
 
             {/* Phone */}
             <div>
-              <label className='block text-sm font-medium text-gray-600 mb-1.5'>
+              <label className='block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5'>
                 Phone Number {isEdit && <span className='text-red-500'>*</span>}
               </label>
               {isEdit ? (
@@ -263,24 +263,24 @@ const MyProfile = () => {
                   type='tel'
                   value={userData.phone}
                   onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
-                  className='w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm'
+                  className='w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                   placeholder='Enter phone number'
                 />
               ) : (
-                <p className='text-gray-900 py-2'>{userData.phone || '-'}</p>
+                <p className='text-gray-900 dark:text-white py-2'>{userData.phone || '-'}</p>
               )}
             </div>
 
             {/* Gender */}
             <div>
-              <label className='block text-sm font-medium text-gray-600 mb-1.5'>
+              <label className='block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5'>
                 Gender {isEdit && <span className='text-red-500'>*</span>}
               </label>
               {isEdit ? (
                 <select
                   value={userData.gender}
                   onChange={(e) => setUserData({ ...userData, gender: e.target.value })}
-                  className='w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white'
+                  className='w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                 >
                   <option value=''>Select Gender</option>
                   <option value='Male'>Male</option>
@@ -288,23 +288,23 @@ const MyProfile = () => {
                   <option value='Other'>Other</option>
                 </select>
               ) : (
-                <p className='text-gray-900 py-2'>{userData.gender || '-'}</p>
+                <p className='text-gray-900 dark:text-white py-2'>{userData.gender || '-'}</p>
               )}
             </div>
 
             {/* Date of Birth */}
             <div>
-              <label className='block text-sm font-medium text-gray-600 mb-1.5'>Date of Birth</label>
+              <label className='block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5'>Date of Birth</label>
               {isEdit ? (
                 <input
                   type='date'
                   value={userData.dob ? userData.dob.split('T')[0] : ''}
                   onChange={(e) => setUserData({ ...userData, dob: e.target.value })}
                   max={new Date().toISOString().split('T')[0]}
-                  className='w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm'
+                  className='w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                 />
               ) : (
-                <p className='text-gray-900 py-2'>
+                <p className='text-gray-900 dark:text-white py-2'>
                   {userData.dob ? new Date(userData.dob).toLocaleDateString('en-US', {
                     year: 'numeric', month: 'long', day: 'numeric'
                   }) : '-'}
@@ -314,7 +314,7 @@ const MyProfile = () => {
 
             {/* Weight */}
             <div>
-              <label className='block text-sm font-medium text-gray-600 mb-1.5'>Weight (kg)</label>
+              <label className='block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5'>Weight (kg)</label>
               {isEdit ? (
                 <input
                   type='number'
@@ -322,17 +322,17 @@ const MyProfile = () => {
                   onChange={(e) => setUserData({ ...userData, weight: e.target.value })}
                   min='1'
                   max='500'
-                  className='w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm'
+                  className='w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                   placeholder='Enter weight in kg'
                 />
               ) : (
-                <p className='text-gray-900 py-2'>{userData.weight ? `${userData.weight} kg` : '-'}</p>
+                <p className='text-gray-900 dark:text-white py-2'>{userData.weight ? `${userData.weight} kg` : '-'}</p>
               )}
             </div>
 
             {/* Address - Full Width */}
             <div className='md:col-span-2'>
-              <label className='block text-sm font-medium text-gray-600 mb-1.5'>Address</label>
+              <label className='block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5'>Address</label>
               {isEdit ? (
                 <div className='space-y-3'>
                   <input
@@ -340,18 +340,18 @@ const MyProfile = () => {
                     placeholder='Address Line 1'
                     value={userData.address.line1}
                     onChange={(e) => setUserData({ ...userData, address: { ...userData.address, line1: e.target.value } })}
-                    className='w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm'
+                    className='w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                   />
                   <input
                     type='text'
                     placeholder='Address Line 2 (Optional)'
                     value={userData.address.line2}
                     onChange={(e) => setUserData({ ...userData, address: { ...userData.address, line2: e.target.value } })}
-                    className='w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm'
+                    className='w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
                   />
                 </div>
               ) : (
-                <p className='text-gray-900 py-2'>
+                <p className='text-gray-900 dark:text-white py-2'>
                   {[userData.address.line1, userData.address.line2].filter(Boolean).join(', ') || '-'}
                 </p>
               )}
@@ -360,7 +360,7 @@ const MyProfile = () => {
 
           {/* Action Buttons */}
           {isEdit && (
-            <div className='flex gap-3 mt-8 pt-6 border-t'>
+            <div className='flex gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700'>
               <button
                 onClick={onSave}
                 disabled={saving}
@@ -379,7 +379,7 @@ const MyProfile = () => {
               <button
                 onClick={handleCancel}
                 disabled={saving}
-                className='px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50'
+                className='px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50'
               >
                 Cancel
               </button>
@@ -388,7 +388,7 @@ const MyProfile = () => {
 
           {/* Delete Account */}
           {!isEdit && (
-            <div className='mt-8 pt-6 border-t border-gray-100'>
+            <div className='mt-8 pt-6 border-t border-gray-100 dark:border-gray-700'>
               <button
                 onClick={handleDeleteAccount}
                 className='text-red-500 hover:text-red-600 text-sm font-medium flex items-center gap-2 transition-colors'

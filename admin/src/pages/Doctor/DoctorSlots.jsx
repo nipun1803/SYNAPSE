@@ -226,51 +226,51 @@ const DoctorSlots = () => {
     return (
         <div className='max-w-7xl mx-auto p-4 sm:p-6'>
             <div className='mb-6'>
-                <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>Manage Available Slots</h1>
-                <p className='text-gray-600 mt-1'>Set your availability for the next 7 days. Patients will only see slots you've opened.</p>
+                <h1 className='text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white'>Manage Available Slots</h1>
+                <p className='text-gray-600 dark:text-gray-400 mt-1'>Set your availability for the next 7 days. Patients will only see slots you've opened.</p>
             </div>
 
             {/* Legend */}
-            <div className='flex flex-wrap gap-6 mb-8 p-6 bg-white border border-gray-100 shadow-sm rounded-xl'>
+            <div className='flex flex-wrap gap-6 mb-8 p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm rounded-xl'>
                 <div className='flex items-center gap-3'>
                     <div className='w-5 h-5 bg-green-600 rounded-md shadow-sm'></div>
-                    <span className='text-sm font-medium text-gray-700'>Available</span>
+                    <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>Available</span>
                 </div>
                 <div className='flex items-center gap-3'>
-                    <div className='w-5 h-5 bg-white border border-gray-200 rounded-md'></div>
-                    <span className='text-sm font-medium text-gray-700'>Not Available</span>
+                    <div className='w-5 h-5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md'></div>
+                    <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>Not Available</span>
                 </div>
                 <div className='flex items-center gap-3'>
-                    <div className='w-5 h-5 bg-red-50 border border-red-100 rounded-md flex items-center justify-center'>
+                    <div className='w-5 h-5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-md flex items-center justify-center'>
                         <div className='w-2 h-2 bg-red-400 rounded-full'></div>
                     </div>
-                    <span className='text-sm font-medium text-gray-700'>Booked</span>
+                    <span className='text-sm font-medium text-gray-700 dark:text-gray-300'>Booked</span>
                 </div>
                 <div className='flex items-center gap-3'>
-                    <div className='w-5 h-5 bg-gray-100 border border-gray-200 rounded-md opacity-60'></div>
-                    <span className='text-sm font-medium text-gray-500'>Time Passed</span>
+                    <div className='w-5 h-5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md opacity-60'></div>
+                    <span className='text-sm font-medium text-gray-500 dark:text-gray-400'>Time Passed</span>
                 </div>
             </div>
 
             <div className='grid gap-6 pb-24'>
                 {weekDates.map((dateInfo) => (
-                    <Card key={dateInfo.key} className='border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200'>
+                    <Card key={dateInfo.key} className='border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800'>
                         <CardContent className='p-6'>
                             <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6'>
                                 <div className='flex items-center gap-4'>
-                                    <div className='w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center'>
-                                        <Calendar className='w-6 h-6 text-blue-600' />
+                                    <div className='w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center'>
+                                        <Calendar className='w-6 h-6 text-blue-600 dark:text-blue-400' />
                                     </div>
                                     <div>
-                                        <h3 className='text-lg font-bold text-gray-900'>{dateInfo.dayName}</h3>
-                                        <p className='text-sm font-medium text-gray-500'>{dateInfo.display}</p>
+                                        <h3 className='text-lg font-bold text-gray-900 dark:text-white'>{dateInfo.dayName}</h3>
+                                        <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>{dateInfo.display}</p>
                                     </div>
                                 </div>
                                 <Button
                                     variant='outline'
                                     size='sm'
                                     onClick={() => toggleAllDay(dateInfo)}
-                                    className='border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors'
+                                    className='border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-300 transition-colors'
                                 >
                                     Toggle All Slots
                                 </Button>
@@ -290,12 +290,12 @@ const DoctorSlots = () => {
                                             className={`
                                                 relative px-1 py-3 text-xs font-semibold rounded-xl border transition-all duration-200 flex items-center justify-center
                                                 ${isPast
-                                                    ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed opacity-50'
+                                                    ? 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 border-gray-100 dark:border-gray-700 cursor-not-allowed opacity-50'
                                                     : isBooked
-                                                        ? 'bg-red-50 text-red-400 border-red-100 cursor-not-allowed'
+                                                        ? 'bg-red-50 dark:bg-red-900/20 text-red-400 dark:text-red-400 border-red-100 dark:border-red-900/30 cursor-not-allowed'
                                                         : isAvailable
                                                             ? 'bg-green-600 text-white border-green-600 shadow-md transform scale-105 z-10'
-                                                            : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400 hover:text-blue-600 hover:shadow-sm'
+                                                            : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-sm'
                                                 }
                                             `}
                                             title={isPast ? 'Time has passed' : isBooked ? 'Already booked by patient' : isAvailable ? 'Click to remove' : 'Click to add'}

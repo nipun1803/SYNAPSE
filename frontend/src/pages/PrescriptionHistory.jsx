@@ -85,15 +85,15 @@ const PrescriptionHistory = () => {
     return (
         <div className="max-w-6xl mx-auto p-6">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">My Prescriptions</h1>
-                <p className="text-gray-600">View and download your prescription history</p>
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">My Prescriptions</h1>
+                <p className="text-gray-600 dark:text-gray-400">View and download your prescription history</p>
             </div>
 
             {prescriptions.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg shadow">
-                    <FileText size={64} className="mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">No Prescriptions Found</h3>
-                    <p className="text-gray-500">You don't have any prescriptions yet.</p>
+                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <FileText size={64} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">No Prescriptions Found</h3>
+                    <p className="text-gray-500 dark:text-gray-400">You don't have any prescriptions yet.</p>
                 </div>
             ) : (
                 <div className="grid gap-6">
@@ -101,16 +101,16 @@ const PrescriptionHistory = () => {
                         <div
                             key={prescription._id}
                             id={`prescription-${prescription._id}`}
-                            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-100"
+                            className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-700"
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="text-xl font-bold text-gray-800">Prescription #{prescription.prescriptionNumber}</h3>
+                                        <h3 className="text-xl font-bold text-gray-800 dark:text-white">Prescription #{prescription.prescriptionNumber}</h3>
                                         {getStatusBadge(prescription.status)}
                                     </div>
 
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600 mt-3">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400 mt-3">
                                         <div className="flex items-center gap-2">
                                             <User size={16} className="text-blue-600" />
                                             <span>Dr. {prescription.doctorId?.name}</span>
@@ -140,32 +140,32 @@ const PrescriptionHistory = () => {
                                     <div className="mt-6 pt-6 border-t">
                                         {/* Diagnosis */}
                                         <div className="mb-6">
-                                            <h4 className="font-semibold text-gray-700 mb-2 text-lg">Diagnosis</h4>
-                                            <p className="text-gray-600 bg-gray-50 p-3 rounded-lg">{prescription.diagnosis}</p>
+                                            <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-lg">Diagnosis</h4>
+                                            <p className="text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700">{prescription.diagnosis}</p>
                                         </div>
 
                                         {/* Medications */}
                                         <div className="mb-6">
-                                            <h4 className="font-semibold text-gray-700 mb-3 text-lg">Medications</h4>
-                                            <div className="overflow-x-auto">
+                                            <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3 text-lg">Medications</h4>
+                                            <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
                                                 <table className="w-full">
-                                                    <thead className="bg-gray-100">
+                                                    <thead className="bg-gray-100 dark:bg-gray-700">
                                                         <tr>
-                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Drug Name</th>
-                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Dosage</th>
-                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Frequency</th>
-                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Duration</th>
-                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Instructions</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Drug Name</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Dosage</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Frequency</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Duration</th>
+                                                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Instructions</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="divide-y divide-gray-200">
+                                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                                                         {prescription.medications.map((med, index) => (
-                                                            <tr key={index} className="hover:bg-gray-50">
-                                                                <td className="px-4 py-3 text-gray-800 font-medium">{med.drugName}</td>
-                                                                <td className="px-4 py-3 text-gray-600">{med.dosage}</td>
-                                                                <td className="px-4 py-3 text-gray-600">{med.frequency}</td>
-                                                                <td className="px-4 py-3 text-gray-600">{med.duration}</td>
-                                                                <td className="px-4 py-3 text-gray-600">{med.instructions || '-'}</td>
+                                                            <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                                <td className="px-4 py-3 text-gray-800 dark:text-gray-200 font-medium">{med.drugName}</td>
+                                                                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{med.dosage}</td>
+                                                                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{med.frequency}</td>
+                                                                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{med.duration}</td>
+                                                                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{med.instructions || '-'}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
@@ -176,8 +176,8 @@ const PrescriptionHistory = () => {
                                         {/* Notes */}
                                         {prescription.notes && (
                                             <div className="mb-6">
-                                                <h4 className="font-semibold text-gray-700 mb-2 text-lg">Additional Notes</h4>
-                                                <p className="text-gray-600 bg-gray-50 p-3 rounded-lg">{prescription.notes}</p>
+                                                <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-lg">Additional Notes</h4>
+                                                <p className="text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700">{prescription.notes}</p>
                                             </div>
                                         )}
 
@@ -189,7 +189,7 @@ const PrescriptionHistory = () => {
                                             </button>
                                             <Link
                                                 to={`/my-appointments`}
-                                                className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                                                className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                             >
                                                 View Appointments
                                             </Link>

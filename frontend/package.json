@@ -30,6 +30,7 @@
     "react-shimmer-effects": "^1.0.4",
     "react-toastify": "^10.0.6",
     "shadcn-ui": "^0.9.5",
+    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.1.12"

@@ -8,7 +8,7 @@ const AdminContextProvider = ({ children }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
   const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || "http://localhost:5173/unified-login";
 
-  const [aToken, setAToken] = useState(null);
+  const [aToken, setAToken] = useState(localStorage.getItem('aToken') || null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -48,13 +48,19 @@ const AdminContextProvider = ({ children }) => {
       setCheckingAuth(true);
       const { data } = await api.get(`/api/admin/dashboard`);
       if (data?.success) {
-        setAToken(true);
+        // If API succeeds, it means cookie token is valid.
+        // We set aToken to true so the app knows we are logged in.
+        if (!aToken) {
+          setAToken(true);
+        }
       } else {
         setAToken(null);
+        localStorage.removeItem('aToken');
       }
     } catch (err) {
-      toast.error('Admin auth check failed');
-      setAToken(null);
+      // If 401, interceptor handles it. For other errors, maybe don't kill session immediately?
+      // But if dashboard fails, safe to assume auth issue or server down.
+      // console.error(err); 
     } finally {
       setCheckingAuth(false);
     }
@@ -170,6 +176,35 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
+  const [users, setUsers] = useState([]);
+
+  const getAllUsersList = async () => {
+    try {
+      const { data } = await api.get('/api/admin/users');
+      if (data?.success) {
+        setUsers(data.users);
+      } else {
+        toast.error(data?.message || "Failed to fetch users");
+      }
+    } catch (err) {
+      toast.error('Failed to load users');
+    }
+  };
+
+  const changeUserStatus = async (userId) => {
+    try {
+      const { data } = await api.patch(`/api/admin/users/${userId}/block`);
+      if (data?.success) {
+        toast.success(data.message);
+        getAllUsersList();
+      } else {
+        toast.error(data?.message || "Failed to update user status");
+      }
+    } catch (err) {
+      toast.error('Failed to update user status');
+    }
+  };
+
   const value = {
     aToken,
     setAToken,
@@ -185,6 +220,9 @@ const AdminContextProvider = ({ children }) => {
     dashData,
     getDashData,
     logoutAdmin,
+    users,
+    getAllUsers: getAllUsersList,
+    changeUserStatus
   };
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

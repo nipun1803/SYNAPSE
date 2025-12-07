@@ -9,7 +9,7 @@ const AppContextProvider = ({ children }) => {
 
   const [doctors, setDoctors] = useState([])
   const [userData, setUserData] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [doctorsLoading, setDoctorsLoading] = useState(true)
 
   // Fetch doctors list - currently fetches every time

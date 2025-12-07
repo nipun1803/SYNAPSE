@@ -119,10 +119,10 @@ const UnifiedLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 font-sans text-slate-800">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 font-sans text-slate-800 dark:text-gray-100">
 
 
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 lg:gap-8 overflow-hidden rounded-3xl shadow-2xl bg-white border border-blue-100">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 lg:gap-8 overflow-hidden rounded-3xl shadow-2xl bg-white dark:bg-gray-800 border border-blue-100 dark:border-gray-700">
 
 
         <div className="hidden lg:flex flex-col relative text-white">
@@ -166,24 +166,24 @@ const UnifiedLogin = () => {
           </div>
         </div>
 
-        <div className="flex flex-col justify-center p-8 lg:p-16 bg-white relative">
+        <div className="flex flex-col justify-center p-8 lg:p-16 bg-white dark:bg-gray-800 relative">
           <div className="max-w-[400px] mx-auto w-full space-y-8">
 
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {authMode === "login" ? "Welcome Back" : "Join Synapse"}
               </h1>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 dark:text-gray-400">
                 {authMode === "login"
                   ? "Sign in to access your portal."
                   : "Create an account to manage your health."}
               </p>
             </div>
             <Tabs value={userRole} onValueChange={setUserRole} className="w-full">
-              <TabsList className="w-full grid grid-cols-3 bg-blue-50/80 p-1.5 rounded-xl h-12 border border-blue-100/50">
-                <TabsTrigger value="user" className="rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">Patient</TabsTrigger>
-                <TabsTrigger value="doctor" className="rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">Doctor</TabsTrigger>
-                <TabsTrigger value="admin" className="rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">Admin</TabsTrigger>
+              <TabsList className="w-full grid grid-cols-3 bg-blue-50/80 dark:bg-gray-700 p-1.5 rounded-xl h-12 border border-blue-100/50 dark:border-gray-600">
+                <TabsTrigger value="user" className="rounded-lg text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm transition-all text-gray-600 dark:text-gray-300">Patient</TabsTrigger>
+                <TabsTrigger value="doctor" className="rounded-lg text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm transition-all text-gray-600 dark:text-gray-300">Doctor</TabsTrigger>
+                <TabsTrigger value="admin" className="rounded-lg text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-300 data-[state=active]:shadow-sm transition-all text-gray-600 dark:text-gray-300">Admin</TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -201,7 +201,7 @@ const UnifiedLogin = () => {
                             <User className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
                             <Input
                               placeholder="Full Name"
-                              className="pl-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
+                              className="pl-10 h-11 border-blue-100 dark:border-gray-600 bg-blue-50/20 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-400 dark:focus:border-blue-500 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400"
                               {...field}
                             />
                           </div>
@@ -222,7 +222,7 @@ const UnifiedLogin = () => {
                           <Mail className="absolute left-3 top-3.5 h-4 w-4 text-blue-400" />
                           <Input
                             placeholder="Email Address"
-                            className="pl-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
+                            className="pl-10 h-11 border-blue-100 dark:border-gray-600 bg-blue-50/20 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-400 dark:focus:border-blue-500 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400"
                             {...field}
                           />
                         </div>
@@ -243,7 +243,7 @@ const UnifiedLogin = () => {
                           <Input
                             type={showPassword ? "text" : "password"}
                             placeholder="Password"
-                            className="pl-10 pr-10 h-11 border-blue-100 bg-blue-50/20 focus:bg-white focus:border-blue-400 rounded-xl"
+                            className="pl-10 pr-10 h-11 border-blue-100 dark:border-gray-600 bg-blue-50/20 dark:bg-gray-700/50 focus:bg-white dark:focus:bg-gray-700 focus:border-blue-400 dark:focus:border-blue-500 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400"
                             {...field}
                           />
                           <button
@@ -272,18 +272,18 @@ const UnifiedLogin = () => {
 
 
             {authMode === 'login' && (
-              <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mt-4 transition-all">
+              <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 mt-4 transition-all">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-blue-700 flex items-center gap-2">
+                  <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-2">
                     <Sparkles size={14} className="text-blue-500" />
                     Demo Access
                   </p>
-                  <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Test Mode</span>
+                  <span className="text-[10px] bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">Test Mode</span>
                 </div>
                 <Button
                   variant="outline"
                   onClick={fillDemo}
-                  className="w-full h-9 bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium"
+                  className="w-full h-9 bg-white dark:bg-gray-700 border-blue-200 dark:border-gray-600 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-700 dark:hover:text-blue-200 text-xs font-medium"
                 >
                   Auto-Fill {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Credentials
                 </Button>
@@ -291,11 +291,11 @@ const UnifiedLogin = () => {
             )}
 
             <div className="text-center pt-2">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-gray-400">
                 {authMode === "login" ? "New to Synapse?" : "Already have an account?"}{" "}
                 <button
                   onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}
-                  className="text-blue-600 font-bold hover:text-blue-700 hover:underline transition-all"
+                  className="text-blue-600 dark:text-blue-400 font-bold hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-all"
                 >
                   {authMode === "login" ? "Create an account" : "Log in"}
                 </button>

@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Info, CreditCard } from 'lucide-react'
-import { doctorService, userService } from '../api/services'
+import { doctorService, reviewService, userService } from '../api/services'
 
 const Appointment = () => {
   const { docId } = useParams()
+
   const navigate = useNavigate()
   const { doctors, currencySymbol, backendUrl, refreshDoctors, userData } = useContext(AppContext)
 
@@ -21,6 +22,10 @@ const Appointment = () => {
   const [timeSlots, setTimeSlots] = useState([])
   const [slotTime, setSlotTime] = useState('')
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [reviews, setReviews] = useState([])
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
   const [booking, setBooking] = useState(false)
   const [paymentMode, setPaymentMode] = useState('online') // 'online' or 'cash'
   const [purpose, setPurpose] = useState('')
@@ -93,6 +98,52 @@ const Appointment = () => {
     setDocInfo(foundDoctor || null)
     setLoadingDoc(false)
   }, [doctors, docId])
+
+  const fetchReviews = async () => {
+    try {
+      const data = await reviewService.getReviews(docId)
+      if (data.success) {
+        setReviews(data.reviews)
+      }
+    } catch (error) {
+      console.error('Failed to load reviews')
+    }
+  }
+
+  const handleAddReview = async () => {
+    if (!reviewComment.trim()) {
+      toast.error('Please enter a comment')
+      return
+    }
+
+    try {
+      setSubmittingReview(true)
+      const data = await reviewService.addReview({
+        docId,
+        rating: reviewRating,
+        comment: reviewComment
+      })
+
+      if (data.success) {
+        toast.success('Review added successfully')
+        setReviewComment('')
+        setReviewRating(5)
+        fetchReviews()
+        // Refresh doctor info to update avg rating if needed
+        // fetchDocInfo() 
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error('Failed to add review')
+    } finally {
+      setSubmittingReview(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchReviews()
+  }, [docId])
 
   useEffect(() => {
     if (!docInfo) return
@@ -293,6 +344,93 @@ const Appointment = () => {
     return (
       <div className='flex justify-center items-center min-h-screen'>
         <Loader2 className='w-12 h-12 text-blue-600 animate-spin' />
+        {/* Reviews Section */}
+        <div className='mt-12'>
+          <h3 className='text-2xl font-bold text-gray-900 mb-6'>Patient Reviews</h3>
+
+          {/* Add Review Form */}
+          <Card className='mb-8 border-gray-200 shadow-sm'>
+            <CardContent className='p-6'>
+              <h4 className='text-lg font-semibold mb-4'>Write a Review</h4>
+              <div className='flex flex-col gap-4'>
+                <div className='flex items-center gap-2'>
+                  <span className='text-sm font-medium text-gray-700'>Rating:</span>
+                  <div className='flex gap-1'>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setReviewRating(star)}
+                        className={`text-2xl focus:outline-none transition-colors ${star <= reviewRating ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-200'
+                          }`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder='Share your experience with this doctor...'
+                  className='w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent min-h-[100px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400'
+                />
+                <div className='flex justify-end'>
+                  <Button
+                    onClick={handleAddReview}
+                    disabled={submittingReview}
+                    className='bg-primary hover:bg-primary/90 text-white'
+                  >
+                    {submittingReview ? (
+                      <>
+                        <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Review'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Reviews List */}
+          <div className='space-y-4'>
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <div key={review._id} className='bg-white p-6 rounded-xl border border-gray-100 shadow-sm'>
+                  <div className='flex items-start justify-between mb-2'>
+                    <div className='flex items-center gap-3'>
+                      <div className='w-10 h-10 bg-gray-200 rounded-full overflow-hidden'>
+                        {review.userData?.image ? (
+                          <img src={review.userData.image} alt={review.userData.name} className='w-full h-full object-cover' />
+                        ) : (
+                          <div className='w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold'>
+                            {review.userData?.name?.charAt(0) || 'U'}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className='font-semibold text-gray-900'>{review.userData?.name}</p>
+                        <p className='text-xs text-gray-500'>{new Date(review.date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className='flex text-yellow-500 text-sm'>
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className={i < review.rating ? 'fill-current' : 'text-gray-300'}>★</span>
+                      ))}
+                    </div>
+                  </div>
+                  <p className='text-gray-600 mt-2 leading-relaxed'>{review.comment}</p>
+                </div>
+              ))
+            ) : (
+              <div className='text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300'>
+                <p className='text-gray-500'>No reviews yet. Be the first to review!</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     )
   }
@@ -310,17 +448,32 @@ const Appointment = () => {
           />
         </div>
 
-        <Card className='flex-1 border-gray-200 shadow-lg'>
+        <Card className='flex-1 border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-800'>
           <CardContent className='p-6 sm:p-8'>
             <div className='flex items-start justify-between gap-4 mb-4'>
               <div>
-                <h1 className='flex items-center gap-2 text-2xl font-bold text-gray-900 mb-2'>
+                <div className='flex items-center gap-2 text-3xl font-bold text-gray-900 dark:text-white'>
                   {docInfo.name}
-                  <img className='w-5 h-5' src={assets.verified_icon} alt='Verified' />
-                </h1>
-                <div className='flex flex-wrap items-center gap-2 text-sm text-gray-600'>
-                  <span>{docInfo.degree} - {docInfo.speciality}</span>
-                  <Badge variant='outline' className='text-xs'>{docInfo.experience}</Badge>
+                  {docInfo.verified && (
+                    <img src={assets.verified_icon} className='w-6 h-6' alt='Verified' title='Verified Doctor' />
+                  )}
+                </div>
+                <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mt-1'>
+                  <p>{docInfo.degree} - {docInfo.speciality}</p>
+                  <span className='py-0.5 px-2 border border-gray-200 dark:border-gray-600 text-xs rounded-full'>{docInfo.experience}</span>
+                </div>
+                <div className='flex items-center gap-1 mt-2'>
+                  <div className='flex text-yellow-500'>
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className={i < Math.round(docInfo.rating || 0) ? 'fill-current' : 'text-gray-300'}>★</span>
+                    ))}
+                  </div>
+                  <span className='text-sm font-medium text-gray-700 ml-1'>
+                    {docInfo.rating ? docInfo.rating.toFixed(1) : 'New'}
+                  </span>
+                  <span className='text-sm text-gray-500 ml-1'>
+                    ({docInfo.reviewCount || 0} reviews)
+                  </span>
                 </div>
               </div>
 
@@ -335,16 +488,16 @@ const Appointment = () => {
 
             <div className='space-y-4'>
               <div>
-                <p className='flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2'>
+                <p className='flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-2'>
                   <Info className='w-4 h-4' />
                   About
                 </p>
-                <p className='text-sm text-gray-600 leading-relaxed'>{docInfo.about}</p>
+                <p className='text-sm text-gray-600 dark:text-gray-300 leading-relaxed'>{docInfo.about}</p>
               </div>
 
-              <div className='pt-4 border-t border-gray-200'>
-                <p className='text-gray-600 text-sm'>
-                  Appointment fee: <span className='text-lg font-semibold text-gray-900'>{currencySymbol}{docInfo.fees}</span>
+              <div className='pt-4 border-t border-gray-200 dark:border-gray-700'>
+                <p className='text-gray-600 dark:text-gray-400 text-sm'>
+                  Appointment fee: <span className='text-lg font-semibold text-gray-900 dark:text-white'>{currencySymbol}{docInfo.fees}</span>
                 </p>
               </div>
             </div>
@@ -352,50 +505,50 @@ const Appointment = () => {
         </Card>
       </div>
 
-      <Card className='border-gray-200 shadow-lg'>
+      <Card className='border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-800'>
         <CardContent className='p-6 sm:p-8'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2'>
-            <Calendar className='w-6 h-6 text-blue-600' />
+          <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2'>
+            <Calendar className='w-6 h-6 text-blue-600 dark:text-blue-400' />
             Book Your Appointment
           </h2>
 
           <div className='mb-8'>
-            <h3 className='text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2'>
+            <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2'>
               <Calendar className='w-5 h-5' />
               Select Date
             </h3>
             <input
               type='date'
-              className='w-full sm:w-auto px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors text-gray-900'
+              className='w-full sm:w-auto px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 transition-colors text-gray-900 dark:text-white bg-white dark:bg-gray-700 color-scheme-dark'
               value={toLocalDateInputValue(selectedDate)}
               onChange={handleDateChange}
               min={minDateStr}
               max={maxDateStr}
             />
-            <p className='mt-2 text-sm text-gray-500 font-medium'>
+            <p className='mt-2 text-sm text-gray-500 dark:text-gray-400 font-medium'>
               {daysOfWeek[selectedDate.getDay()]}, {selectedDate.toLocaleDateString('en-US', {
                 month: 'long', day: 'numeric', year: 'numeric'
               })}
             </p>
           </div>
 
-          <div className='flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg'>
+          <div className='flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg'>
             <div className='flex items-center gap-2'>
-              <span className='inline-block w-3 h-3 rounded bg-gray-200 border-2 border-gray-300'></span>
-              <span className='text-xs sm:text-sm text-gray-600'>Available</span>
+              <span className='inline-block w-3 h-3 rounded bg-gray-200 dark:bg-gray-600 border-2 border-gray-300 dark:border-gray-500'></span>
+              <span className='text-xs sm:text-sm text-gray-600 dark:text-gray-300'>Available</span>
             </div>
             <div className='flex items-center gap-2'>
-              <CheckCircle2 className='w-3 h-3 text-green-600' />
-              <span className='text-xs sm:text-sm text-gray-600'>Selected</span>
+              <CheckCircle2 className='w-3 h-3 text-green-600 dark:text-green-400' />
+              <span className='text-xs sm:text-sm text-gray-600 dark:text-gray-300'>Selected</span>
             </div>
             <div className='flex items-center gap-2'>
               <XCircle className='w-3 h-3 text-red-400' />
-              <span className='text-xs sm:text-sm text-gray-600'>Booked</span>
+              <span className='text-xs sm:text-sm text-gray-600 dark:text-gray-300'>Booked</span>
             </div>
           </div>
 
           <div className='mb-8'>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2'>
+            <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2'>
               <Clock className='w-5 h-5' />
               Select Time
             </h3>
@@ -421,10 +574,10 @@ const Appointment = () => {
                     className={`
                       relative py-3 px-2 rounded-xl text-sm font-medium transition-all duration-200 border
                       ${slot.disabled
-                        ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed opacity-60'
+                        ? 'bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-100 dark:border-gray-600 cursor-not-allowed opacity-60'
                         : slotTime === slot.time
                           ? 'bg-primary text-white border-primary shadow-md transform scale-105 z-10'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-primary hover:text-primary hover:shadow-sm'
+                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-primary dark:hover:border-blue-400 hover:text-primary dark:hover:text-blue-400 hover:shadow-sm'
                       }
                     `}
                     title={slot.disabled ? 'Already booked' : 'Click to select'}
@@ -443,7 +596,7 @@ const Appointment = () => {
 
           {/* Appointment Purpose/Reason */}
           <div className='mb-8'>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2'>
+            <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2'>
               <Info className='w-5 h-5' />
               Reason for Visit
             </h3>
@@ -451,7 +604,7 @@ const Appointment = () => {
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               placeholder='Please describe your symptoms or reason for the appointment (e.g., fever, headache, regular checkup, follow-up visit...)'
-              className='w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors text-gray-900 min-h-[100px] resize-none'
+              className='w-full p-4 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 transition-colors text-gray-900 dark:text-white bg-white dark:bg-gray-700 min-h-[100px] resize-none placeholder:text-gray-400'
               maxLength={500}
             />
             <p className='text-sm text-gray-500 mt-1'>{purpose.length}/500 characters</p>
@@ -459,7 +612,7 @@ const Appointment = () => {
 
           {/* Payment Mode Selection */}
           <div className='mb-8'>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2'>
+            <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2'>
               <CreditCard className='w-5 h-5' />
               Payment Mode
             </h3>
@@ -467,8 +620,8 @@ const Appointment = () => {
               <button
                 onClick={() => setPaymentMode('online')}
                 className={`p-4 border-2 rounded-xl transition-all ${paymentMode === 'online'
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300'
+                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 bg-white dark:bg-gray-700'
                   }`}
               >
                 <div className='flex items-center gap-3'>
@@ -479,8 +632,8 @@ const Appointment = () => {
                     )}
                   </div>
                   <div className='text-left'>
-                    <p className='font-semibold text-gray-900'>Online Payment</p>
-                    <p className='text-sm text-gray-600'>Pay securely via Razorpay</p>
+                    <p className='font-semibold text-gray-900 dark:text-white'>Online Payment</p>
+                    <p className='text-sm text-gray-600 dark:text-gray-400'>Pay securely via Razorpay</p>
                   </div>
                 </div>
               </button>
@@ -488,8 +641,8 @@ const Appointment = () => {
               <button
                 onClick={() => setPaymentMode('cash')}
                 className={`p-4 border-2 rounded-xl transition-all ${paymentMode === 'cash'
-                  ? 'border-green-600 bg-green-50'
-                  : 'border-gray-200 hover:border-green-300'
+                  ? 'border-green-600 bg-green-50 dark:bg-green-900/30'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-500 bg-white dark:bg-gray-700'
                   }`}
               >
                 <div className='flex items-center gap-3'>
@@ -500,8 +653,8 @@ const Appointment = () => {
                     )}
                   </div>
                   <div className='text-left'>
-                    <p className='font-semibold text-gray-900'>Cash Payment</p>
-                    <p className='text-sm text-gray-600'>Pay at the clinic</p>
+                    <p className='font-semibold text-gray-900 dark:text-white'>Cash Payment</p>
+                    <p className='text-sm text-gray-600 dark:text-gray-400'>Pay at the clinic</p>
                   </div>
                 </div>
               </button>

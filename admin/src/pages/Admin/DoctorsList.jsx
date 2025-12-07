@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Users, CheckCircle, XCircle, Search, Trash2 } from 'lucide-react'
+import { Users, CheckCircle, XCircle, Search, Trash2, LayoutGrid, List as ListIcon } from 'lucide-react'
 
 const DoctorsList = () => {
   const { doctors, changeAvailability, aToken, getAllDoctors } = useContext(AdminContext)
@@ -16,6 +16,7 @@ const DoctorsList = () => {
   const [filter, setFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [deleting, setDeleting] = useState(null)
+  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
 
   useEffect(() => {
     if (aToken) {
@@ -82,189 +83,249 @@ const DoctorsList = () => {
   }
 
   return (
-    <div className='p-6 max-w-7xl mx-auto'>
+    <div className='p-6 max-w-7xl mx-auto space-y-6'>
 
-
-      <div className='mb-6'>
-        <h1 className='text-2xl font-bold text-gray-900'>Doctors List</h1>
-        <p className='text-gray-600 mt-1'>Manage all registered doctors</p>
+      <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
+        <div>
+          <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>Doctors List</h1>
+          <p className='text-gray-600 dark:text-gray-400 mt-1'>Manage all registered doctors</p>
+        </div>
+        <div className='flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700'>
+          <Button
+            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+            size='sm'
+            onClick={() => setViewMode('grid')}
+            className='gap-2'
+          >
+            <LayoutGrid className='w-4 h-4' />
+            Grid
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+            size='sm'
+            onClick={() => setViewMode('list')}
+            className='gap-2'
+          >
+            <ListIcon className='w-4 h-4' />
+            List
+          </Button>
+        </div>
       </div>
 
-
-      <div className='grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6'>
-        <div className='bg-white border border-gray-200 rounded-xl p-5'>
-          <div className='flex items-center justify-between'>
+      {/* Stats Cards */}
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-5'>
+        <Card className='dark:bg-gray-800 dark:border-gray-700'>
+          <CardContent className='p-5 flex items-center justify-between'>
             <div>
-              <p className='text-gray-600 text-sm font-medium mb-1'>Total Doctors</p>
-              <p className='text-3xl font-bold text-gray-900'>{doctors.length}</p>
+              <p className='text-gray-600 dark:text-gray-400 text-sm font-medium mb-1'>Total Doctors</p>
+              <p className='text-3xl font-bold text-gray-900 dark:text-white'>{doctors.length}</p>
             </div>
-            <div className='w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center'>
-              <svg className='w-6 h-6 text-gray-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
-              </svg>
+            <div className='w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center'>
+              <Users className='w-6 h-6 text-blue-600' />
             </div>
-          </div>
-        </div>
-
-        <div className='bg-white border border-gray-200 rounded-xl p-5'>
-          <div className='flex items-center justify-between'>
+          </CardContent>
+        </Card>
+        <Card className='dark:bg-gray-800 dark:border-gray-700'>
+          <CardContent className='p-5 flex items-center justify-between'>
             <div>
-              <p className='text-gray-600 text-sm font-medium mb-1'>Available</p>
-              <p className='text-3xl font-bold text-gray-900'>{availableCount}</p>
+              <p className='text-gray-600 dark:text-gray-400 text-sm font-medium mb-1'>Available</p>
+              <p className='text-3xl font-bold text-gray-900 dark:text-white'>{availableCount}</p>
             </div>
             <div className='w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center'>
-              <svg className='w-6 h-6 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
-              </svg>
+              <CheckCircle className='w-6 h-6 text-green-600' />
             </div>
-          </div>
-        </div>
-
-        <div className='bg-white border border-gray-200 rounded-xl p-5'>
-          <div className='flex items-center justify-between'>
+          </CardContent>
+        </Card>
+        <Card className='dark:bg-gray-800 dark:border-gray-700'>
+          <CardContent className='p-5 flex items-center justify-between'>
             <div>
-              <p className='text-gray-600 text-sm font-medium mb-1'>Unavailable</p>
-              <p className='text-3xl font-bold text-gray-900'>{unavailableCount}</p>
+              <p className='text-gray-600 dark:text-gray-400 text-sm font-medium mb-1'>Unavailable</p>
+              <p className='text-3xl font-bold text-gray-900 dark:text-white'>{unavailableCount}</p>
             </div>
             <div className='w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center'>
-              <svg className='w-6 h-6 text-red-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z' />
-              </svg>
+              <XCircle className='w-6 h-6 text-red-600' />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters & Search */}
+      <Card className='dark:bg-gray-800 dark:border-gray-700'>
+        <CardContent className='p-4'>
+          <div className='flex flex-col sm:flex-row gap-4 justify-between'>
+            <div className='flex gap-2'>
+              <Button
+                onClick={() => setFilter('all')}
+                variant={filter === 'all' ? 'default' : 'outline'}
+                size='sm'
+                className={filter === 'all' ? 'bg-gray-900 text-white hover:bg-gray-800' : ''}
+              >
+                All
+              </Button>
+              <Button
+                onClick={() => setFilter('available')}
+                variant={filter === 'available' ? 'default' : 'outline'}
+                size='sm'
+                className={filter === 'available' ? 'bg-green-600 text-white hover:bg-green-700' : ''}
+              >
+                Available
+              </Button>
+              <Button
+                onClick={() => setFilter('unavailable')}
+                variant={filter === 'unavailable' ? 'default' : 'outline'}
+                size='sm'
+                className={filter === 'unavailable' ? 'bg-red-600 text-white hover:bg-red-700' : ''}
+              >
+                Unavailable
+              </Button>
+            </div>
+            <div className='relative w-full sm:w-72'>
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+              <input
+                type='text'
+                placeholder='Search by name or speciality...'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm bg-white dark:bg-gray-900 dark:text-white'
+              />
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-
-      <div className='bg-white border border-gray-200 rounded-xl p-5 mb-5'>
-        <div className='space-y-4'>
-          <div className='flex gap-2'>
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'all'
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-            >
-              All ({doctors.length})
-            </button>
-            <button
-              onClick={() => setFilter('available')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'available'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-            >
-              Available ({availableCount})
-            </button>
-            <button
-              onClick={() => setFilter('unavailable')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'unavailable'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-            >
-              Unavailable ({unavailableCount})
-            </button>
-          </div>
-
-
-          <input
-            type='text'
-            placeholder='Search by name or speciality...'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20'
-          />
-        </div>
-      </div>
-
-
-      <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
-        <div className='px-6 py-4 border-b border-gray-200 bg-gray-50'>
-          <div className='flex items-center justify-between'>
-            <h2 className='font-semibold text-gray-900'>All Doctors</h2>
-            <span className='text-sm text-gray-600'>
-              Showing {filteredDoctors.length} of {doctors.length}
-            </span>
-          </div>
+      {/* Content */}
+      <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm'>
+        <div className='px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex justify-between items-center'>
+          <h2 className='font-semibold text-gray-900 dark:text-white'>All Doctors</h2>
+          <span className='text-sm text-gray-600 dark:text-gray-400'>
+            Showing {filteredDoctors.length} of {doctors.length}
+          </span>
         </div>
 
         {filteredDoctors.length > 0 ? (
-          <div className='p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'>
-            {filteredDoctors.map((item) => (
-              <div
-                key={item._id}
-                className='bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow'
-              >
-                {/* doc img */}
-                <div className='relative h-48 bg-gray-100'>
-                  <img
-                    className='w-full h-full object-cover'
-                    src={toSrc(item.image, assets.doctor_icon)}
-                    alt={item.name}
-                  />
-                  {/* avail button */}
-                  <div className='absolute top-3 right-3'>
-                    {item.available ? (
-                      <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200'>
-                        Available
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200'>
-                        Unavailable
-                      </span>
-                    )}
+          viewMode === 'grid' ? (
+            <div className='p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+              {filteredDoctors.map((item) => (
+                <div
+                  key={item._id}
+                  className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group'
+                >
+                  <div className='relative h-52 bg-gray-100 dark:bg-gray-900 overflow-hidden'>
+                    <img
+                      className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                      src={toSrc(item.image, assets.doctor_icon)}
+                      alt={item.name}
+                    />
+                    <div className='absolute top-3 right-3'>
+                      <Badge variant={item.available ? 'default' : 'destructive'} className={item.available ? 'bg-green-500 hover:bg-green-600' : ''}>
+                        {item.available ? 'Available' : 'Unavailable'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className='p-5'>
+                    <h3 className='text-lg font-bold text-gray-900 dark:text-white mb-1'>Dr. {item.name}</h3>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mb-2'>{item.speciality}</p>
+                    <p className='text-xs text-gray-500 dark:text-gray-500 mb-4 line-clamp-2'>{item.about}</p>
+
+                    <div className='flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700'>
+                      <span>{item.experience} Exp</span>
+                      <span className='font-bold text-gray-900 dark:text-white'>{currency}{item.fees}</span>
+                    </div>
+
+                    <div className='flex items-center justify-between gap-3'>
+                      <div className='flex items-center gap-2'>
+                        <input
+                          type='checkbox'
+                          checked={!!item.available}
+                          onChange={() => handleAvailabilityToggle(item._id)}
+                          className='w-4 h-4 text-primary rounded border-gray-300 dark:border-gray-600 focus:ring-primary'
+                        />
+                        <span className='text-sm text-gray-700 dark:text-gray-300'>Available</span>
+                      </div>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => handleDeleteDoctor(item._id, item.name)}
+                        disabled={deleting === item._id}
+                        className='text-red-600 hover:text-red-700 hover:bg-red-50 p-2 h-auto'
+                      >
+                        <Trash2 className='w-4 h-4' />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-
-                {/* doc info */}
-                <div className='p-4'>
-                  <h3 className='text-base font-semibold text-gray-900 mb-1'>
-                    Dr. {item.name}
-                  </h3>
-                  <p className='text-sm text-gray-600 mb-1'>{item.speciality}</p>
-                  <p className='text-xs text-gray-500 mb-3'>{item.degree}</p>
-
-                  <div className='flex items-center justify-between text-sm text-gray-600 mb-3 pb-3 border-b border-gray-200'>
-                    <span>{item.experience}</span>
-                    <span className='font-semibold text-gray-900'>{currency}{item.fees}</span>
-                  </div>
-
-
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm font-medium text-gray-700'>Status</span>
-                    <label className='relative inline-flex items-center cursor-pointer'>
-                      <input
-                        type='checkbox'
-                        checked={!!item.available}
-                        onChange={() => handleAvailabilityToggle(item._id)}
-                        className='sr-only peer'
-                      />
-                      <div className={`w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${item.available ? 'peer-checked:bg-green-600' : ''
-                        }`}></div>
-                    </label>
-                  </div>
-
-                  {/* Delete  */}
-                  <button
-                    onClick={() => handleDeleteDoctor(item._id, item.name)}
-                    disabled={deleting === item._id}
-                    className='mt-3 w-full px-3 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition'
-                  >
-                    {deleting === item._id ? 'Deleting...' : 'Delete Doctor'}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className='overflow-x-auto'>
+              <table className='w-full'>
+                <thead className='bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700'>
+                  <tr>
+                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider'>Doctor</th>
+                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider'>Speciality</th>
+                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider'>Experience</th>
+                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider'>Fees</th>
+                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider'>Status</th>
+                    <th className='px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider'>Actions</th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800'>
+                  {filteredDoctors.map((item) => (
+                    <tr key={item._id} className='hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
+                      <td className='px-6 py-4'>
+                        <div className='flex items-center gap-3'>
+                          <img
+                            src={toSrc(item.image, assets.doctor_icon)}
+                            alt={item.name}
+                            className='w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700'
+                          />
+                          <div>
+                            <p className='text-sm font-semibold text-gray-900 dark:text-white'>Dr. {item.name}</p>
+                            <p className='text-xs text-gray-500 dark:text-gray-400'>{item.degree}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 text-sm text-gray-700 dark:text-gray-300'>{item.speciality}</td>
+                      <td className='px-6 py-4 text-sm text-gray-700 dark:text-gray-300'>{item.experience}</td>
+                      <td className='px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white'>{currency}{item.fees}</td>
+                      <td className='px-6 py-4'>
+                        <div className='flex items-center gap-2'>
+                          <input
+                            type='checkbox'
+                            checked={!!item.available}
+                            onChange={() => handleAvailabilityToggle(item._id)}
+                            className='w-4 h-4 text-primary rounded border-gray-300 dark:border-gray-600 focus:ring-primary'
+                          />
+                          <Badge variant={item.available ? 'default' : 'secondary'} className={item.available ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}>
+                            {item.available ? 'Available' : 'Unavailable'}
+                          </Badge>
+                        </div>
+                      </td>
+                      <td className='px-6 py-4'>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => handleDeleteDoctor(item._id, item.name)}
+                          disabled={deleting === item._id}
+                          className='text-red-600 hover:text-red-700 hover:bg-red-50'
+                        >
+                          <Trash2 className='w-4 h-4' />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
-          <div className='text-center py-12'>
-            <svg className='mx-auto h-12 w-12 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
-            </svg>
-            <h3 className='mt-2 text-sm font-medium text-gray-900'>No doctors found</h3>
-            <p className='mt-1 text-sm text-gray-500'>
+          <div className='text-center py-16'>
+            <div className='w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4'>
+              <Search className='h-8 w-8 text-gray-400 dark:text-gray-500' />
+            </div>
+            <h3 className='text-lg font-medium text-gray-900 dark:text-white'>No doctors found</h3>
+            <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
               {searchTerm
                 ? `No results for "${searchTerm}"`
                 : filter === 'all'

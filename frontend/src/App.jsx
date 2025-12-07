@@ -15,6 +15,7 @@ import MyProfile from './pages/Profile'
 import PaymentHistory from './pages/PaymentHistory'
 import PrescriptionHistory from './pages/PrescriptionHistory'
 import UnifiedLogin from './pages/UnifiedLogin'
+import ChatPage from './pages/ChatPage'
 
 
 const ProtectedRoute = ({ children }) => {
@@ -55,8 +56,18 @@ const PublicOnlyRoute = ({ children }) => {
 }
 
 const App = () => {
+  const [isDark, setIsDark] = React.useState(false)
+
+  React.useEffect(() => {
+    const updateTheme = () => setIsDark(document.documentElement.classList.contains('dark'))
+    updateTheme()
+    const observer = new MutationObserver(updateTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 dark:text-white'>
       <ToastContainer
         position='top-right'
         autoClose={3000}
@@ -67,6 +78,7 @@ const App = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        theme={isDark ? 'dark' : 'light'}
       />
       <Navbar />
       <main className='mx-4 sm:mx-[10%] py-4'>
@@ -105,6 +117,16 @@ const App = () => {
           <Route path='/my-prescriptions' element={
             <ProtectedRoute>
               <PrescriptionHistory />
+            </ProtectedRoute>
+          } />
+          <Route path='/my-prescriptions' element={
+            <ProtectedRoute>
+              <PrescriptionHistory />
+            </ProtectedRoute>
+          } />
+          <Route path='/chat/:appointmentId' element={
+            <ProtectedRoute>
+              <ChatPage />
             </ProtectedRoute>
           } />
         </Routes>

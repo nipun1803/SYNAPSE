@@ -5,11 +5,13 @@ import { DoctorContext } from '../../context/DoctorContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, CheckCircle, XCircle, Search, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, Clock, CheckCircle, XCircle, Search, Users, MessageSquare } from 'lucide-react';
 
 const DoctorAppointments = () => {
   const { dToken, appointments, getAppointments, cancelAppointment, completeAppointment } =
     useContext(DoctorContext);
+  const navigate = useNavigate();
 
   const { slotDateFormat, calculateAge, currency } = useContext(AppContext);
 
@@ -96,49 +98,49 @@ const DoctorAppointments = () => {
     <div className='p-6 max-w-7xl mx-auto space-y-6'>
 
       <div>
-        <h1 className='text-3xl font-bold text-gray-900'>My Appointments</h1>
-        <p className='text-gray-600 mt-1'>Manage your patient appointments</p>
+        <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>My Appointments</h1>
+        <p className='text-gray-600 dark:text-gray-400 mt-1'>Manage your patient appointments</p>
       </div>
 
 
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-        <Card>
+        <Card className='dark:bg-gray-800 dark:border-gray-700'>
           <CardContent className='p-4'>
             <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center'>
-                <Clock className='w-5 h-5 text-blue-600' />
+              <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center'>
+                <Clock className='w-5 h-5 text-blue-600 dark:text-blue-400' />
               </div>
               <div>
-                <p className='text-sm text-gray-600'>Upcoming</p>
-                <p className='text-2xl font-bold text-gray-900'>{upcomingCount}</p>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>Upcoming</p>
+                <p className='text-2xl font-bold text-gray-900 dark:text-white'>{upcomingCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='dark:bg-gray-800 dark:border-gray-700'>
           <CardContent className='p-4'>
             <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center'>
-                <CheckCircle className='w-5 h-5 text-green-600' />
+              <div className='w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center'>
+                <CheckCircle className='w-5 h-5 text-green-600 dark:text-green-400' />
               </div>
               <div>
-                <p className='text-sm text-gray-600'>Completed</p>
-                <p className='text-2xl font-bold text-gray-900'>{completedCount}</p>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>Completed</p>
+                <p className='text-2xl font-bold text-gray-900 dark:text-white'>{completedCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='dark:bg-gray-800 dark:border-gray-700'>
           <CardContent className='p-4'>
             <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center'>
-                <XCircle className='w-5 h-5 text-red-600' />
+              <div className='w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center'>
+                <XCircle className='w-5 h-5 text-red-600 dark:text-red-400' />
               </div>
               <div>
-                <p className='text-sm text-gray-600'>Cancelled</p>
-                <p className='text-2xl font-bold text-gray-900'>{cancelledCount}</p>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>Cancelled</p>
+                <p className='text-2xl font-bold text-gray-900 dark:text-white'>{cancelledCount}</p>
               </div>
             </div>
           </CardContent>
@@ -146,7 +148,7 @@ const DoctorAppointments = () => {
       </div>
 
       {/* filtering */}
-      <Card>
+      <Card className='dark:bg-gray-800 dark:border-gray-700'>
         <CardContent className='p-4'>
           <div className='flex gap-2 flex-wrap'>
             <Button
@@ -190,18 +192,18 @@ const DoctorAppointments = () => {
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
         <input
           type="text"
           placeholder="Search patients by name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full pl-10 pr-4 py-2 border dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white"
         />
       </div>
 
       {/* appointment table */}
-      <Card>
+      <Card className='dark:bg-gray-800 dark:border-gray-700'>
         <CardHeader>
           <CardTitle>Appointments List</CardTitle>
         </CardHeader>
@@ -209,146 +211,161 @@ const DoctorAppointments = () => {
           {appointments.length > 0 ? (
             <div className='overflow-x-auto'>
               <table className='w-full'>
-                <thead className='bg-gray-50 border-b'>
+                <thead className='bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700'>
                   <tr>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>#</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Patient</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Age</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Date & Time</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Reason for Visit</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Payment</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Fee</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Status</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase'>Actions</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>#</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Patient</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Age</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Date & Time</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Reason for Visit</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Payment</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Fee</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Status</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase'>Actions</th>
                   </tr>
                 </thead>
-                <tbody className='divide-y divide-gray-100'>
+                <tbody className='divide-y divide-gray-100 dark:divide-gray-700'>
                   {appointments.map((item, index) => (
-                    <tr key={item._id || index} className='hover:bg-gray-50'>
-                      <td className='px-6 py-4 text-sm font-medium text-gray-900'>{getRowNumber(index)}</td>
+                    <tr key={item._id || index} className='hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
+                      <td className='px-6 py-4 text-sm font-medium text-gray-900 dark:text-white'>{getRowNumber(index)}</td>
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-3'>
                           <img
                             src={item.userData?.image || assets.profile_pic}
-                            className='w-10 h-10 rounded-full object-cover'
+                            className='w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-600'
                             alt='Patient'
                           />
                           <div>
-                            <p className='text-sm font-medium text-gray-900'>{item.userData?.name || 'Unknown'}</p>
-                            <p className='text-xs text-gray-500'>{item.userData?.email}</p>
+                            <p className='text-sm font-medium text-gray-900 dark:text-white'>{item.userData?.name || 'Unknown'}</p>
+                            <p className='text-xs text-gray-500 dark:text-gray-400'>{item.userData?.email}</p>
                           </div>
                         </div>
                       </td>
-                      <td className='px-6 py-4 text-sm text-gray-700'>
+                      <td className='px-6 py-4 text-sm text-gray-700 dark:text-gray-300'>
                         {calculateAge(item.userData?.dob) || '-'}
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-sm font-medium text-gray-900'>{slotDateFormat(item.slotDate)}</p>
-                        <p className='text-xs text-gray-500'>{item.slotTime}</p>
+                        <p className='text-sm font-medium text-gray-900 dark:text-white'>{slotDateFormat(item.slotDate)}</p>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>{item.slotTime}</p>
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-sm text-gray-700 max-w-[200px] truncate' title={item.purpose || 'Not specified'}>
-                          {item.purpose ? item.purpose : <span className='text-gray-400 italic'>Not specified</span>}
+                        <p className='text-sm text-gray-700 dark:text-gray-300 max-w-[200px] truncate' title={item.purpose || 'Not specified'}>
+                          {item.purpose ? item.purpose : <span className='text-gray-400 dark:text-gray-500 italic'>Not specified</span>}
                         </p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex flex-col gap-1'>
                           {item.payment ? (
                             item.paymentStatus === 'completed' ? (
-                              <Badge className='bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100 gap-1'>
+                              <Badge className='bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 gap-1'>
                                 <CheckCircle className='w-3 h-3' />
                                 Paid Online
                               </Badge>
                             ) : item.paymentStatus === 'refunded' ? (
-                              <Badge className='bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100 gap-1'>
+                              <Badge className='bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800 hover:bg-orange-100 gap-1'>
                                 Refunded
                               </Badge>
                             ) : (
-                              <Badge variant='outline' className='gap-1'>
+                              <Badge variant='outline' className='gap-1 dark:border-gray-600 dark:text-gray-300'>
                                 Payment Pending
                               </Badge>
                             )
                           ) : (
-                            <Badge className='bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100 gap-1'>
+                            <Badge className='bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 gap-1'>
                               Cash (Pending)
                             </Badge>
                           )}
                         </div>
                       </td>
-                      <td className='px-6 py-4 text-sm font-semibold text-gray-900'>{currency}{item.amount}</td>
+                      <td className='px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white'>{currency}{item.amount}</td>
                       <td className='px-6 py-4'>
                         {item.cancelled ? (
-                          <Badge variant='destructive' className='gap-1'>
+                          <Badge variant='destructive' className='gap-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100'>
                             <XCircle className='w-3 h-3' />
                             Cancelled
                           </Badge>
                         ) : item.isCompleted ? (
-                          <Badge className='bg-green-100 text-green-700 hover:bg-green-100 gap-1'>
+                          <Badge className='bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-green-100 gap-1'>
                             <CheckCircle className='w-3 h-3' />
                             Completed
                           </Badge>
                         ) : (
-                          <Badge className='bg-blue-100 text-blue-700 hover:bg-blue-100 gap-1'>
+                          <Badge className='bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-100 gap-1'>
                             <Clock className='w-3 h-3' />
                             Upcoming
                           </Badge>
                         )}
                       </td>
                       <td className='px-6 py-4'>
-                        {!item.cancelled && !item.isCompleted && (
-                          <div className='flex items-center gap-2'>
+                        <div className='flex items-center gap-2 flex-wrap'>
+                          {!item.cancelled && !item.isCompleted && (
+                            <>
+                              <Button
+                                onClick={() => onComplete(item._id)}
+                                disabled={actionLoading.id === item._id}
+                                variant='ghost'
+                                size='sm'
+                                className='text-green-600 dark:text-green-400 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30'
+                              >
+                                {actionLoading.id === item._id && actionLoading.type === 'complete' ? (
+                                  <div className='w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin' />
+                                ) : (
+                                  <>
+                                    <CheckCircle className='w-4 h-4 mr-1' />
+                                    Complete
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                onClick={() => onCancel(item._id)}
+                                disabled={actionLoading.id === item._id}
+                                variant='ghost'
+                                size='sm'
+                                className='text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30'
+                              >
+                                {actionLoading.id === item._id && actionLoading.type === 'cancel' ? (
+                                  <div className='w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin' />
+                                ) : (
+                                  <>
+                                    <XCircle className='w-4 h-4 mr-1' />
+                                    Cancel
+                                  </>
+                                )}
+                              </Button>
+                            </>
+                          )}
+
+                          {!item.cancelled && (
                             <Button
-                              onClick={() => onComplete(item._id)}
-                              disabled={actionLoading.id === item._id}
-                              variant='ghost'
                               size='sm'
-                              className='text-green-600 hover:text-green-700 hover:bg-green-50'
+                              variant='ghost'
+                              onClick={() => navigate(`/doctor/chat/${item._id}`)}
+                              className='text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30'
                             >
-                              {actionLoading.id === item._id && actionLoading.type === 'complete' ? (
-                                <div className='w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin' />
-                              ) : (
-                                <>
-                                  <CheckCircle className='w-4 h-4 mr-1' />
-                                  Complete
-                                </>
-                              )}
+                              <MessageSquare className='w-4 h-4 mr-1' />
+                              Chat
                             </Button>
+                          )}
+
+                          {item.isCompleted && !item.prescriptionId && (
                             <Button
-                              onClick={() => onCancel(item._id)}
-                              disabled={actionLoading.id === item._id}
-                              variant='ghost'
                               size='sm'
-                              className='text-red-600 hover:text-red-700 hover:bg-red-50'
+                              onClick={() => window.location.href = `/doctor/create-prescription?appointmentId=${item._id}&patientId=${item.userId}`}
+                              className='bg-blue-600 hover:bg-blue-700 text-white'
                             >
-                              {actionLoading.id === item._id && actionLoading.type === 'cancel' ? (
-                                <div className='w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin' />
-                              ) : (
-                                <>
-                                  <XCircle className='w-4 h-4 mr-1' />
-                                  Cancel
-                                </>
-                              )}
+                              Create Prescription
                             </Button>
-                          </div>
-                        )}
-                        {item.isCompleted && !item.prescriptionId && (
-                          <Button
-                            size='sm'
-                            onClick={() => window.location.href = `/doctor/create-prescription?appointmentId=${item._id}&patientId=${item.userId}`}
-                            className='bg-blue-600 hover:bg-blue-700 text-white'
-                          >
-                            Create Prescription
-                          </Button>
-                        )}
-                        {item.prescriptionId && (
-                          <Button
-                            size='sm'
-                            onClick={() => window.location.href = `/doctor/view-prescription?appointmentId=${item._id}`}
-                            className='bg-green-600 hover:bg-green-700 text-white'
-                          >
-                            View Prescription
-                          </Button>
-                        )}
+                          )}
+                          {item.prescriptionId && (
+                            <Button
+                              size='sm'
+                              onClick={() => window.location.href = `/doctor/view-prescription?appointmentId=${item._id}`}
+                              className='bg-green-600 hover:bg-green-700 text-white'
+                            >
+                              View Prescription
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -357,9 +374,9 @@ const DoctorAppointments = () => {
             </div>
           ) : (
             <div className='text-center py-12'>
-              <Calendar className='mx-auto h-12 w-12 text-gray-400' />
-              <h3 className='mt-2 text-sm font-medium text-gray-900'>No appointments found</h3>
-              <p className='mt-1 text-sm text-gray-500'>
+              <Calendar className='mx-auto h-12 w-12 text-gray-400 dark:text-gray-500' />
+              <h3 className='mt-2 text-sm font-medium text-gray-900 dark:text-white'>No appointments found</h3>
+              <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
                 {filter !== 'all' ? `No ${filter} appointments` : 'Appointments will appear here'}
               </p>
             </div>
@@ -379,7 +396,7 @@ const DoctorAppointments = () => {
             >
               Previous
             </Button>
-            <span className='flex items-center px-4 py-2 text-sm font-medium text-gray-700'>
+            <span className='flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300'>
               Page {page} of {totalPages}
             </span>
             <Button
@@ -393,6 +410,7 @@ const DoctorAppointments = () => {
           </div>
         )
       }
+
     </div >
   );
 };

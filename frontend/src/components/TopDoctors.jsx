@@ -21,15 +21,15 @@ const TopDoctors = () => {
   }
 
   return (
-    <section className='py-16 bg-white'>
+    <section className='py-16 bg-white dark:bg-gray-950'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
 
 
         <div className='text-center mb-12'>
-          <h1 className='text-4xl font-bold text-gray-900 mb-4'>
+          <h1 className='text-4xl font-bold text-gray-900 dark:text-white mb-4'>
             Top Doctors to Book
           </h1>
-          <p className='text-lg text-gray-600 max-w-2xl mx-auto'>
+          <p className='text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto'>
             Simply browse through our extensive list of trusted doctors and book
             your appointment with ease.
           </p>
@@ -78,10 +78,10 @@ const TopDoctors = () => {
                 </div>
 
                 <CardContent className='p-6'>
-                  <h3 className='text-xl font-semibold text-gray-900 mb-1'>
+                  <h3 className='text-xl font-semibold text-gray-900 dark:text-white mb-1'>
                     {doctor.name}
                   </h3>
-                  <p className='text-gray-600 text-sm mb-3'>
+                  <p className='text-gray-600 dark:text-gray-400 text-sm mb-3'>
                     {doctor.speciality}
                   </p>
 

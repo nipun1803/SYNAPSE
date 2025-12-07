@@ -10,12 +10,14 @@ import AddDoctor from './pages/Admin/AddDoctor'
 import AllAppointments from './pages/Admin/AllAppointments'
 import Dashboard from './pages/Admin/Dashboard'
 import DoctorsList from './pages/Admin/DoctorsList'
+import UsersList from './pages/Admin/UsersList'
 import DoctorAppointments from './pages/Doctor/DoctorAppointments'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard'
 import DoctorProfile from './pages/Doctor/DoctorProfile'
 import DoctorSlots from './pages/Doctor/DoctorSlots'
 import CreatePrescription from './pages/Doctor/CreatePrescription'
 import ViewPrescription from './pages/Doctor/ViewPrescription'
+import DoctorChat from './pages/Doctor/DoctorChat'
 
 
 const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || 'http://localhost:5173/unified-login'
@@ -26,7 +28,7 @@ const AdminRoute = ({ children }) => {
 
   if (checkingAuth) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-slate-50'>
+      <div className='min-h-screen flex items-center justify-center bg-slate-50 dark:bg-gray-900'>
         <div className='animate-spin rounded-full h-16 w-16 border-b-4 border-primary'></div>
       </div>
     )
@@ -69,8 +71,18 @@ const App = () => {
     setSidebarOpen(false)
   }, [location.pathname])
 
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    const updateTheme = () => setIsDark(document.documentElement.classList.contains('dark'))
+    updateTheme()
+    const observer = new MutationObserver(updateTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className='min-h-screen bg-slate-50 flex flex-col'>
+    <div className='min-h-screen bg-slate-50 dark:bg-gray-900 dark:text-white flex flex-col'>
 
       <ToastContainer
         position='top-right'
@@ -82,7 +94,7 @@ const App = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme='light'
+        theme={isDark ? 'dark' : 'light'}
         limit={3}
       />
 
@@ -118,6 +130,11 @@ const App = () => {
                 <DoctorsList />
               </AdminRoute>
             } />
+            <Route path='/users' element={
+              <AdminRoute>
+                <UsersList />
+              </AdminRoute>
+            } />
 
 
             <Route path='/doctor-dashboard' element={
@@ -148,6 +165,11 @@ const App = () => {
             <Route path='/doctor/view-prescription' element={
               <DoctorRoute>
                 <ViewPrescription />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/chat/:appointmentId' element={
+              <DoctorRoute>
+                <DoctorChat />
               </DoctorRoute>
             } />
           </Routes>

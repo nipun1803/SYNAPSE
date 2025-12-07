@@ -41,6 +41,11 @@ const Sidebar = ({ isOpen, onClose }) => {
       to: '/doctor-list',
       label: 'Doctors List',
       icon: Users
+    },
+    {
+      to: '/users',
+      label: 'Users List',
+      icon: Users
     }
   ]
 
@@ -79,14 +84,14 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-[61px] left-0 z-40 h-[calc(100vh-61px)] w-64 bg-white border-r border-gray-200 overflow-y-auto transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed lg:sticky top-[61px] left-0 z-40 h-[calc(100vh-61px)] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
         <div className='p-5'>
           {/* Close button for mobile */}
           <button
             onClick={onClose}
-            className='lg:hidden absolute top-4 right-4 text-gray-600 hover:text-gray-900'
+            className='lg:hidden absolute top-4 right-4 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           >
             <X className='w-5 h-5' />
           </button>
@@ -94,7 +99,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           {/* Panel Title Badge */}
           {title && (
             <div className='mb-6'>
-              <p className='text-sm font-semibold text-gray-900'>{title}</p>
+              <p className='text-sm font-semibold text-gray-900 dark:text-gray-200'>{title}</p>
             </div>
           )}
 
@@ -109,7 +114,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
                       ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`
                   }
                   onClick={onClose}

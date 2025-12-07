@@ -35,7 +35,7 @@ const Footer = () => {
       label: "Address",
       content: (
         <>
-          123 Healthcare Street<br/>
+          123 Healthcare Street<br />
           Medical District, City 12345
         </>
       )
@@ -66,15 +66,15 @@ const Footer = () => {
   ]
 
   return (
-    <footer className="bg-white border-t mt-20">
+    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-20">
       <div className="max-w-7xl mx-auto px-4 py-12">
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-          
+
           <div className="md:col-span-2">
-            <img className="mb-5 w-40" src={assets.logo} alt="Synapse" />
-            <p className="text-gray-600 leading-relaxed mb-6 max-w-md">
-              Your trusted healthcare partner. Book appointments with top doctors, 
+            <img className="mb-5 w-40 dark:invert dark:brightness-200" src={assets.logo} alt="Synapse" />
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-md">
+              Your trusted healthcare partner. Book appointments with top doctors,
               manage your health records, and get quality medical care - all in one place.
             </p>
             <div className="flex gap-2">
@@ -88,9 +88,9 @@ const Footer = () => {
                     className={`rounded-full ${social.hoverColor} transition-all`}
                     asChild
                   >
-                    <a 
+                    <a
                       href={social.href}
-                      target="_blank" 
+                      target="_blank"
                       rel="noopener noreferrer"
                       aria-label={social.name}
                     >
@@ -103,13 +103,13 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-gray-900 font-semibold text-base mb-4">Quick Links</h3>
+            <h3 className="text-gray-900 dark:text-white font-semibold text-base mb-4">Quick Links</h3>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.to}>
-                  <Link 
-                    to={link.to} 
-                    className="text-gray-600 hover:text-blue-600 transition-colors text-sm inline-flex items-center group"
+                  <Link
+                    to={link.to}
+                    className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm inline-flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform">
                       {link.label}
@@ -121,16 +121,16 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-gray-900 font-semibold text-base mb-4">Contact Us</h3>
+            <h3 className="text-gray-900 dark:text-white font-semibold text-base mb-4">Contact Us</h3>
             <ul className="space-y-4 text-sm">
               {contactInfo.map((item) => {
                 const IconComponent = item.icon
                 return (
                   <li key={item.label} className="flex gap-3">
-                    <IconComponent className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <IconComponent className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <span className="block font-medium text-gray-700 mb-1">{item.label}</span>
-                      <div className="text-gray-600">{item.content}</div>
+                      <span className="block font-medium text-gray-700 dark:text-gray-300 mb-1">{item.label}</span>
+                      <div className="text-gray-600 dark:text-gray-400">{item.content}</div>
                     </div>
                   </li>
                 )
@@ -142,15 +142,15 @@ const Footer = () => {
         <Separator className="my-6" />
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Copyright © {currentYear} Synapse. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-6 text-sm">
             {legalLinks.map((link) => (
-              <Link 
+              <Link
                 key={link.to}
-                to={link.to} 
-                className="text-gray-600 hover:text-blue-600 transition-colors"
+                to={link.to}
+                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 {link.label}
               </Link>

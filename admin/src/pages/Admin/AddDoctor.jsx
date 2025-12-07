@@ -162,16 +162,16 @@ const AddDoctor = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-          <UserPlus className="w-7 h-7 text-blue-600" />
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <UserPlus className="w-7 h-7 text-blue-600 dark:text-blue-400" />
           Add New Doctor
         </h1>
-        <p className="text-gray-600 mt-1">Fill in the details to register a new doctor</p>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Fill in the details to register a new doctor</p>
       </div>
 
       <form onSubmit={onSubmitHandler} className="space-y-6">
         {/* upload section */}
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-5 h-5" />
@@ -182,7 +182,7 @@ const AddDoctor = () => {
             <div className="flex items-center gap-6">
               <div className="relative">
                 <label htmlFor="doc-img" className="cursor-pointer block">
-                  <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition-colors">
+                  <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 transition-colors">
                     <img
                       className="w-full h-full object-cover"
                       src={previewUrl || UPLOAD_PLACEHOLDER}
@@ -200,10 +200,10 @@ const AddDoctor = () => {
               </div>
 
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
                   Upload Requirements
                 </h3>
-                <ul className="text-sm text-gray-600 space-y-1">
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                   <li>• Professional headshot photo</li>
                   <li>• Maximum file size: 5MB</li>
                   <li>• Formats: JPG, PNG, WEBP</li>
@@ -227,20 +227,20 @@ const AddDoctor = () => {
         </Card>
 
 
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Full Name <span className="text-red-600">*</span>
                 </label>
                 <input
                   onChange={(e) => setName(e.target.value)}
                   value={name}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   type="text"
                   placeholder="Dr. John Doe"
                   required
@@ -248,13 +248,13 @@ const AddDoctor = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email Address <span className="text-red-600">*</span>
                 </label>
                 <input
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   type="email"
                   placeholder="doctor@example.com"
                   required
@@ -262,13 +262,13 @@ const AddDoctor = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Password <span className="text-red-600">*</span>
                 </label>
                 <input
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   type="password"
                   placeholder="Minimum 6 characters"
                   required
@@ -276,13 +276,13 @@ const AddDoctor = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Education / Degree <span className="text-red-600">*</span>
                 </label>
                 <input
                   onChange={(e) => setDegree(e.target.value)}
                   value={degree}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   type="text"
                   placeholder="MBBS, MD"
                   required
@@ -293,20 +293,20 @@ const AddDoctor = () => {
         </Card>
 
 
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle>Professional Details</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Speciality
                 </label>
                 <select
                   onChange={(e) => setSpeciality(e.target.value)}
                   value={speciality}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                 >
                   <option value="General physician">General Physician</option>
                   <option value="Gynecologist">Gynecologist</option>
@@ -318,13 +318,13 @@ const AddDoctor = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Experience
                 </label>
                 <select
                   onChange={(e) => setExperience(e.target.value)}
                   value={experience}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                 >
                   {Array.from({ length: 10 }, (_, i) => i + 1).map((year) => (
                     <option
@@ -338,13 +338,13 @@ const AddDoctor = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Consultation Fee ({currency})
                 </label>
                 <input
                   onChange={(e) => setFees(e.target.value)}
                   value={fees}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   type="number"
                   placeholder="500"
                   required
@@ -355,20 +355,20 @@ const AddDoctor = () => {
         </Card>
 
 
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle>Clinic Address</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Address Line 1 <span className="text-red-600">*</span>
                 </label>
                 <input
                   onChange={(e) => setAddress1(e.target.value)}
                   value={address1}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   type="text"
                   placeholder="Street address, building name"
                   required
@@ -376,13 +376,13 @@ const AddDoctor = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Address Line 2
                 </label>
                 <input
                   onChange={(e) => setAddress2(e.target.value)}
                   value={address2}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   type="text"
                   placeholder="City, State, Zip Code"
                 />
@@ -392,7 +392,7 @@ const AddDoctor = () => {
         </Card>
 
 
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle>About Doctor</CardTitle>
           </CardHeader>
@@ -400,7 +400,7 @@ const AddDoctor = () => {
             <textarea
               onChange={(e) => setAbout(e.target.value)}
               value={about}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-gray-700 dark:text-white"
               placeholder="Write about the doctor's experience, expertise, and qualifications..."
               rows={6}
               required
@@ -434,6 +434,7 @@ const AddDoctor = () => {
             onClick={resetForm}
             variant="outline"
             size="lg"
+            className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Reset Form
           </Button>

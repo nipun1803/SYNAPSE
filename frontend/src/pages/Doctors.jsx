@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Filter, Stethoscope, Users } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const Doctors = () => {
   const { speciality } = useParams()
@@ -118,11 +119,11 @@ const Doctors = () => {
   return (
     <section className='py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'>
       <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2'>
+        <h1 className='text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2'>
           <Stethoscope className='w-7 h-7 text-blue-600' />
           Find a Doctor
         </h1>
-        <p className='text-gray-600'>Browse through our specialist doctors and book an appointment</p>
+        <p className='text-gray-600 dark:text-gray-400'>Browse through our specialist doctors and book an appointment</p>
       </div>
 
       <div className='flex flex-col sm:flex-row items-start gap-6'>
@@ -141,29 +142,29 @@ const Doctors = () => {
         </Button>
 
         <aside className={`w-full sm:w-64 flex-shrink-0 ${showFilter ? 'block' : 'hidden sm:block'}`}>
-          <Card className='border-gray-200 shadow-md sticky top-4'>
+          <Card className='border-gray-200 dark:border-gray-700 shadow-md sticky top-4'>
             <CardContent className='p-4 space-y-6'>
 
               {/* search */}
               <div>
-                <h3 className='text-sm font-semibold text-gray-900 mb-3'>Search</h3>
+                <h3 className='text-sm font-semibold text-gray-900 dark:text-white mb-3'>Search</h3>
                 <input
                   type="text"
                   placeholder="Search doctor..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                 />
                 {searchInput !== searchQuery && (
-                  <p className="text-xs text-gray-500 mt-1">Searching...</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Searching...</p>
                 )}
               </div>
 
               {/* sort */}
               <div>
-                <h3 className='text-sm font-semibold text-gray-900 mb-3'>Sort By</h3>
+                <h3 className='text-sm font-semibold text-gray-900 dark:text-white mb-3'>Sort By</h3>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
                 >
@@ -177,7 +178,7 @@ const Doctors = () => {
 
               {/* categories */}
               <div>
-                <h3 className='text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+                <h3 className='text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2'>
                   <Filter className='w-4 h-4' />
                   Specialties
                 </h3>
@@ -188,7 +189,7 @@ const Doctors = () => {
                       onClick={() => handleCategoryClick(category)}
                       className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${speciality === category
                         ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
                         }`}
                     >
                       {category}
@@ -214,7 +215,7 @@ const Doctors = () => {
 
         <div className='flex-1 w-full'>
           <div className='flex items-center justify-between mb-6'>
-            <p className='text-gray-600 flex items-center gap-2'>
+            <p className='text-gray-600 dark:text-gray-400 flex items-center gap-2'>
               <Users className='w-5 h-5' />
               {loading ? (
                 <span className='font-medium'>Loading...</span>
@@ -223,7 +224,7 @@ const Doctors = () => {
                   <span className='font-medium'>{doctors.length}</span>
                   {doctors.length === 1 ? ' doctor' : ' doctors'} found
                   {totalDoctors > doctors.length && (
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
                       ({totalDoctors} total)
                     </span>
                   )}
@@ -237,15 +238,28 @@ const Doctors = () => {
               <div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                 <Users className='w-8 h-8 text-red-400' />
               </div>
-              <h3 className='text-lg font-semibold text-gray-900 mb-2'>Error loading doctors</h3>
-              <p className='text-gray-600 mb-6'>{error}</p>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>Error loading doctors</h3>
+              <p className='text-gray-600 dark:text-gray-400 mb-6'>{error}</p>
               <Button onClick={fetchDoctorsList} className='bg-blue-600 hover:bg-blue-700 text-white'>
                 Try Again
               </Button>
             </div>
           ) : loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className='border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-800'>
+                  <Skeleton className='h-56 w-full' />
+                  <div className='p-5 space-y-3'>
+                    <Skeleton className='h-6 w-3/4' />
+                    <Skeleton className='h-4 w-1/2' />
+                    <div className='flex justify-between pt-2'>
+                      <Skeleton className='h-4 w-1/4' />
+                      <Skeleton className='h-4 w-1/4' />
+                    </div>
+                    <Skeleton className='h-10 w-full mt-4' />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : doctors.length > 0 ? (
             <>
@@ -254,7 +268,7 @@ const Doctors = () => {
                   <Card
                     key={doctor._id}
                     onClick={() => handleDoctorClick(doctor._id)}
-                    className='group overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-gray-200'
+                    className='group overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-gray-200 dark:border-gray-700'
                   >
                     <div className='relative overflow-hidden'>
                       <img
@@ -262,23 +276,38 @@ const Doctors = () => {
                         src={doctor.image}
                         alt={doctor.name}
                       />
-                      {doctor.available && (
-                        <Badge className='absolute top-3 right-3 bg-green-100 text-green-700 hover:bg-green-100 border-0 shadow-md'>
-                          <span className='w-2 h-2 bg-green-500 rounded-full mr-1.5'></span>
-                          Available
-                        </Badge>
-                      )}
+                      <div className='absolute top-3 right-3 flex flex-col gap-2 items-end'>
+                        {doctor.available && (
+                          <Badge className='bg-green-100 text-green-700 hover:bg-green-100 border-0 shadow-sm backdrop-blur-sm'>
+                            <span className='w-2 h-2 bg-green-500 rounded-full mr-1.5'></span>
+                            Available
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
                     <CardContent className='p-5'>
-                      <h3 className='text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors'>
-                        {doctor.name}
-                      </h3>
-                      <p className='text-sm text-gray-600 mb-2'>{doctor.speciality}</p>
+                      <div className='flex justify-between items-start mb-2'>
+                        <div>
+                          <h3 className='text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors flex items-center gap-1'>
+                            {doctor.name}
+                            {doctor.verified && (
+                              <img src={assets.verified_icon} className='w-4 h-4' alt='Verified' title='Verified Doctor' />
+                            )}
+                          </h3>
+                          <p className='text-sm text-gray-600 dark:text-gray-400'>{doctor.speciality}</p>
+                        </div>
+                        <div className='flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-md border border-yellow-100'>
+                          <span className='text-yellow-500 text-xs'>★</span>
+                          <span className='text-xs font-bold text-gray-700 dark:text-gray-300'>{doctor.rating ? doctor.rating.toFixed(1) : 'New'}</span>
+                        </div>
+                      </div>
 
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                        <span>Exp: {doctor.experience}</span>
-                        <span className="font-medium text-gray-900">Fees: ₹{doctor.fees}</span>
+                      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4 mt-3">
+                        <span className='bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-medium'>
+                          {doctor.experience} Exp
+                        </span>
+                        <span className="font-bold text-gray-900 dark:text-white">₹{doctor.fees}</span>
                       </div>
 
                       <Button
@@ -326,8 +355,8 @@ const Doctors = () => {
               <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                 <Users className='w-8 h-8 text-gray-400' />
               </div>
-              <h3 className='text-lg font-semibold text-gray-900 mb-2'>No doctors found</h3>
-              <p className='text-gray-600 mb-6'>Try adjusting your search or filters</p>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>No doctors found</h3>
+              <p className='text-gray-600 dark:text-gray-400 mb-6'>Try adjusting your search or filters</p>
               <Button onClick={handleClearFilters} className='bg-blue-600 hover:bg-blue-700 text-white'>
                 Clear Filters
               </Button>

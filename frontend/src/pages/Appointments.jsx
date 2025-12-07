@@ -6,13 +6,17 @@ import { AppContext } from '../context/AppContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Calendar, Clock, DollarSign, CreditCard, Loader2, ClipboardList, CheckCircle, FileText, X, RefreshCw } from 'lucide-react'
-import { userService } from '../api/services'
+import { MapPin, Calendar, Clock, DollarSign, CreditCard, Loader2, ClipboardList, CheckCircle, CheckCircle2, FileText, X, RefreshCw, MessageSquare } from 'lucide-react'
+import { userService, doctorService, reviewService } from '../api/services'
 import prescriptionService from '../api/prescriptionService'
+import axios from 'axios'
+import ReviewModal from '../components/ReviewModal'
+import ChatWindow from '../components/ChatWindow'
+import { Skeleton } from '@/components/ui/skeleton'
 
-const MyAppointments = () => {
+const Appointments = () => {
   const navigate = useNavigate()
-  const { currencySymbol, slotDateFormat } = useContext(AppContext)
+  const { currencySymbol, slotDateFormat, backendUrl, token, getDoctorsData } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(null)
@@ -26,6 +30,10 @@ const MyAppointments = () => {
   const [rescheduleTime, setRescheduleTime] = useState('')
   const [rescheduling, setRescheduling] = useState(false)
   const [availableSlots, setAvailableSlots] = useState([])
+  const [reviewModal, setReviewModal] = useState(null)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
 
   const handleViewPrescription = async (prescriptionId) => {
     try {
@@ -165,17 +173,132 @@ const MyAppointments = () => {
     }
   }
 
-  const openRescheduleModal = (appointment) => {
+  const openRescheduleModal = async (appointment) => {
     setRescheduleModal(appointment)
     setRescheduleDate('')
     setRescheduleTime('')
-    setAvailableSlots(generateTimeSlots())
+    setAvailableSlots([])
+
+    // Fetch doctor's availability when modal opens
+    try {
+      const docId = appointment.docData?._id
+      if (docId) {
+        const data = await doctorService.getAvailability(docId)
+        if (data.success) {
+          // Store availability data in state or ref to use when date is selected
+          setDoctorAvailability(data)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch doctor availability', error)
+      toast.error('Could not load doctor availability')
+    }
   }
+
+  const [doctorAvailability, setDoctorAvailability] = useState(null)
+
+  const handleOpenReviewModal = (appointment) => {
+    setReviewModal(appointment)
+    setReviewRating(5)
+    setReviewComment('')
+  }
+
+  const handleSubmitReview = async () => {
+    if (!reviewComment.trim()) {
+      toast.error('Please enter a comment')
+      return
+    }
+
+    try {
+      setSubmittingReview(true)
+      const data = await reviewService.addReview({
+        docId: reviewModal.docData._id,
+        rating: reviewRating,
+        comment: reviewComment
+      })
+
+      if (data.success) {
+        toast.success('Review added successfully')
+        setReviewModal(null)
+        // Optionally refresh appointments or just close
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error('Failed to add review')
+    } finally {
+      setSubmittingReview(false)
+    }
+  }
+
+  // Update slots when date changes
+  useEffect(() => {
+    if (rescheduleDate && doctorAvailability && rescheduleModal) {
+      const dateKey = rescheduleDate // Already in DD_MM_YYYY format from selection
+
+      const available = doctorAvailability.available_slots?.[dateKey] || []
+      const booked = doctorAvailability.slots_booked?.[dateKey] || []
+
+      // Filter available slots
+      const now = new Date()
+      const [d, m, y] = dateKey.split('_')
+      const selectedDateObj = new Date(y, m - 1, d)
+      const isToday = selectedDateObj.toDateString() === now.toDateString()
+
+      const validSlots = available.filter(time => {
+        // Filter booked slots
+        if (booked.includes(time)) return false
+
+        // Filter past slots if today
+        if (isToday) {
+          const [timeStr, period] = time.split(' ')
+          let [hours, minutes] = timeStr.split(':').map(Number)
+          if (period === 'PM' && hours !== 12) hours += 12
+          if (period === 'AM' && hours === 12) hours = 0
+
+          const slotTime = new Date(selectedDateObj)
+          slotTime.setHours(hours, minutes, 0, 0)
+          return slotTime > now
+        }
+        return true
+      })
+
+      setAvailableSlots(validSlots)
+      setRescheduleTime('') // Reset time when date changes
+    }
+  }, [rescheduleDate, doctorAvailability])
+
+
 
   if (loading) {
     return (
-      <div className='flex justify-center items-center min-h-[60vh]'>
-        <Loader2 className='w-12 h-12 text-blue-600 animate-spin' />
+      <div className='max-w-6xl mx-auto py-8 px-4 space-y-4'>
+        <div className='mb-8'>
+          <Skeleton className='h-10 w-64 mb-2' />
+          <Skeleton className='h-5 w-96' />
+        </div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className='border border-gray-200 rounded-lg p-6 flex flex-col md:flex-row gap-6'>
+            <Skeleton className='w-full md:w-48 h-48 rounded-lg' />
+            <div className='flex-1 space-y-4'>
+              <div className='flex justify-between'>
+                <div className='space-y-2'>
+                  <Skeleton className='h-6 w-48' />
+                  <Skeleton className='h-4 w-32' />
+                </div>
+                <Skeleton className='h-6 w-24 rounded-full' />
+              </div>
+              <div className='space-y-2'>
+                <Skeleton className='h-4 w-full' />
+                <Skeleton className='h-4 w-3/4' />
+              </div>
+              <div className='flex justify-end gap-2 mt-4'>
+                <Skeleton className='h-10 w-32' />
+                <Skeleton className='h-10 w-32' />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     )
   }
@@ -183,18 +306,18 @@ const MyAppointments = () => {
   return (
     <div className='max-w-6xl mx-auto py-8 px-4'>
       <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-900'>My Appointments</h1>
-        <p className='text-gray-600 mt-2'>Manage your upcoming and past appointments</p>
+        <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>My Appointments</h1>
+        <p className='text-gray-600 dark:text-gray-400 mt-2'>Manage your upcoming and past appointments</p>
       </div>
 
       {appointments.length > 0 ? (
         <div className='space-y-4'>
           {appointments.map((item) => (
-            <Card key={item._id} className='group border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden'>
+            <Card key={item._id} className='group border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden bg-white dark:bg-gray-800'>
               <CardContent className='p-0'>
                 <div className='flex flex-col md:flex-row'>
                   {/* Doctor Image Section */}
-                  <div className='w-full md:w-48 h-48 md:h-auto relative bg-indigo-50 flex-shrink-0'>
+                  <div className='w-full md:w-48 h-48 md:h-auto relative bg-indigo-50 dark:bg-indigo-900/20 flex-shrink-0'>
                     <img
                       className='w-full h-full object-cover object-top'
                       src={item.docData?.image || assets.doctor_icon}
@@ -209,14 +332,14 @@ const MyAppointments = () => {
                     <div>
                       <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4'>
                         <div>
-                          <h3 className='text-xl font-bold text-gray-900 flex items-center gap-2 group-hover:text-blue-600 transition-colors'>
+                          <h3 className='text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors'>
                             {item.docData?.name}
                             {item.docData?.verified && (
                               <img src={assets.verified_icon} className='w-5 h-5' alt='Verified' title='Verified Doctor' />
                             )}
                           </h3>
-                          <p className='text-gray-600 font-medium'>{item.docData?.speciality}</p>
-                          <p className='text-sm text-gray-500'>{item.docData?.degree}</p>
+                          <p className='text-gray-600 dark:text-gray-300 font-medium'>{item.docData?.speciality}</p>
+                          <p className='text-sm text-gray-500 dark:text-gray-400'>{item.docData?.degree}</p>
                         </div>
 
                         <div className='flex flex-wrap gap-2'>
@@ -246,7 +369,7 @@ const MyAppointments = () => {
                                 Refunded
                               </Badge>
                             ) : (
-                              <Badge variant='outline' className='text-gray-600 border-gray-300'>
+                              <Badge variant='outline' className='text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'>
                                 Payment Pending
                               </Badge>
                             )
@@ -259,8 +382,79 @@ const MyAppointments = () => {
                         </div>
                       </div>
 
+                      {!item.cancelled && (
+                        <div className='flex gap-2 w-full sm:w-auto'>
+                          <button
+                            onClick={() => navigate(`/chat/${item._id}`)}
+                            className='flex-1 sm:flex-none text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-all px-4 py-2 flex items-center justify-center gap-1'
+                          >
+                            <MessageSquare size={16} /> Chat
+                          </button>
+
+                          {!item.isCompleted ? (
+                            <button className='flex-1 sm:flex-none text-sm text-stone-500 border rounded hover:bg-primary hover:text-white transition-all px-4 py-2'>
+                              Pay Online
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleOpenReviewModal(item)}
+                              className='flex-1 sm:flex-none text-sm text-primary border border-primary rounded hover:bg-primary hover:text-white transition-all px-4 py-2'
+                            >
+                              Rate Doctor
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {item.cancelled && (
+                        <button className='sm:min-w-48 py-2 border border-red-500 rounded text-red-500'>Appointment cancelled</button>
+                      )}
+
+                      {/* Appointment Timeline */}
+                      {!item.cancelled && (
+                        <div className='mb-6 px-2'>
+                          <div className='flex items-center justify-between relative'>
+                            {/* Progress Line */}
+                            <div className='absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-100 -z-10 rounded-full'></div>
+                            <div
+                              className='absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-green-500 -z-10 rounded-full transition-all duration-500'
+                              style={{
+                                width: item.isCompleted ? '100%' : item.payment || item.paymentStatus === 'completed' ? '50%' : '0%'
+                              }}
+                            ></div>
+
+                            {/* Steps */}
+                            <div className='flex flex-col items-center gap-1'>
+                              <div className='w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold shadow-sm ring-4 ring-white'>
+                                <CheckCircle2 className='w-4 h-4' />
+                              </div>
+                              <span className='text-xs font-medium text-gray-700 dark:text-gray-300'>Booked</span>
+                            </div>
+
+                            <div className='flex flex-col items-center gap-1'>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white dark:ring-gray-800 transition-colors duration-300 ${item.payment || item.paymentStatus === 'completed' || item.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                                }`}>
+                                {item.payment || item.paymentStatus === 'completed' || item.isCompleted ? <CheckCircle2 className='w-4 h-4' /> : '2'}
+                              </div>
+                              <span className={`text-xs font-medium ${item.payment || item.paymentStatus === 'completed' || item.isCompleted ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}>Paid</span>
+                            </div>
+
+                            <div className='flex flex-col items-center gap-1'>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white dark:ring-gray-800 transition-colors duration-300 ${item.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                                }`}>
+                                {item.isCompleted ? <CheckCircle2 className='w-4 h-4' /> : '3'}
+                              </div>
+                              <span className={`text-xs font-medium ${item.isCompleted ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}>Completed</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4'>
+                      </div>
+
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 mb-6'>
-                        <div className='flex items-center gap-3 text-sm text-gray-700'>
+                        <div className='flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300'>
                           <div className='w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0'>
                             <Calendar className='w-4 h-4 text-blue-600' />
                           </div>
@@ -272,7 +466,7 @@ const MyAppointments = () => {
                           </div>
                         </div>
 
-                        <div className='flex items-center gap-3 text-sm text-gray-700'>
+                        <div className='flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300'>
                           <div className='w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0'>
                             <MapPin className='w-4 h-4 text-green-600' />
                           </div>
@@ -289,19 +483,19 @@ const MyAppointments = () => {
                       {item.purpose && (
                         <div className='mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100'>
                           <p className='text-xs text-blue-600 font-medium uppercase tracking-wide mb-1'>Reason for Visit</p>
-                          <p className='text-sm text-gray-700'>{item.purpose}</p>
+                          <p className='text-sm text-gray-700 dark:text-gray-300'>{item.purpose}</p>
                         </div>
                       )}
                     </div>
 
-                    <div className='pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4'>
+                    <div className='pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4'>
                       <div className='flex items-center gap-2'>
-                        <div className='p-2 bg-gray-50 rounded-lg'>
-                          <CreditCard className='w-5 h-5 text-gray-600' />
+                        <div className='p-2 bg-gray-50 dark:bg-gray-700 rounded-lg'>
+                          <CreditCard className='w-5 h-5 text-gray-600 dark:text-gray-300' />
                         </div>
                         <div>
                           <p className='text-xs text-gray-500 font-medium uppercase'>Amount</p>
-                          <p className='text-lg font-bold text-gray-900'>{currencySymbol}{item.amount || item.docData?.fees}</p>
+                          <p className='text-lg font-bold text-gray-900 dark:text-white'>{currencySymbol}{item.amount || item.docData?.fees}</p>
                         </div>
                       </div>
 
@@ -322,6 +516,18 @@ const MyAppointments = () => {
                                 View Prescription
                               </>
                             )}
+                          </Button>
+                        )}
+
+                        {/* Rate Doctor button - for completed appointments */}
+                        {item.isCompleted && (
+                          <Button
+                            onClick={() => handleOpenReviewModal(item)}
+                            variant='outline'
+                            className='border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50'
+                          >
+                            <span className='mr-1'>★</span>
+                            Rate Doctor
                           </Button>
                         )}
 
@@ -384,13 +590,13 @@ const MyAppointments = () => {
           )}
         </div>
       ) : (
-        <Card className='border-gray-200'>
+        <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
           <CardContent className='text-center py-16'>
-            <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <ClipboardList className='w-8 h-8 text-gray-400' />
+            <div className='w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4'>
+              <ClipboardList className='w-8 h-8 text-gray-400 dark:text-gray-500' />
             </div>
-            <h3 className='text-lg font-medium text-gray-900'>No appointments yet</h3>
-            <p className='mt-2 text-sm text-gray-500'>Start by booking an appointment with a doctor.</p>
+            <h3 className='text-lg font-medium text-gray-900 dark:text-white'>No appointments yet</h3>
+            <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>Start by booking an appointment with a doctor.</p>
             <Button
               onClick={() => window.location.href = '/doctors'}
               className='mt-6 bg-blue-600 hover:bg-blue-700 text-white'
@@ -406,16 +612,16 @@ const MyAppointments = () => {
       {selectedPrescription && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Prescription Details</h2>
-                <p className="text-sm text-gray-500">#{selectedPrescription.prescriptionNumber || selectedPrescription._id}</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Prescription Details</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">#{selectedPrescription.prescriptionNumber || selectedPrescription._id}</p>
               </div>
               <button
                 onClick={() => setSelectedPrescription(null)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
               >
-                <X className="w-6 h-6 text-gray-500" />
+                <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
 
@@ -432,30 +638,30 @@ const MyAppointments = () => {
                     />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Dr. {selectedPrescription.doctorId?.name}</p>
-                    <p className="text-sm text-gray-600">{selectedPrescription.doctorId?.speciality}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">Dr. {selectedPrescription.doctorId?.name}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedPrescription.doctorId?.speciality}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">Date</p>
-                  <p className="font-medium text-gray-900">{slotDateFormat(selectedPrescription.createdAt)}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Date</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{slotDateFormat(selectedPrescription.createdAt)}</p>
                 </div>
               </div>
 
               {/* Diagnosis */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Diagnosis</h3>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                  <p className="text-gray-700">{selectedPrescription.diagnosis}</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Diagnosis</h3>
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-100 dark:border-gray-600">
+                  <p className="text-gray-700 dark:text-gray-300">{selectedPrescription.diagnosis}</p>
                 </div>
               </div>
 
               {/* Medications */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Medications</h3>
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Medications</h3>
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 font-medium border-b border-gray-200">
+                    <thead className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium border-b border-gray-200 dark:border-gray-700">
                       <tr>
                         <th className="px-4 py-3">Drug Name</th>
                         <th className="px-4 py-3">Dosage</th>
@@ -465,15 +671,15 @@ const MyAppointments = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {selectedPrescription.medications?.map((med, index) => (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 font-medium text-gray-900">{med.drugName}</td>
-                          <td className="px-4 py-3 text-gray-600">{med.dosage}</td>
+                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{med.drugName}</td>
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{med.dosage}</td>
                           <td className="px-4 py-3">
                             <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
                               {med.frequency}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-600">{med.duration}</td>
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{med.duration}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -484,7 +690,7 @@ const MyAppointments = () => {
               {/* Notes */}
               {selectedPrescription.notes && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Doctor's Notes</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Doctor's Notes</h3>
                   <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 text-yellow-800">
                     <p>{selectedPrescription.notes}</p>
                   </div>
@@ -590,8 +796,76 @@ const MyAppointments = () => {
           </div>
         </div>
       )}
+
+      {/* Review Modal */}
+      {reviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Rate & Review</h2>
+                <p className="text-sm text-gray-500">Dr. {reviewModal.docData?.name}</p>
+              </div>
+              <button
+                onClick={() => setReviewModal(null)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className='flex flex-col gap-4'>
+                <div className='flex items-center justify-center gap-2'>
+                  <div className='flex gap-2'>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setReviewRating(star)}
+                        className={`text-3xl focus:outline-none transition-colors ${star <= reviewRating ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-200'
+                          }`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder='Share your experience with this doctor...'
+                  className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent min-h-[120px]'
+                />
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+              <Button
+                onClick={() => setReviewModal(null)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitReview}
+                disabled={submittingReview}
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                {submittingReview ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit Review'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-export default MyAppointments
+export default Appointments

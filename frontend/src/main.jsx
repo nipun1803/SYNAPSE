@@ -5,10 +5,14 @@ import App from './App.jsx'
 import AppContextProvider from './context/AppContext.jsx'
 import './index.css'
 
+import { SocketContextProvider } from './context/SocketContext.jsx'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <AppContextProvider>
-      <App />
+      <SocketContextProvider>
+        <App />
+      </SocketContextProvider>
     </AppContextProvider>
   </BrowserRouter>,
 )

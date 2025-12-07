@@ -178,11 +178,22 @@ export const adminService = {
     })
 };
 
+export const reviewService = {
+    // POST /api/reviews/add
+    addReview: (payload) => fetchAPI(`${BASE_URL}/api/reviews/add`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    }),
+
+    // GET /api/reviews/:docId
+    getReviews: (docId) => fetchAPI(`${BASE_URL}/api/reviews/${docId}`)
+};
 
 
 export default {
     auth: authService,
     user: userService,
     doctor: doctorService,
-    admin: adminService
+    admin: adminService,
+    review: reviewService
 };

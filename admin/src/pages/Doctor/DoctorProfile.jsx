@@ -110,10 +110,10 @@ const DoctorProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-4xl mx-auto">
 
-        <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6 overflow-hidden">
 
           <div className="h-32 bg-gradient-to-r from-green-500 to-teal-600"></div>
 
@@ -124,7 +124,7 @@ const DoctorProfile = () => {
                 <img
                   src={profileData.image}
                   alt="Doctor Profile"
-                  className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg"
+                  className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover shadow-lg"
                 />
               </div>
 
@@ -132,7 +132,7 @@ const DoctorProfile = () => {
               {!isEdit && (
                 <button
                   onClick={() => setIsEdit(true)}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition"
                 >
                   <Edit className="h-4 w-4" />
                   Edit Profile
@@ -142,10 +142,10 @@ const DoctorProfile = () => {
 
             {/* profile info */}
             <div className="mt-4">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {profileData.name}
               </h1>
-              <div className="flex items-center gap-2 mt-2 text-gray-600">
+              <div className="flex items-center gap-2 mt-2 text-gray-600 dark:text-gray-300">
                 <GraduationCap className="h-4 w-4" />
                 <span className="font-medium">{profileData.degree}</span>
                 <span>•</span>
@@ -153,13 +153,13 @@ const DoctorProfile = () => {
                 <span>{profileData.speciality}</span>
                 <Badge
                   variant="secondary"
-                  className="bg-blue-100 text-blue-800"
+                  className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
                 >
                   <Calendar className="h-3 w-3 mr-1" />
                   {profileData.experience}
                 </Badge>
               </div>
-              <div className="flex items-center gap-2 text-gray-500 mt-1">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mt-1">
                 <Mail className="h-4 w-4" />
                 <p>{profileData.email}</p>
               </div>
@@ -167,14 +167,14 @@ const DoctorProfile = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Professional Information
           </h2>
 
           <div className="space-y-6">
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 About {isEdit && <span className="text-red-500">*</span>}
               </Label>
               {isEdit ? (
@@ -185,13 +185,13 @@ const DoctorProfile = () => {
                       about: e.target.value,
                     }))
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   rows={6}
                   value={profileData.about}
                   placeholder="Write about your experience, expertise, and qualifications..."
                 />
               ) : (
-                <p className="text-gray-900 whitespace-pre-wrap">
+                <p className="text-gray-900 dark:text-gray-300 whitespace-pre-wrap">
                   {profileData.about}
                 </p>
               )}
@@ -199,14 +199,14 @@ const DoctorProfile = () => {
 
 
             <div>
-              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <User className="h-4 w-4" />
                 Name
               </Label>
               {isEdit ? (
                 <Input
                   type="text"
-                  className="w-full"
+                  className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                   onChange={(e) =>
                     setProfileData((prev) => ({
                       ...prev,
@@ -217,20 +217,20 @@ const DoctorProfile = () => {
                   placeholder="Enter your name"
                 />
               ) : (
-                <p className="text-gray-900">{profileData.name}</p>
+                <p className="text-gray-900 dark:text-gray-300">{profileData.name}</p>
               )}
             </div>
 
 
             <div>
-              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Phone className="h-4 w-4" />
                 Phone Number
               </Label>
               {isEdit ? (
                 <Input
                   type="tel"
-                  className="w-full"
+                  className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                   onChange={(e) =>
                     setProfileData((prev) => ({
                       ...prev,
@@ -241,7 +241,7 @@ const DoctorProfile = () => {
                   placeholder="Enter phone number"
                 />
               ) : (
-                <p className="text-gray-900">
+                <p className="text-gray-900 dark:text-gray-300">
                   {profileData.phone || "Not provided"}
                 </p>
               )}
@@ -249,21 +249,21 @@ const DoctorProfile = () => {
 
 
             <div>
-              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <DollarSign className="h-4 w-4" />
                 Consultation Fee{" "}
                 {isEdit && <span className="text-red-500">*</span>}
               </Label>
               {isEdit ? (
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                     {currency}
                   </span>
                   <Input
                     type="number"
                     min="0"
                     step="1"
-                    className="w-full pl-8"
+                    className="w-full pl-8 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
@@ -275,14 +275,14 @@ const DoctorProfile = () => {
                   />
                 </div>
               ) : (
-                <p className="text-gray-900 text-lg font-semibold">
+                <p className="text-gray-900 dark:text-gray-300 text-lg font-semibold">
                   {currency} {profileData.fees}
                 </p>
               )}
             </div>
 
             <div>
-              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <MapPin className="h-4 w-4" />
                 Clinic Address{" "}
                 {isEdit && <span className="text-red-500">*</span>}
@@ -292,7 +292,7 @@ const DoctorProfile = () => {
                   <Input
                     type="text"
                     placeholder="Street address, building name"
-                    className="w-full"
+                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
@@ -304,7 +304,7 @@ const DoctorProfile = () => {
                   <Input
                     type="text"
                     placeholder="City, State, Zip Code (optional)"
-                    className="w-full"
+                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
@@ -315,7 +315,7 @@ const DoctorProfile = () => {
                   />
                 </div>
               ) : (
-                <div className="text-gray-900">
+                <div className="text-gray-900 dark:text-gray-300">
                   <p>{profileData.address.line1}</p>
                   {profileData.address.line2 && (
                     <p>{profileData.address.line2}</p>
@@ -325,13 +325,13 @@ const DoctorProfile = () => {
             </div>
 
 
-            <div className="border-t pt-4">
+            <div className="border-t dark:border-gray-700 pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="block text-sm font-medium text-gray-700">
+                  <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Availability Status
                   </Label>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {profileData.available
                       ? "You are currently accepting appointments"
                       : "You are not accepting new appointments"}
@@ -352,9 +352,8 @@ const DoctorProfile = () => {
                     className="sr-only peer"
                   />
                   <div
-                    className={`w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
-                      profileData.available ? "peer-checked:bg-green-600" : ""
-                    } ${!isEdit ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${profileData.available ? "peer-checked:bg-green-600" : ""
+                      } ${!isEdit ? "opacity-50 cursor-not-allowed" : ""}`}
                   ></div>
                 </label>
               </div>
@@ -363,7 +362,7 @@ const DoctorProfile = () => {
 
 
           {isEdit && (
-            <div className="flex gap-3 mt-6 pt-6 border-t">
+            <div className="flex gap-3 mt-6 pt-6 border-t dark:border-gray-700">
               <Button
                 onClick={updateProfile}
                 disabled={loading}
@@ -396,14 +395,14 @@ const DoctorProfile = () => {
 
 
         {!isEdit && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
             <div className="flex gap-3">
-              <Info className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <Info className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-green-900 font-medium">
+                <p className="text-sm text-green-900 dark:text-green-300 font-medium">
                   Keep your profile updated
                 </p>
-                <p className="text-sm text-green-700 mt-1">
+                <p className="text-sm text-green-700 dark:text-green-400 mt-1">
                   Your profile information helps patients make informed
                   decisions when booking appointments. Make sure your
                   availability status reflects your current schedule.
