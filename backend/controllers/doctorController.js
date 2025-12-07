@@ -137,77 +137,65 @@ const appointmentComplete = catchAsync(async (req, res) => {
     .json({ success: false, message: "Unable to complete appointment" });
 });
 
-const doctorList = async (req, res) => {
-  try {
-    const { page = 1, limit = 6, search, speciality, sort } = req.query;
+const doctorList = catchAsync(async (req, res) => {
+  const { page = 1, limit = 6, search, speciality, sort } = req.query;
 
-    // Parse pagination parameters
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
-    const skip = (pageNum - 1) * limitNum;
+  const pageNum = parseInt(page, 10);
+  const limitNum = parseInt(limit, 10);
+  const skip = (pageNum - 1) * limitNum;
 
-    // Build query object
-    const query = {};
+  const query = {};
 
-    // Filter by speciality
-    if (speciality && speciality.trim()) {
-      query.speciality = { $regex: new RegExp(`^${speciality.trim()}$`, 'i') };
-    }
-
-    // Search by name
-    if (search && search.trim()) {
-      query.name = { $regex: search.trim(), $options: 'i' };
-    }
-
-    // Build sort object
-    let sortObj = {};
-    if (sort) {
-      switch (sort) {
-        case 'fees_asc':
-          sortObj.fees = 1;
-          break;
-        case 'fees_desc':
-          sortObj.fees = -1;
-          break;
-        case 'experience_asc':
-          sortObj.experience = 1;
-          break;
-        case 'experience_desc':
-          sortObj.experience = -1;
-          break;
-        default:
-          sortObj._id = 1; // Default sort
-      }
-    } else {
-      sortObj._id = 1; // Default sort
-    }
-
-    // Get total count for pagination
-    const total = await doctorModel.countDocuments(query);
-
-    // Fetch doctors with pagination and sorting
-    const doctors = await doctorModel
-      .find(query)
-      .select("-password -email")
-      .sort(sortObj)
-      .skip(skip)
-      .limit(limitNum);
-
-    res.status(200).json({
-      success: true,
-      doctors,
-      pagination: {
-        total,
-        page: pageNum,
-        limit: limitNum,
-        pages: Math.ceil(total / limitNum),
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
+  if (speciality && speciality.trim()) {
+    query.speciality = { $regex: new RegExp(`^${speciality.trim()}$`, 'i') };
   }
-};
+
+  if (search && search.trim()) {
+    query.name = { $regex: search.trim(), $options: 'i' };
+  }
+
+  let sortObj = {};
+  if (sort) {
+    switch (sort) {
+      case 'fees_asc':
+        sortObj.fees = 1;
+        break;
+      case 'fees_desc':
+        sortObj.fees = -1;
+        break;
+      case 'experience_asc':
+        sortObj.experience = 1;
+        break;
+      case 'experience_desc':
+        sortObj.experience = -1;
+        break;
+      default:
+        sortObj._id = 1;
+    }
+  } else {
+    sortObj._id = 1;
+  }
+
+  const total = await doctorModel.countDocuments(query);
+
+  const doctors = await doctorModel
+    .find(query)
+    .select("-password -email")
+    .sort(sortObj)
+    .skip(skip)
+    .limit(limitNum);
+
+  res.status(200).json({
+    success: true,
+    doctors,
+    pagination: {
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum),
+    },
+  });
+});
 
 const changeAvailability = catchAsync(async (req, res) => {
   const docId = req.params.id || req.body?.docId;
@@ -253,7 +241,7 @@ const changeAvailability = catchAsync(async (req, res) => {
 // TODO: Add more detailed dashboard analytics
 const doctorDashboard = catchAsync(async (req, res) => {
   const docId = req.doctor.id;
-  const appointments = await appointmentModel.find({ docId });
+  const appointments = await appointmentModel.find({ docId }).populate('userData').populate('docData');
   let earnings = 0;
   appointments.forEach((item) => {
     if (item.isCompleted || item.payment) {
@@ -268,11 +256,45 @@ const doctorDashboard = catchAsync(async (req, res) => {
     }
   });
 
+  // Chart Data (Last 6 Months)
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const chartData = [];
+  const today = new Date();
+
+  // Initialize last 6 months
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    chartData.push({
+      monthKey: `${d.getMonth()}-${d.getFullYear()}`,
+      name: months[d.getMonth()],
+      revenue: 0,
+      appointments: 0
+    });
+  }
+
+  appointments.forEach((appt) => {
+    if (!appt.date) return;
+    const d = new Date(appt.date);
+    const key = `${d.getMonth()}-${d.getFullYear()}`;
+
+    const period = chartData.find(p => p.monthKey === key);
+    if (period) {
+      period.appointments += 1;
+      if (appt.isCompleted || appt.payment) {
+        period.revenue += (appt.amount || 0);
+      }
+    }
+  });
+
+  const finalChartData = chartData.map(({ monthKey, ...rest }) => rest);
+
   const dashData = {
     earnings,
     appointments: appointments.length,
     patients: patients.length,
     latestAppointments: appointments.reverse().slice(0, 5),
+    allAppointments: appointments,
+    chartData: finalChartData
   };
 
   res.json({ success: true, dashData });
@@ -372,6 +394,23 @@ const updateDoctorSlots = catchAsync(async (req, res) => {
   });
 });
 
+// Get single appointment by ID for doctor
+const getAppointmentById = catchAsync(async (req, res) => {
+  const docId = req.doctor.id;
+  const { id } = req.params;
+
+  const appointment = await appointmentModel.findOne({ _id: id, docId });
+
+  if (!appointment) {
+    return res.status(404).json({
+      success: false,
+      message: "Appointment not found or access denied"
+    });
+  }
+
+  res.json({ success: true, appointment });
+});
+
 export {
   loginDoctor,
   logoutDoctor,
@@ -386,4 +425,5 @@ export {
   getDoctorAvailableSlots,
   getMyAvailableSlots,
   updateDoctorSlots,
+  getAppointmentById,
 };

@@ -10,6 +10,10 @@ import doctorRouter from './routes/doctors.js';
 import userRouter from './routes/users.js';
 import paymentRouter from './routes/paymentRoute.js';
 import prescriptionRouter from './routes/prescriptionRoute.js';
+import reviewRouter from './routes/reviewRoute.js';
+
+import chatRouter from './routes/chatRoute.js';
+import { createSocketServer } from './realtime/socket.js';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -25,11 +29,13 @@ app.use(cors({
     process.env.FRONTEND_URL,
     process.env.ADMIN_URL,
     'http://localhost:5173',
-    'http://localhost:5174'
+    'http://localhost:5174',
+    'https://synapse-seven-theta.vercel.app',
+    'https://synapse-cma3.vercel.app'
   ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], 
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'token', 'aToken', 'dToken'],
   exposedHeaders: ['Set-Cookie']
 }));
 
@@ -42,8 +48,10 @@ app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/doctors', doctorRouter);
 app.use('/api/users', userRouter);
+app.use('/api/chat', chatRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/prescriptions', prescriptionRouter);
+app.use('/api/reviews', reviewRouter);
 
 
 app.get('/', (req, res) => {
@@ -65,8 +73,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: err.message });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server started on PORT: ${port}`);
 });
+
+// Initialize Socket.io
+createSocketServer(server, { jwtSecret: process.env.JWT_SECRET });
 
 export default app;

@@ -114,6 +114,13 @@ const loginUser = catchAsync(async (req, res) => {
     });
   }
 
+  if (user.blocked) {
+    return res.status(403).json({
+      success: false,
+      message: "Your account has been blocked by admin",
+    });
+  }
+
   const isMatch = await bcrypt.compare(password || "", user.password);
   if (!isMatch) {
     return res.status(401).json({
@@ -190,6 +197,12 @@ const unifiedLogin = catchAsync(async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "User does not exist" });
+    }
+
+    if (user.blocked) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Your account has been blocked by admin" });
     }
 
     const isMatch = await bcrypt.compare(password || "", user.password);
@@ -613,6 +626,32 @@ const getAppointmentById = catchAsync(async (req, res) => {
   res.status(200).json({ success: true, appointment });
 });
 
+
+
+// Admin: Get all users
+const getAllUsers = catchAsync(async (req, res) => {
+  const users = await userModel.find({}).select('-password');
+  res.json({ success: true, users });
+});
+
+// Admin: Block/Unblock user
+const toggleBlockUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const user = await userModel.findById(id);
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  user.blocked = !user.blocked;
+  await user.save();
+
+  res.json({
+    success: true,
+    message: user.blocked ? "User blocked successfully" : "User unblocked successfully"
+  });
+});
+
 export {
   loginUser,
   registerUser,
@@ -625,4 +664,6 @@ export {
   cancelAppointment,
   rescheduleAppointment,
   getAppointmentById,
+  getAllUsers,
+  toggleBlockUser
 };

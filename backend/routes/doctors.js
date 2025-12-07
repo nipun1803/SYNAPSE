@@ -11,7 +11,8 @@ import {
   updateDoctorProfile,
   getDoctorAvailableSlots,
   getMyAvailableSlots,
-  updateDoctorSlots
+  updateDoctorSlots,
+  getAppointmentById
 } from '../controllers/doctorController.js';
 import authAdmin from '../middleware/authAdmin.js';
 import authDoctor from '../middleware/authDoctor.js';
@@ -29,6 +30,7 @@ router.put('/me/slots', authDoctor, updateDoctorSlots);
 
 // Doctor appointments & dashboard
 router.get('/me/appointments', authDoctor, appointmentsDoctor);
+router.get('/me/appointments/:id', authDoctor, getAppointmentById);
 router.get('/me/dashboard', authDoctor, doctorDashboard);
 
 // Doctor actions

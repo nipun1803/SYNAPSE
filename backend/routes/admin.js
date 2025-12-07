@@ -1,10 +1,14 @@
 import express from "express";
-import { addDoctor, adminDashboard, allDoctors, appointmentCancel, appointmentsAdmin, loginAdmin, logoutAdmin, deleteAppointment, deleteDoctor } from '../controllers/adminController.js';
+import { addDoctor, adminDashboard, allDoctors, appointmentCancel, appointmentsAdmin, loginAdmin, logoutAdmin, deleteAppointment, deleteDoctor, getUserAppointments } from '../controllers/adminController.js';
+import { getAllUsers, toggleBlockUser } from "../controllers/userController.js";
 import { changeAvailability } from "../controllers/doctorController.js";
 import authAdmin from "../middleware/authAdmin.js";
 import upload from "../middleware/multer.js";
 
 const router = express.Router();
+
+// /api/admin/users/:id/appointments
+router.get("/users/:id/appointments", authAdmin, getUserAppointments);
 
 // /api/admin/login
 router.post("/login", loginAdmin);
@@ -31,5 +35,11 @@ router.patch("/doctors/:id/availability", authAdmin, changeAvailability);
 
 // /api/admin/doctors/:id - Delete doctor
 router.delete("/doctors/:id", authAdmin, deleteDoctor);
+
+// /api/admin/users
+router.get("/users", authAdmin, getAllUsers);
+
+// /api/admin/users/:id/block
+router.patch("/users/:id/block", authAdmin, toggleBlockUser);
 
 export default router;

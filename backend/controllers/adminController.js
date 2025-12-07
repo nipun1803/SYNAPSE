@@ -262,13 +262,48 @@ const allDoctors = catchAsync(async (req, res) => {
 const adminDashboard = catchAsync(async (req, res) => {
   const doctors = await doctorModel.find({});
   const users = await userModel.find({});
-  const appointments = await appointmentModel.find({});
+  const appointments = await appointmentModel.find({}).populate('docData');
+
+  // Calculate Chart Data (Last 6 Months)
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const chartData = [];
+  const today = new Date();
+
+  // Initialize last 6 months
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    chartData.push({
+      monthKey: `${d.getMonth()}-${d.getFullYear()}`, // accurate key
+      name: months[d.getMonth()], // display name
+      revenue: 0,
+      appointments: 0
+    });
+  }
+
+  appointments.forEach((appt) => {
+    if (!appt.date) return;
+    const d = new Date(appt.date);
+    const key = `${d.getMonth()}-${d.getFullYear()}`;
+
+    const period = chartData.find(p => p.monthKey === key);
+    if (period) {
+      period.appointments += 1;
+      if (appt.isCompleted || appt.payment) {
+        period.revenue += (appt.amount || 0);
+      }
+    }
+  });
+
+  // Remove helper keys before sending
+  const finalChartData = chartData.map(({ monthKey, ...rest }) => rest);
 
   const dashData = {
     doctors: doctors.length,
     appointments: appointments.length,
     patients: users.length,
     latestAppointments: appointments.slice().reverse(),
+    allAppointments: appointments,
+    chartData: finalChartData
   };
   res.status(200).json({ success: true, dashData });
 });
@@ -346,6 +381,22 @@ const deleteDoctor = catchAsync(async (req, res) => {
     .json({ success: true, message: "Doctor deleted successfully" });
 });
 
+// Get all appointments for a specific user
+const getUserAppointments = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: "User ID is required" });
+  }
+
+  const appointments = await appointmentModel
+    .find({ userId: id })
+    .sort({ date: -1 })
+    .populate('docData', 'name image speciality');
+
+  res.json({ success: true, appointments });
+});
+
 export {
   addDoctor,
   loginAdmin,
@@ -356,4 +407,5 @@ export {
   adminDashboard,
   deleteAppointment,
   deleteDoctor,
+  getUserAppointments
 };

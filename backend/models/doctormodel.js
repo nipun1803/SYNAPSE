@@ -17,6 +17,8 @@ const doctorSchema = new mongoose.Schema({
   slots_booked: { type: Object, default: {} },
   // Slots that the doctor has opened for booking (1 week only): { "DD_MM_YYYY": ["10:00 AM", "10:30 AM", ...] }
   available_slots: { type: Object, default: {} },
+  rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
   date: { type: Number, required: true },
 });
 
