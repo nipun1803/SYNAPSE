@@ -143,7 +143,7 @@ const ChatPage = () => {
     if (!currentAppointment) return null;
 
     return (
-        <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white">
+        <div className="flex flex-col h-[calc(100vh-140px)] bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white rounded-xl overflow-hidden shadow-sm">
             {/* Header */}
             <div className="bg-white dark:bg-gray-800 px-4 sm:px-6 py-3 shadow-md border-b border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center max-w-6xl mx-auto">
@@ -161,13 +161,11 @@ const ChatPage = () => {
                                     alt={currentAppointment.docData.name}
                                     className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
                                 />
-                                <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                             </div>
                             <div>
                                 <h2 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">Dr. {currentAppointment.docData.name}</h2>
-                                <p className={`text-xs font-medium flex items-center gap-1 ${isConnected ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                                    {isConnected ? 'Online' : 'Offline'}
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {currentAppointment.docData.speciality}
                                 </p>
                             </div>
                         </div>

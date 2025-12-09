@@ -570,7 +570,7 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
 
 const listAppointment = catchAsync(async (req, res) => {
   const userId = req.user?.id;
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, filter, docId, date } = req.query;
 
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -580,13 +580,35 @@ const listAppointment = catchAsync(async (req, res) => {
   const limitNum = parseInt(limit, 10);
   const skip = (pageNum - 1) * limitNum;
 
+  const query = { userId };
+
+  // Status Filters
+  if (filter === 'upcoming') {
+    query.cancelled = false;
+    query.isCompleted = false;
+  } else if (filter === 'completed') {
+    query.isCompleted = true;
+  } else if (filter === 'cancelled') {
+    query.cancelled = true;
+  }
+
+  // Doctor Filter
+  if (docId) {
+    query.docId = docId;
+  }
+
+  // Date Filter (Expects DD_MM_YYYY format)
+  if (date) {
+    query.slotDate = date;
+  }
+
   const appointments = await appointmentModel
-    .find({ userId })
+    .find(query)
     .sort({ date: -1, _id: -1 })
     .skip(skip)
     .limit(limitNum);
 
-  const total = await appointmentModel.countDocuments({ userId });
+  const total = await appointmentModel.countDocuments(query);
 
   res.status(200).json({
     success: true,

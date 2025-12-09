@@ -1,17 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Calendar, Clock, DollarSign, CreditCard, Loader2, ClipboardList, CheckCircle, CheckCircle2, FileText, X, RefreshCw, MessageSquare } from 'lucide-react'
-import { userService, doctorService, reviewService } from '../api/services'
 import prescriptionService from '../api/prescriptionService'
 import axios from 'axios'
 import ReviewModal from '../components/ReviewModal'
 import ChatWindow from '../components/ChatWindow'
+import { toast } from 'react-toastify'
+import { userService, doctorService, reviewService } from '../api/services'
+import { MapPin, Calendar, Clock, DollarSign, CreditCard, Loader2, ClipboardList, CheckCircle, CheckCircle2, FileText, X, RefreshCw, MessageSquare, User, Filter } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const Appointments = () => {
@@ -19,6 +20,10 @@ const Appointments = () => {
   const { currencySymbol, slotDateFormat, backendUrl, token, getDoctorsData } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('all') // 'all', 'upcoming', 'completed', 'cancelled'
+  const [filterDocId, setFilterDocId] = useState('')
+  const [filterDate, setFilterDate] = useState('')
+  const [doctors, setDoctors] = useState([])
   const [cancelling, setCancelling] = useState(null)
   const [deleting, setDeleting] = useState(null)
   const [page, setPage] = useState(1)
@@ -58,7 +63,19 @@ const Appointments = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true)
-      const data = await userService.getAppointments({ page, limit: 5 })
+      setLoading(true)
+      // Convert date from YYYY-MM-DD to DD_MM_YYYY for backend if present
+      let formattedDate = ''
+      if (filterDate) {
+        const [y, m, d] = filterDate.split('-')
+        formattedDate = `${d}_${m}_${y}`
+      }
+
+      const params = { page, limit: 5, filter }
+      if (filterDocId) params.docId = filterDocId
+      if (formattedDate) params.date = formattedDate
+
+      const data = await userService.getAppointments(params)
 
       if (data.success) {
         setAppointments(data.appointments || [])
@@ -117,14 +134,42 @@ const Appointments = () => {
 
   useEffect(() => {
     fetchAppointments()
-  }, [page])
+  }, [page, filter, filterDocId, filterDate])
+
+  // Fetch doctors for the filter dropdown
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const data = await doctorService.getList()
+        if (data.success) {
+          setDoctors(data.doctors)
+        }
+      } catch (error) {
+        console.error("Failed to load doctors list")
+      }
+    }
+    fetchDoctors()
+  }, [])
+
+  const handleFilterChange = (newFilter) => {
+    if (newFilter === filter) return
+    setFilter(newFilter)
+    setPage(1)
+  }
+
+  const clearFilters = () => {
+    setFilter('all')
+    setFilterDocId('')
+    setFilterDate('')
+    setPage(1)
+  }
 
   // Generate available time slots
   const generateTimeSlots = () => {
     const slots = []
     for (let hour = 9; hour <= 17; hour++) {
       slots.push(`${hour}:00`)
-      if (hour < 17) slots.push(`${hour}:30`)
+      if (hour < 17) slots.push(`${hour}: 30`)
     }
     return slots
   }
@@ -310,6 +355,81 @@ const Appointments = () => {
         <p className='text-gray-600 dark:text-gray-400 mt-2'>Manage your upcoming and past appointments</p>
       </div>
 
+      {/* Filter Tabs */}
+      <div className='flex flex-wrap gap-2 mb-6'>
+        {[
+          { id: 'all', label: 'All Appointments' },
+          { id: 'upcoming', label: 'Upcoming' },
+          { id: 'completed', label: 'Completed' },
+          { id: 'cancelled', label: 'Cancelled' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleFilterChange(tab.id)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 
+              ${filter === tab.id
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+              } `}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Advanced Filters */}
+      <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 transition-all duration-300">
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+
+          <div className="w-full md:flex-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1.5">
+              <User size={14} className="text-blue-500" />
+              Filter by Doctor
+            </label>
+            <div className="relative">
+              <select
+                value={filterDocId}
+                onChange={(e) => { setFilterDocId(e.target.value); setPage(1); }}
+                className="flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+              >
+                <option value="">All Doctors</option>
+                {doctors.map(doc => (
+                  <option key={doc._id} value={doc._id}>{doc.name} - {doc.speciality}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
+                <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full md:flex-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1.5">
+              <Calendar size={14} className="text-blue-500" />
+              Filter by Date
+            </label>
+            <Input
+              type="date"
+              value={filterDate}
+              onChange={(e) => { setFilterDate(e.target.value); setPage(1); }}
+              className="w-full"
+            />
+          </div>
+
+          {(filter !== 'all' || filterDocId || filterDate) && (
+            <div className="w-full md:w-auto">
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="w-full md:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-900/30 gap-2 h-10"
+              >
+                <X size={16} /> Clear Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {appointments.length > 0 ? (
         <div className='space-y-4'>
           {appointments.map((item) => (
@@ -385,7 +505,7 @@ const Appointments = () => {
                       {!item.cancelled && (
                         <div className='flex gap-2 w-full sm:w-auto'>
                           <button
-                            onClick={() => navigate(`/chat/${item._id}`)}
+                            onClick={() => navigate(`/ chat / ${item._id} `)}
                             className='flex-1 sm:flex-none text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-all px-4 py-2 flex items-center justify-center gap-1'
                           >
                             <MessageSquare size={16} /> Chat
@@ -432,19 +552,19 @@ const Appointments = () => {
                             </div>
 
                             <div className='flex flex-col items-center gap-1'>
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white dark:ring-gray-800 transition-colors duration-300 ${item.payment || item.paymentStatus === 'completed' || item.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
-                                }`}>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white dark: ring-gray-800 transition-colors duration-300 ${item.payment || item.paymentStatus === 'completed' || item.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                                } `}>
                                 {item.payment || item.paymentStatus === 'completed' || item.isCompleted ? <CheckCircle2 className='w-4 h-4' /> : '2'}
                               </div>
-                              <span className={`text-xs font-medium ${item.payment || item.paymentStatus === 'completed' || item.isCompleted ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}>Paid</span>
+                              <span className={`text-xs font-medium ${item.payment || item.paymentStatus === 'completed' || item.isCompleted ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'} `}>Paid</span>
                             </div>
 
                             <div className='flex flex-col items-center gap-1'>
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white dark:ring-gray-800 transition-colors duration-300 ${item.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
-                                }`}>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white dark: ring-gray-800 transition-colors duration-300 ${item.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                                } `}>
                                 {item.isCompleted ? <CheckCircle2 className='w-4 h-4' /> : '3'}
                               </div>
-                              <span className={`text-xs font-medium ${item.isCompleted ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}>Completed</span>
+                              <span className={`text-xs font-medium ${item.isCompleted ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'} `}>Completed</span>
                             </div>
                           </div>
                         </div>
@@ -500,7 +620,7 @@ const Appointments = () => {
                       </div>
 
                       <div className='flex flex-wrap gap-2 justify-end md:justify-start'>
-                        {/* View Prescription button - for completed appointments with prescription */}
+                        {/* View Prescription button-for completed appointments with prescription */}
                         {item.isCompleted && item.prescriptionId && (
                           <Button
                             onClick={() => handleViewPrescription(item.prescriptionId)}
@@ -519,7 +639,7 @@ const Appointments = () => {
                           </Button>
                         )}
 
-                        {/* Rate Doctor button - for completed appointments */}
+                        {/* Rate Doctor button-for completed appointments */}
                         {item.isCompleted && (
                           <Button
                             onClick={() => handleOpenReviewModal(item)}
@@ -531,7 +651,7 @@ const Appointments = () => {
                           </Button>
                         )}
 
-                        {/* Reschedule button - for upcoming appointments, only if not already rescheduled */}
+                        {/* Reschedule button-for upcoming appointments, only if not already rescheduled */}
                         {!item.cancelled && !item.isCompleted && (!item.rescheduleCount || item.rescheduleCount < 1) && (
                           <Button
                             onClick={() => openRescheduleModal(item)}
@@ -543,7 +663,7 @@ const Appointments = () => {
                           </Button>
                         )}
 
-                        {/* Cancel button - for upcoming appointments */}
+                        {/* Cancel button-for upcoming appointments */}
                         {!item.cancelled && !item.isCompleted && (
                           <Button
                             onClick={() => cancelAppointment(item._id)}
@@ -762,7 +882,7 @@ const Appointments = () => {
                       className={`px-3 py-2 text-sm rounded-lg border transition-colors ${rescheduleTime === slot
                         ? 'bg-blue-600 text-white border-blue-600'
                         : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300'
-                        }`}
+                        } `}
                     >
                       {slot}
                     </button>
@@ -822,8 +942,8 @@ const Appointments = () => {
                       <button
                         key={star}
                         onClick={() => setReviewRating(star)}
-                        className={`text-3xl focus:outline-none transition-colors ${star <= reviewRating ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-200'
-                          }`}
+                        className={`text-3xl focus: outline-none transition-colors ${star <= reviewRating ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-200'
+                          } `}
                       >
                         ★
                       </button>
