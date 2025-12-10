@@ -277,10 +277,14 @@ const updateProfile = catchAsync(async (req, res) => {
   await userModel.findByIdAndUpdate(userId, update);
 
   if (imageFile) {
-    const uploaded = await cloudinary.uploader.upload(imageFile.path, {
-      resource_type: "image",
-    });
-    await userModel.findByIdAndUpdate(userId, { image: uploaded.secure_url });
+    try {
+      const uploaded = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+      await userModel.findByIdAndUpdate(userId, { image: uploaded.secure_url });
+    } catch (e) {
+      return res.status(502).json({ success: false, message: "Image upload failed" });
+    }
   }
   res.status(200).json({ success: true, message: "Profile Updated" });
 });

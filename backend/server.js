@@ -2,7 +2,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
-import connectCloudinary from './config/cloudinary.js';
 import connectDB from './config/mongodb.js';
 import adminRouter from './routes/admin.js';
 import authRouter from './routes/auth.js';
@@ -44,8 +43,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 
-app.use('/api/auth', authRouter);
-app.use('/api/admin', adminRouter);
 app.use('/api/doctors', doctorRouter);
 app.use('/api/users', userRouter);
 app.use('/api/chat', chatRouter);
@@ -63,10 +60,6 @@ app.get('/api/health', (req, res) => {
 });
 
 
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
-});
-
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
@@ -77,7 +70,6 @@ const server = app.listen(port, () => {
   console.log(`Server started on PORT: ${port}`);
 });
 
-// Initialize Socket.io
-createSocketServer(server, { jwtSecret: process.env.JWT_SECRET });
+  res.status(500).json({ success: false, message: err.message });
 
 export default app;

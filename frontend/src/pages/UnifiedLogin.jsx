@@ -105,8 +105,8 @@ const UnifiedLogin = () => {
     // Demo credentials for testing
     // FIXME: Remove these hardcoded values before production deployment!
     const demos = {
-      user: { email: "test@gmail.com", password: "12345678" },
-      doctor: { email: "testdoc@gmail.com", password: "doctor123" },
+      user: { email: "test@gmail.com", password: "Test@1234" },
+      doctor: { email: "testdoc@gmail.com", password: "Doc@1234" },
       admin: { email: "admin@gmail.com", password: "admin123" },
     };
 

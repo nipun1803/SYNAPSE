@@ -214,10 +214,14 @@ const addDoctor = catchAsync(async (req, res) => {
 
   let imageUrl = "";
   if (imageFile) {
-    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-      resource_type: "image",
-    });
-    imageUrl = imageUpload.secure_url;
+    try {
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+      imageUrl = imageUpload.secure_url;
+    } catch (e) {
+      return res.status(502).json({ success: false, message: "Image upload failed" });
+    }
   }
 
   let parsedAddress =
