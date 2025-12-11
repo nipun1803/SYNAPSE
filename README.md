@@ -331,9 +331,3 @@ npm run dev
 **Styled with TailwindCSS • Deployed on Vercel and Render**
 
 
-
-🚀 **Future Enhancements:**
-- Payment Integration
-- Video Consultation
-- Advanced Analytics
-- Mobile App Development
