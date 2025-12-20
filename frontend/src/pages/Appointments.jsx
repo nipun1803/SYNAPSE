@@ -505,7 +505,7 @@ const Appointments = () => {
                       {!item.cancelled && (
                         <div className='flex gap-2 w-full sm:w-auto'>
                           <button
-                            onClick={() => navigate(`/ chat / ${item._id} `)}
+                            onClick={() => navigate(`/chat/${item._id}`)}
                             className='flex-1 sm:flex-none text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-all px-4 py-2 flex items-center justify-center gap-1'
                           >
                             <MessageSquare size={16} /> Chat

@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 
 const ChatWindow = ({ appointmentId, receiverId, receiverName, isOpen, onClose, role = 'user' }) => {
     const { socket } = useContext(SocketContext);
-    const { backendUrl, token, userData } = useContext(AppContext); // Adjust for DoctorContext in Admin app
+    const { backendUrl, userData } = useContext(AppContext);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -33,12 +33,9 @@ const ChatWindow = ({ appointmentId, receiverId, receiverName, isOpen, onClose, 
         const fetchHistory = async () => {
             setLoading(true);
             try {
-                // Determine headers based on role (User uses 'token', Doctor/Admin might differ)
-                // Assuming this component is shared or headers are handled.
-                // For User App:
-                const headers = { token };
-
-                const { data } = await axios.get(`${backendUrl}/api/chat/history/${appointmentId}`, { headers });
+                const { data } = await axios.get(`${backendUrl}/api/chat/history/${appointmentId}`, {
+                    withCredentials: true
+                });
                 if (data.success) {
                     setMessages(data.chats);
                 }
@@ -66,7 +63,7 @@ const ChatWindow = ({ appointmentId, receiverId, receiverName, isOpen, onClose, 
             socket?.off('receive_message', handleReceiveMessage);
         };
 
-    }, [isOpen, appointmentId, socket, backendUrl, token]);
+    }, [isOpen, appointmentId, socket, backendUrl]);
 
 
     const handleSendMessage = async (e) => {

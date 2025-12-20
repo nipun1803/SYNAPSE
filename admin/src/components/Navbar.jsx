@@ -108,7 +108,8 @@ const Navbar = ({ onToggleSidebar }) => {
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-            title="Toggle theme"
+            title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
             {darkMode ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +117,7 @@ const Navbar = ({ onToggleSidebar }) => {
               </svg>
             ) : (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 24.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
             )}
           </button>

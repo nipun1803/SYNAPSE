@@ -67,13 +67,13 @@ const Footer = () => {
 
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-20">
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-8 sm:mb-10">
 
-          <div className="md:col-span-2">
-            <img className="mb-5 w-40 dark:invert dark:brightness-200" src={assets.logo} alt="Synapse" />
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-md">
+          <div className="sm:col-span-2 lg:col-span-2">
+            <img className="mb-4 sm:mb-5 w-32 sm:w-36 md:w-40 dark:invert dark:brightness-200" src={assets.logo} alt="Synapse" />
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4 sm:mb-6 max-w-md text-sm sm:text-base">
               Your trusted healthcare partner. Book appointments with top doctors,
               manage your health records, and get quality medical care - all in one place.
             </p>
@@ -85,7 +85,7 @@ const Footer = () => {
                     key={social.name}
                     variant="outline"
                     size="icon"
-                    className={`rounded-full ${social.hoverColor} transition-all`}
+                    className={`rounded-full ${social.hoverColor} transition-all h-9 w-9 sm:h-10 sm:w-10`}
                     asChild
                   >
                     <a
@@ -94,7 +94,7 @@ const Footer = () => {
                       rel="noopener noreferrer"
                       aria-label={social.name}
                     >
-                      <IconComponent className="h-4 w-4" />
+                      <IconComponent className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </a>
                   </Button>
                 )
@@ -103,13 +103,13 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-gray-900 dark:text-white font-semibold text-base mb-4">Quick Links</h3>
-            <ul className="space-y-3">
+            <h3 className="text-gray-900 dark:text-white font-semibold text-sm sm:text-base mb-3 sm:mb-4">Quick Links</h3>
+            <ul className="space-y-2 sm:space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm inline-flex items-center group"
+                    className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-xs sm:text-sm inline-flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform">
                       {link.label}
@@ -121,16 +121,16 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-gray-900 dark:text-white font-semibold text-base mb-4">Contact Us</h3>
-            <ul className="space-y-4 text-sm">
+            <h3 className="text-gray-900 dark:text-white font-semibold text-sm sm:text-base mb-3 sm:mb-4">Contact Us</h3>
+            <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm">
               {contactInfo.map((item) => {
                 const IconComponent = item.icon
                 return (
-                  <li key={item.label} className="flex gap-3">
-                    <IconComponent className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="block font-medium text-gray-700 dark:text-gray-300 mb-1">{item.label}</span>
-                      <div className="text-gray-600 dark:text-gray-400">{item.content}</div>
+                  <li key={item.label} className="flex gap-2 sm:gap-3">
+                    <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <span className="block font-medium text-gray-700 dark:text-gray-300 mb-0.5 sm:mb-1">{item.label}</span>
+                      <div className="text-gray-600 dark:text-gray-400 break-words">{item.content}</div>
                     </div>
                   </li>
                 )
@@ -139,13 +139,13 @@ const Footer = () => {
           </div>
         </div>
 
-        <Separator className="my-6" />
+        <Separator className="my-4 sm:my-6" />
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center md:text-left">
             Copyright © {currentYear} Synapse. All rights reserved.
           </p>
-          <div className="flex flex-wrap gap-6 text-sm">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm">
             {legalLinks.map((link) => (
               <Link
                 key={link.to}

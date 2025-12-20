@@ -32,7 +32,7 @@ const createOrder = catchAsync(async (req, res) => {
     // Check if slot is already booked
     const slotBooked = doctor.slots_booked?.[slotDate]?.includes(slotTime);
     if (slotBooked) {
-        return res.status(400).json({ success: false, message: 'Slot already booked' });
+        return res.status(409).json({ success: false, message: 'Slot already booked' });
     }
 
     // Create Razorpay order
@@ -135,7 +135,7 @@ const verifyPayment = catchAsync(async (req, res) => {
 
     await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
-    res.json({
+    res.status(201).json({
         success: true,
         message: 'Appointment booked successfully',
         appointmentId: newAppointment._id,
