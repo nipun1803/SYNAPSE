@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, CheckCircle, XCircle, Search, Users, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, XCircle, Search, Users, MessageSquare, Video, FolderOpen } from 'lucide-react';
+import PatientReportsViewer from './PatientReportsViewer';
 
 const DoctorAppointments = () => {
   const { dToken, appointments, getAppointments, cancelAppointment, completeAppointment } =
@@ -51,6 +52,7 @@ const DoctorAppointments = () => {
   const getRowNumber = (index) => startIndex + index + 1;
 
   const [actionLoading, setActionLoading] = useState({ id: null, type: null });
+  const [viewReportsFor, setViewReportsFor] = useState(null);
 
   const onCancel = async (id) => {
     if (!window.confirm('Cancel this appointment?')) return;
@@ -347,6 +349,28 @@ const DoctorAppointments = () => {
                             </Button>
                           )}
 
+                          {!item.cancelled && !item.isCompleted && (
+                            <Button
+                              size='sm'
+                              variant='ghost'
+                              onClick={() => navigate(`/doctor/video-call/${item._id}`)}
+                              className='text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                            >
+                              <Video className='w-4 h-4 mr-1' />
+                              Video Call
+                            </Button>
+                          )}
+
+                          <Button
+                            size='sm'
+                            variant='ghost'
+                            onClick={() => setViewReportsFor({ userId: item.userId, name: item.userData?.name })}
+                            className='text-purple-600 dark:text-purple-400 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+                          >
+                            <FolderOpen className='w-4 h-4 mr-1' />
+                            Reports
+                          </Button>
+
                           {item.isCompleted && !item.prescriptionId && (
                             <Button
                               size='sm'
@@ -410,6 +434,15 @@ const DoctorAppointments = () => {
           </div>
         )
       }
+
+      {/* Patient Reports Viewer Modal */}
+      {viewReportsFor && (
+        <PatientReportsViewer
+          userId={viewReportsFor.userId}
+          patientName={viewReportsFor.name}
+          onClose={() => setViewReportsFor(null)}
+        />
+      )}
 
     </div >
   );

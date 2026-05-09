@@ -106,6 +106,46 @@ export const userService = {
 };
 
 
+export const reportService = {
+    // GET /api/reports
+    getMyReports: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = queryString
+            ? `${BASE_URL}/api/reports?${queryString}`
+            : `${BASE_URL}/api/reports`;
+        return fetchAPI(url);
+    },
+
+    // POST /api/reports (file upload)
+    uploadReport: (formData) => fetch(`${BASE_URL}/api/reports`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+    }).then(r => r.json()),
+
+    // DELETE /api/reports/:id
+    deleteReport: (id) => fetchAPI(`${BASE_URL}/api/reports/${id}`, {
+        method: 'DELETE'
+    })
+};
+
+
+export const videoCallService = {
+    // POST /api/users/appointments/:id/video/start
+    startCall: (appointmentId) => fetchAPI(`${BASE_URL}/api/users/appointments/${appointmentId}/video/start`, {
+        method: 'POST'
+    }),
+
+    // POST /api/users/appointments/:id/video/end
+    endCall: (appointmentId) => fetchAPI(`${BASE_URL}/api/users/appointments/${appointmentId}/video/end`, {
+        method: 'POST'
+    }),
+
+    // GET /api/users/appointments/:id/video/status
+    getStatus: (appointmentId) => fetchAPI(`${BASE_URL}/api/users/appointments/${appointmentId}/video/status`)
+};
+
+
 
 
 export const doctorService = {
@@ -190,10 +230,26 @@ export const reviewService = {
 };
 
 
+export const paymentService = {
+    createOrder: (payload) => fetchAPI(`${BASE_URL}/api/payments/create-order`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    }),
+
+    verifyPayment: (payload) => fetchAPI(`${BASE_URL}/api/payments/verify-payment`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    })
+};
+
+
 export default {
     auth: authService,
     user: userService,
     doctor: doctorService,
     admin: adminService,
-    review: reviewService
+    review: reviewService,
+    report: reportService,
+    videoCall: videoCallService,
+    payment: paymentService
 };

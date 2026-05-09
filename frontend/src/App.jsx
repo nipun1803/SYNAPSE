@@ -16,6 +16,8 @@ import PaymentHistory from './pages/PaymentHistory'
 import PrescriptionHistory from './pages/PrescriptionHistory'
 import UnifiedLogin from './pages/UnifiedLogin'
 import ChatPage from './pages/ChatPage'
+import VideoCall from './pages/VideoCall'
+import MyReports from './pages/MyReports'
 
 
 const ProtectedRoute = ({ children }) => {
@@ -119,14 +121,19 @@ const App = () => {
               <PrescriptionHistory />
             </ProtectedRoute>
           } />
-          <Route path='/my-prescriptions' element={
-            <ProtectedRoute>
-              <PrescriptionHistory />
-            </ProtectedRoute>
-          } />
           <Route path='/chat/:appointmentId' element={
             <ProtectedRoute>
               <ChatPage />
+            </ProtectedRoute>
+          } />
+          <Route path='/video-call/:appointmentId' element={
+            <ProtectedRoute>
+              <VideoCall />
+            </ProtectedRoute>
+          } />
+          <Route path='/my-reports' element={
+            <ProtectedRoute>
+              <MyReports />
             </ProtectedRoute>
           } />
         </Routes>

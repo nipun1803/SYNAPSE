@@ -2,6 +2,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import connectDB from './config/mongodb.js';
 import connectCloudinary from './config/cloudinary.js';
 import adminRouter from './routes/admin.js';
@@ -12,6 +14,7 @@ import paymentRouter from './routes/paymentRoute.js';
 import prescriptionRouter from './routes/prescriptionRoute.js';
 import reviewRouter from './routes/reviewRoute.js';
 import chatRouter from './routes/chatRoute.js';
+import reportRouter from './routes/reportRoute.js';
 import { createSocketServer } from './realtime/socket.js';
 
 const app = express();
@@ -20,6 +23,21 @@ const port = process.env.PORT || 4000;
 app.set('trust proxy', 1);
 connectDB();
 connectCloudinary();
+
+// Security: HTTP headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Rate limiting for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 requests per window
+  message: { success: false, message: 'Too many requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 app.use(cors({
   origin: [
@@ -40,6 +58,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Apply rate limiting to auth routes
+app.use('/api/auth', authLimiter);
+
 // Mount Routes
 app.use('/api/admin', adminRouter);
 app.use('/api/auth', authRouter);
@@ -49,6 +70,7 @@ app.use('/api/chat', chatRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/prescriptions', prescriptionRouter);
 app.use('/api/reviews', reviewRouter);
+app.use('/api/reports', reportRouter);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API Working' });
@@ -58,9 +80,19 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Global error handler — sanitized for production
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ success: false, message: err.message });
+  const statusCode = err.statusCode || 500;
+  const message = process.env.NODE_ENV === 'production'
+    ? 'Something went wrong'
+    : err.message;
+
+  res.status(statusCode).json({
+    success: false,
+    message,
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+  });
 });
 
 const server = app.listen(port, () => {

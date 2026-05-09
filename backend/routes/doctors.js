@@ -14,6 +14,8 @@ import {
   updateDoctorSlots,
   getAppointmentById
 } from '../controllers/doctorController.js';
+import { startVideoCall, endVideoCall, getVideoCallStatus } from '../controllers/videoCallController.js';
+import { getPatientReports } from '../controllers/reportController.js';
 import authAdmin from '../middleware/authAdmin.js';
 import authDoctor from '../middleware/authDoctor.js';
 import upload from '../middleware/multer.js';
@@ -37,6 +39,14 @@ router.get('/me/dashboard', authDoctor, doctorDashboard);
 router.patch('/me/availability', authDoctor, changeAvailability);
 router.patch('/me/appointments/:id/complete', authDoctor, appointmentComplete);
 router.patch('/me/appointments/:id/cancel', authDoctor, appointmentCancel);
+
+// Video call routes (doctor)
+router.post('/me/appointments/:id/video/start', authDoctor, startVideoCall);
+router.post('/me/appointments/:id/video/end', authDoctor, endVideoCall);
+router.get('/me/appointments/:id/video/status', authDoctor, getVideoCallStatus);
+
+// Patient reports access (doctor)
+router.get('/me/patients/:userId/reports', authDoctor, getPatientReports);
 
 // Admin management
 router.post('/', authAdmin, upload.single('image'), addDoctor);

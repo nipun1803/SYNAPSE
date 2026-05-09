@@ -19,7 +19,7 @@ const doctorSchema = new mongoose.Schema({
   available_slots: { type: Object, default: {} },
   rating: { type: Number, default: 0 },
   reviewCount: { type: Number, default: 0 },
-  date: { type: Number, required: true },
+  date: { type: Number, default: Date.now },
 });
 
 const doctorModel = mongoose.models.doctor || mongoose.model("doctor", doctorSchema);

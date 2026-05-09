@@ -205,6 +205,21 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
+  const getUserReports = async (userId) => {
+    try {
+      const { data } = await api.get(`/api/admin/users/${userId}/reports`);
+      if (data?.success) {
+        return data.reports;
+      } else {
+        toast.error(data?.message || "Failed to fetch user reports");
+        return [];
+      }
+    } catch (err) {
+      toast.error('Failed to load user reports');
+      return [];
+    }
+  };
+
   const value = {
     aToken,
     setAToken,
@@ -222,7 +237,8 @@ const AdminContextProvider = ({ children }) => {
     logoutAdmin,
     users,
     getAllUsers: getAllUsersList,
-    changeUserStatus
+    changeUserStatus,
+    getUserReports
   };
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

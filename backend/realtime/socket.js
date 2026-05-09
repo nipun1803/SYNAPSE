@@ -33,7 +33,7 @@ export function createSocketServer(httpServer, { jwtSecret } = {}) {
   };
 
   // ------------------------------------------------------------------------
-  // Chat Namespace (New) - For Doctors and Patients
+  // Chat & Video Call Namespace - For Doctors and Patients
   // ------------------------------------------------------------------------
   const chatNsp = io.of("/"); // Using default namespace for simplicity
 
@@ -49,6 +49,47 @@ export function createSocketServer(httpServer, { jwtSecret } = {}) {
     // Event: Join a specific Appointment Chat Room
     socket.on("join_chat", (appointmentId) => {
       socket.join(`chat_${appointmentId}`);
+    });
+
+    // Event: Join a video call room (for signaling)
+    socket.on("join_video", (appointmentId) => {
+      socket.join(`video_${appointmentId}`);
+    });
+
+    // Event: Video call started notification
+    socket.on("video_started", (data) => {
+      const { appointmentId } = data;
+      chatNsp.to(`chat_${appointmentId}`).emit("video_call_started", {
+        appointmentId,
+        startedBy: data.startedBy,
+        roomName: data.roomName
+      });
+    });
+
+    // Event: Video call ended notification
+    socket.on("video_ended", (data) => {
+      const { appointmentId } = data;
+      chatNsp.to(`chat_${appointmentId}`).emit("video_call_ended", {
+        appointmentId,
+        endedBy: data.endedBy
+      });
+      chatNsp.to(`video_${appointmentId}`).emit("video_call_ended", {
+        appointmentId,
+        endedBy: data.endedBy
+      });
+    });
+
+    // WebRTC Signaling Events
+    socket.on("webrtc_offer", (data) => {
+      socket.to(`video_${data.appointmentId}`).emit("webrtc_offer", data);
+    });
+
+    socket.on("webrtc_answer", (data) => {
+      socket.to(`video_${data.appointmentId}`).emit("webrtc_answer", data);
+    });
+
+    socket.on("webrtc_ice_candidate", (data) => {
+      socket.to(`video_${data.appointmentId}`).emit("webrtc_ice_candidate", data);
     });
 
     // Event: Send Message

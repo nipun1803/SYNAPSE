@@ -18,6 +18,7 @@ import DoctorSlots from './pages/Doctor/DoctorSlots'
 import CreatePrescription from './pages/Doctor/CreatePrescription'
 import ViewPrescription from './pages/Doctor/ViewPrescription'
 import DoctorChat from './pages/Doctor/DoctorChat'
+import DoctorVideoCall from './pages/Doctor/DoctorVideoCall'
 
 
 const UNIFIED_LOGIN_URL = import.meta.env.VITE_UNIFIED_LOGIN_URL || 'http://localhost:5173/unified-login'
@@ -170,6 +171,11 @@ const App = () => {
             <Route path='/doctor/chat/:appointmentId' element={
               <DoctorRoute>
                 <DoctorChat />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/video-call/:appointmentId' element={
+              <DoctorRoute>
+                <DoctorVideoCall />
               </DoctorRoute>
             } />
           </Routes>

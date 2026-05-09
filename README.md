@@ -277,7 +277,29 @@ In today's healthcare landscape, patients face significant challenges:
 - MongoDB Atlas account
 - Cloudinary account (for image uploads)
 
-### Backend Setup
+### 🐳 Docker Setup (Recommended)
+
+The easiest way to run the entire Synapse platform (Backend, Frontend, and Admin) is using Docker Compose. This ensures a consistent environment across all services without needing to manage local `node_modules`.
+
+**1. Launch the Platform**
+```bash
+# Build and start all services in the background
+docker-compose up -d --build
+```
+
+**2. Access the Services**
+- **Frontend (Patient Portal):** [http://localhost:5173](http://localhost:5173)
+- **Admin Panel:** [http://localhost:5174](http://localhost:5174)
+- **Backend API:** [http://localhost:4000](http://localhost:4000)
+
+**3. Stopping the Services**
+```bash
+docker-compose down
+```
+
+### 🛠️ Manual Setup Instructions
+
+#### Backend Setup
 
 ```bash
 # Navigate to backend directory
