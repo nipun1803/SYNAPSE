@@ -2,6 +2,7 @@ import express from "express";
 import { addDoctor, adminDashboard, allDoctors, appointmentCancel, appointmentsAdmin, loginAdmin, logoutAdmin, deleteAppointment, deleteDoctor, getUserAppointments } from '../controllers/adminController.js';
 import { getAllUsers, toggleBlockUser } from "../controllers/userController.js";
 import { changeAvailability } from "../controllers/doctorController.js";
+import { getReportsForUser } from "../controllers/reportController.js";
 import authAdmin from "../middleware/authAdmin.js";
 import upload from "../middleware/multer.js";
 
@@ -41,5 +42,8 @@ router.get("/users", authAdmin, getAllUsers);
 
 // /api/admin/users/:id/block
 router.patch("/users/:id/block", authAdmin, toggleBlockUser);
+
+// /api/admin/users/:id/reports
+router.get("/users/:id/reports", authAdmin, getReportsForUser);
 
 export default router;

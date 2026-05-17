@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const connectDB = async () => {
   try {
 
-    mongoose.set('bufferCommands', false);
+    mongoose.set('bufferCommands', true);
 
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/synapse';
 

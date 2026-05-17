@@ -11,7 +11,7 @@ import ReviewModal from '../components/ReviewModal'
 import ChatWindow from '../components/ChatWindow'
 import { toast } from 'react-toastify'
 import { userService, doctorService, reviewService } from '../api/services'
-import { MapPin, Calendar, Clock, DollarSign, CreditCard, Loader2, ClipboardList, CheckCircle, CheckCircle2, FileText, X, RefreshCw, MessageSquare, User, Filter } from 'lucide-react'
+import { MapPin, Calendar, Clock, DollarSign, CreditCard, Loader2, ClipboardList, CheckCircle, CheckCircle2, FileText, X, RefreshCw, MessageSquare, User, Filter, Video, FolderOpen } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -499,6 +499,17 @@ const Appointments = () => {
                               Pay at Clinic
                             </Badge>
                           )}
+
+                          {/* Consultation Mode Badge */}
+                          {item.consultationMode === 'online' ? (
+                            <Badge className='bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800 gap-1'>
+                              <Video className='w-3 h-3' /> HD Video Consult
+                            </Badge>
+                          ) : (
+                            <Badge className='bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800 gap-1'>
+                              <MapPin className='w-3 h-3' /> In-Clinic Visit
+                            </Badge>
+                          )}
                         </div>
                       </div>
 
@@ -512,7 +523,10 @@ const Appointments = () => {
                           </button>
 
                           {!item.isCompleted ? (
-                            <button className='flex-1 sm:flex-none text-sm text-stone-500 border rounded hover:bg-primary hover:text-white transition-all px-4 py-2'>
+                            <button 
+                              onClick={() => toast.info('Online payments module is being configured. Please pay at the clinic.')}
+                              className='flex-1 sm:flex-none text-sm text-stone-500 border rounded hover:bg-primary hover:text-white transition-all px-4 py-2'
+                            >
                               Pay Online
                             </button>
                           ) : (
@@ -639,6 +653,16 @@ const Appointments = () => {
                           </Button>
                         )}
 
+                        {/* View Reports button - available for all appointments */}
+                        <Button
+                          onClick={() => navigate('/my-reports')}
+                          variant='outline'
+                          className='border-2 border-purple-500 text-purple-600 hover:bg-purple-50'
+                        >
+                          <FolderOpen className='w-4 h-4 mr-1' />
+                          View My Reports
+                        </Button>
+
                         {/* Rate Doctor button-for completed appointments */}
                         {item.isCompleted && (
                           <Button
@@ -648,6 +672,17 @@ const Appointments = () => {
                           >
                             <span className='mr-1'>★</span>
                             Rate Doctor
+                          </Button>
+                        )}
+
+                        {/* Join Video Call button - for upcoming, non-cancelled online appointments */}
+                        {!item.cancelled && !item.isCompleted && item.consultationMode === 'online' && (
+                          <Button
+                            onClick={() => navigate(`/video-call/${item._id}`)}
+                            className='bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2'
+                          >
+                            <Video className='w-4 h-4' />
+                            Join Video Call
                           </Button>
                         )}
 

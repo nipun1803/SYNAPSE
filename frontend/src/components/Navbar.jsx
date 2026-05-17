@@ -17,6 +17,7 @@ import {
   FileText,
   Sun,
   Moon,
+  FolderOpen,
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -226,7 +227,10 @@ const Navbar = () => {
                   </div>
 
                   {[["/my-profile", "My Profile", UserCircle],
-                  ["/my-appointments", "My Appointments", Calendar]].map(
+                  ["/my-appointments", "My Appointments", Calendar],
+                  ["/my-reports", "My Reports", FolderOpen],
+                  ["/my-prescriptions", "Prescriptions", FileText],
+                  ["/payment-history", "Payment History", CreditCard]].map(
                     ([to, label, Icon]) => (
                       <button
                         key={to}
@@ -330,7 +334,10 @@ const Navbar = () => {
               <div className="my-5 border-t border-gray-200 dark:border-gray-700"></div>
 
               {[["/my-profile", "My Profile", UserCircle],
-              ["/my-appointments", "My Appointments", Calendar]].map(
+              ["/my-appointments", "My Appointments", Calendar],
+              ["/my-reports", "My Reports", FolderOpen],
+              ["/my-prescriptions", "Prescriptions", FileText],
+              ["/payment-history", "Payment History", CreditCard]].map(
                 ([to, label, Icon]) => (
                   <NavLink
                     key={to}

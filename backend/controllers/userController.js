@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import validator from "validator";
+import mongoose from "mongoose";
+import { parse, isValid } from "date-fns";
 import userModel from "../models/usermodel.js";
 import doctorModel from "../models/doctormodel.js";
 import appointmentModel from "../models/appointmentmodel.js";
@@ -8,24 +10,23 @@ import { v2 as cloudinary } from "cloudinary";
 import getCookieOptions from "../utils/cookieUtil.js";
 import catchAsync from "../utils/catchAsync.js";
 
-// TODO: refactor this date parsing - getting messy with all the edge cases
-// Converts slot date string (DD_MM_YYYY) and time to Date object
+// Converts slot date string (DD_MM_YYYY) and time to Date object using date-fns
 function parseSlotToDate(slotDate, slotTime) {
   try {
-    const [d, m, y] = slotDate.split("_").map((n) => parseInt(n, 10));
-    const date = new Date(y, m - 1, d);
-
-    if (slotTime) {
-      const [hm, ampm] = slotTime.split(" ");
-      let [hh, mm] = hm.split(":").map((n) => parseInt(n, 10));
-      // Handle 12-hour format conversion
-      if (ampm?.toUpperCase() === "PM" && hh < 12) hh += 12;
-      if (ampm?.toUpperCase() === "AM" && hh === 12) hh = 0;
-      date.setHours(hh, mm || 0, 0, 0);
-    } else {
-      date.setHours(0, 0, 0, 0);
+    if (!slotDate) return null;
+    
+    const dateStr = slotDate.replace(/_/g, '/');
+    const formatStr = slotTime ? 'dd/MM/yyyy h:mm a' : 'dd/MM/yyyy';
+    const timeStr = slotTime ? ` ${slotTime}` : '';
+    
+    const parsedDate = parse(`${dateStr}${timeStr}`, formatStr, new Date());
+    
+    if (isValid(parsedDate)) {
+      return parsedDate;
     }
-    return date;
+    
+    console.warn("Invalid date format parsed:", slotDate, slotTime);
+    return null;
   } catch (err) {
     console.warn("Failed to parse slot date:", slotDate, slotTime);
     return null;
@@ -291,7 +292,7 @@ const updateProfile = catchAsync(async (req, res) => {
 
 const bookAppointment = catchAsync(async (req, res) => {
   const userId = req.user?.id;
-  const { docId, slotDate, slotTime, paymentMode, purpose } = req.body || {};
+  const { docId, slotDate, slotTime, paymentMode, purpose, consultationMode } = req.body || {};
 
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -355,46 +356,50 @@ const bookAppointment = catchAsync(async (req, res) => {
   const docObj = doc.toObject();
   delete docObj.slots_booked;
 
-  // Create appointment record (cash payment mode only - online handled by payment controller)
-  if (paymentMode === "cash") {
-    const appointment = new appointmentModel({
-      userId,
-      docId,
-      userData: user,
-      docData: docObj,
-      amount: doc.fees,
-      slotTime,
-      slotDate,
-      date: Date.now(),
-      purpose: purpose || '',
-      payment: false, // Cash payment - not paid yet
-      paymentStatus: "pending",
-    });
-    await appointment.save();
-
-    await doctorModel.findByIdAndUpdate(docId, { slots_booked: bookedSlots });
-
-    // Notify admins via socket
-    const emit = req.app?.locals?.emitToAdmins;
-    if (emit) {
-      emit("appointment:created", {
-        type: "appointment:created",
-        appointment: appointment.toObject(),
+  try {
+    // Create appointment record (cash payment mode only - online handled by payment controller)
+    if (paymentMode === "cash") {
+      const appointment = new appointmentModel({
+        userId,
+        docId,
+        userData: user,
+        docData: docObj,
+        amount: doc.fees,
+        slotTime,
+        slotDate,
+        date: Date.now(),
+        purpose: purpose || '',
+        consultationMode: consultationMode || 'offline',
+        payment: false, // Cash payment - not paid yet
+        paymentStatus: "pending",
       });
-      await emitCounts(emit);
-    }
+      await appointment.save();
 
-    res.status(201).json({
-      success: true,
-      message: "Appointment Booked",
-      appointmentId: appointment._id,
-    });
-  } else {
-    // Online payment mode - should not reach here as online payments go through payment controller
-    return res.status(400).json({
-      success: false,
-      message: "Please use payment endpoint for online bookings",
-    });
+      await doctorModel.findByIdAndUpdate(docId, { slots_booked: bookedSlots });
+
+      // Notify admins via socket
+      const emit = req.app?.locals?.emitToAdmins;
+      if (emit) {
+        emit("appointment:created", {
+          type: "appointment:created",
+          appointment: appointment.toObject(),
+        });
+        await emitCounts(emit);
+      }
+
+      res.status(201).json({
+        success: true,
+        message: "Appointment Booked",
+        appointmentId: appointment._id,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Please use payment endpoint for online bookings",
+      });
+    }
+  } catch (error) {
+    throw error;
   }
 });
 
@@ -432,34 +437,38 @@ const cancelAppointment = catchAsync(async (req, res) => {
       .json({ success: false, message: "Appointment already cancelled" });
   }
 
-  await appointmentModel.findByIdAndUpdate(appointmentId, {
-    cancelled: true,
-  });
-
-  const { docId, slotDate, slotTime } = appointmentData;
-  const doctorData = await doctorModel.findById(docId);
-
-  if (doctorData) {
-    const slots_booked = doctorData.slots_booked || {};
-    if (Array.isArray(slots_booked[slotDate])) {
-      slots_booked[slotDate] = slots_booked[slotDate].filter(
-        (e) => e !== slotTime
-      );
-      await doctorModel.findByIdAndUpdate(docId, { slots_booked });
-    }
-  }
-
-  const updated = await appointmentModel.findById(appointmentId).lean();
-  const emit = req.app?.locals?.emitToAdmins;
-  if (emit && updated) {
-    emit("appointment:updated", {
-      type: "appointment:updated",
-      appointment: updated,
+  try {
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      cancelled: true,
     });
-    await emitCounts(emit);
-  }
 
-  res.status(200).json({ success: true, message: "Appointment Cancelled" });
+    const { docId, slotDate, slotTime } = appointmentData;
+    const doctorData = await doctorModel.findById(docId);
+
+    if (doctorData) {
+      const slots_booked = doctorData.slots_booked || {};
+      if (Array.isArray(slots_booked[slotDate])) {
+        slots_booked[slotDate] = slots_booked[slotDate].filter(
+          (e) => e !== slotTime
+        );
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+      }
+    }
+
+    const updated = await appointmentModel.findById(appointmentId).lean();
+    const emit = req.app?.locals?.emitToAdmins;
+    if (emit && updated) {
+      emit("appointment:updated", {
+        type: "appointment:updated",
+        appointment: updated,
+      });
+      await emitCounts(emit);
+    }
+
+    res.status(200).json({ success: true, message: "Appointment Cancelled" });
+  } catch (error) {
+    throw error;
+  }
 });
 
 const rescheduleAppointment = catchAsync(async (req, res) => {
@@ -547,15 +556,19 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
   } else {
     slots_booked[slotDate] = [slotTime];
   }
-  await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+  try {
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
-  // Update appointment with new slot and increment reschedule count
-  await appointmentModel.findByIdAndUpdate(appointmentId, {
-    slotDate,
-    slotTime,
-    date: Date.now(),
-    $inc: { rescheduleCount: 1 }
-  });
+    // Update appointment with new slot and increment reschedule count
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      slotDate,
+      slotTime,
+      date: Date.now(),
+      $inc: { rescheduleCount: 1 }
+    });
+  } catch (error) {
+    throw error;
+  }
 
   const updated = await appointmentModel.findById(appointmentId).lean();
   const emit = req.app?.locals?.emitToAdmins;

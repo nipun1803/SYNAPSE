@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, CheckCircle, XCircle, Search, Users, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, XCircle, Search, Users, MessageSquare, Video, FolderOpen, MapPin } from 'lucide-react';
+import PatientReportsViewer from './PatientReportsViewer';
 
 const DoctorAppointments = () => {
-  const { dToken, appointments, getAppointments, cancelAppointment, completeAppointment } =
+  const { dToken, appointments, apptCounts, getAppointments, cancelAppointment, completeAppointment } =
     useContext(DoctorContext);
   const navigate = useNavigate();
 
@@ -42,15 +43,22 @@ const DoctorAppointments = () => {
     return () => clearTimeout(timeoutId);
   }, [dToken, page, filter, search]);
 
-  // Reset page when filter or search changes
-  useEffect(() => {
+  const handleFilterChange = (newFilter) => {
+    if (newFilter === filter) return;
+    setFilter(newFilter);
     setPage(1);
-  }, [filter, search]);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearch(val);
+    setPage(1);
+  };
 
   const startIndex = (page - 1) * itemsPerPage;
   const getRowNumber = (index) => startIndex + index + 1;
 
   const [actionLoading, setActionLoading] = useState({ id: null, type: null });
+  const [viewReportsFor, setViewReportsFor] = useState(null);
 
   const onCancel = async (id) => {
     if (!window.confirm('Cancel this appointment?')) return;
@@ -90,9 +98,9 @@ const DoctorAppointments = () => {
     );
   }
 
-  const upcomingCount = appointments.filter(a => !a.cancelled && !a.isCompleted).length;
-  const completedCount = appointments.filter(a => a.isCompleted).length;
-  const cancelledCount = appointments.filter(a => a.cancelled).length;
+  const upcomingCount = apptCounts?.upcoming || 0;
+  const completedCount = apptCounts?.completed || 0;
+  const cancelledCount = apptCounts?.cancelled || 0;
 
   return (
     <div className='p-6 max-w-7xl mx-auto space-y-6'>
@@ -152,7 +160,7 @@ const DoctorAppointments = () => {
         <CardContent className='p-4'>
           <div className='flex gap-2 flex-wrap'>
             <Button
-              onClick={() => setFilter('all')}
+              onClick={() => handleFilterChange('all')}
               variant={filter === 'all' ? 'default' : 'outline'}
               className={filter === 'all' ? 'bg-gray-900 text-white hover:bg-gray-800' : ''}
               size='sm'
@@ -160,7 +168,7 @@ const DoctorAppointments = () => {
               All
             </Button>
             <Button
-              onClick={() => setFilter('upcoming')}
+              onClick={() => handleFilterChange('upcoming')}
               variant={filter === 'upcoming' ? 'default' : 'outline'}
               className={filter === 'upcoming' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
               size='sm'
@@ -169,7 +177,7 @@ const DoctorAppointments = () => {
               Upcoming
             </Button>
             <Button
-              onClick={() => setFilter('completed')}
+              onClick={() => handleFilterChange('completed')}
               variant={filter === 'completed' ? 'default' : 'outline'}
               className={filter === 'completed' ? 'bg-green-600 text-white hover:bg-green-700' : ''}
               size='sm'
@@ -178,7 +186,7 @@ const DoctorAppointments = () => {
               Completed
             </Button>
             <Button
-              onClick={() => setFilter('cancelled')}
+              onClick={() => handleFilterChange('cancelled')}
               variant={filter === 'cancelled' ? 'default' : 'outline'}
               className={filter === 'cancelled' ? 'bg-red-600 text-white hover:bg-red-700' : ''}
               size='sm'
@@ -197,7 +205,7 @@ const DoctorAppointments = () => {
           type="text"
           placeholder="Search patients by name..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white"
         />
       </div>
@@ -257,22 +265,33 @@ const DoctorAppointments = () => {
                         <div className='flex flex-col gap-1'>
                           {item.payment ? (
                             item.paymentStatus === 'completed' ? (
-                              <Badge className='bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 gap-1'>
+                              <Badge className='bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 gap-1 w-max'>
                                 <CheckCircle className='w-3 h-3' />
                                 Paid Online
                               </Badge>
                             ) : item.paymentStatus === 'refunded' ? (
-                              <Badge className='bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800 hover:bg-orange-100 gap-1'>
+                              <Badge className='bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800 hover:bg-orange-100 gap-1 w-max'>
                                 Refunded
                               </Badge>
                             ) : (
-                              <Badge variant='outline' className='gap-1 dark:border-gray-600 dark:text-gray-300'>
+                              <Badge variant='outline' className='gap-1 dark:border-gray-600 dark:text-gray-300 w-max'>
                                 Payment Pending
                               </Badge>
                             )
                           ) : (
-                            <Badge className='bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 gap-1'>
+                            <Badge className='bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 gap-1 w-max'>
                               Cash (Pending)
+                            </Badge>
+                          )}
+
+                          {/* Consultation Mode Badge */}
+                          {item.consultationMode === 'online' ? (
+                            <Badge className='bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 gap-1 w-max mt-1'>
+                              <Video className='w-3 h-3 mr-1' /> Online Consult
+                            </Badge>
+                          ) : (
+                            <Badge className='bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 gap-1 w-max mt-1'>
+                              <MapPin className='w-3 h-3 mr-1' /> In-Clinic Visit
                             </Badge>
                           )}
                         </div>
@@ -347,6 +366,28 @@ const DoctorAppointments = () => {
                             </Button>
                           )}
 
+                          {!item.cancelled && !item.isCompleted && item.consultationMode === 'online' && (
+                            <Button
+                              size='sm'
+                              variant='ghost'
+                              onClick={() => navigate(`/doctor/video-call/${item._id}`)}
+                              className='text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                            >
+                              <Video className='w-4 h-4 mr-1' />
+                              Video Call
+                            </Button>
+                          )}
+
+                          <Button
+                            size='sm'
+                            variant='ghost'
+                            onClick={() => setViewReportsFor({ userId: item.userId, name: item.userData?.name })}
+                            className='text-purple-600 dark:text-purple-400 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+                          >
+                            <FolderOpen className='w-4 h-4 mr-1' />
+                            Reports
+                          </Button>
+
                           {item.isCompleted && !item.prescriptionId && (
                             <Button
                               size='sm'
@@ -410,6 +451,15 @@ const DoctorAppointments = () => {
           </div>
         )
       }
+
+      {/* Patient Reports Viewer Modal */}
+      {viewReportsFor && (
+        <PatientReportsViewer
+          userId={viewReportsFor.userId}
+          patientName={viewReportsFor.name}
+          onClose={() => setViewReportsFor(null)}
+        />
+      )}
 
     </div >
   );

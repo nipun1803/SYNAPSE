@@ -13,6 +13,10 @@ const PrescriptionHistory = () => {
     const [searchParams] = useSearchParams();
     const appointmentId = searchParams.get('appointmentId');
 
+    const [activeStatus, setActiveStatus] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dateFilter, setDateFilter] = useState('');
+
     useEffect(() => {
         if (userData?._id) {
             fetchPrescriptionHistory();
@@ -74,6 +78,13 @@ const PrescriptionHistory = () => {
         );
     };
 
+    const filteredPrescriptions = prescriptions.filter(p => {
+        const matchesSearch = !searchTerm || p.doctorId?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = activeStatus === 'all' || p.status === activeStatus;
+        const matchesDate = !dateFilter || new Date(p.createdAt).toISOString().split('T')[0] === dateFilter;
+        return matchesSearch && matchesStatus && matchesDate;
+    });
+
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
@@ -89,15 +100,69 @@ const PrescriptionHistory = () => {
                 <p className="text-gray-600 dark:text-gray-400">View and download your prescription history</p>
             </div>
 
-            {prescriptions.length === 0 ? (
+            {/* Filters Section */}
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm mb-8">
+                <div className="flex flex-col md:flex-row gap-4">
+                    {/* Search */}
+                    <div className="flex-1 relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by doctor name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
+                    {/* Status Filter */}
+                    <div className="flex gap-2">
+                        {['all', 'active', 'fulfilled', 'cancelled'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setActiveStatus(status)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${
+                                    activeStatus === status
+                                        ? 'bg-blue-600 text-white shadow-md'
+                                        : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                                }`}
+                            >
+                                {status}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Date Filter */}
+                    <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="date"
+                            value={dateFilter}
+                            onChange={(e) => setDateFilter(e.target.value)}
+                            className="pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
+                    {(searchTerm || activeStatus !== 'all' || dateFilter) && (
+                        <button
+                            onClick={() => { setSearchTerm(''); setActiveStatus('all'); setDateFilter(''); }}
+                            className="px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            Reset
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {filteredPrescriptions.length === 0 ? (
                 <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
                     <FileText size={64} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">No Prescriptions Found</h3>
-                    <p className="text-gray-500 dark:text-gray-400">You don't have any prescriptions yet.</p>
+                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">No Matches Found</h3>
+                    <p className="text-gray-500 dark:text-gray-400">Try adjusting your filters.</p>
                 </div>
             ) : (
                 <div className="grid gap-6">
-                    {prescriptions.map((prescription) => (
+                    {filteredPrescriptions.map((prescription) => (
                         <div
                             key={prescription._id}
                             id={`prescription-${prescription._id}`}

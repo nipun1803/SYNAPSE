@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AdminContext } from '../../context/AdminContext'
-import { Ban, CheckCircle, Search, History, User } from 'lucide-react'
+import { Ban, CheckCircle, Search, History, User, FolderOpen } from 'lucide-react'
 import UserAppointmentsModal from './UserAppointmentsModal'
+import AdminUserReportsViewer from './AdminUserReportsViewer'
 
 const UsersList = () => {
     const { users, aToken, getAllUsers, changeUserStatus } = useContext(AdminContext)
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedUserId, setSelectedUserId] = useState(null)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+    const [viewReportsFor, setViewReportsFor] = useState(null)
 
     useEffect(() => {
         if (aToken) {
@@ -97,6 +99,13 @@ const UsersList = () => {
                                             <History className='w-4 h-4' />
                                         </button>
                                         <button
+                                            onClick={() => setViewReportsFor({ userId: item._id, name: item.name })}
+                                            className='group p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-600 dark:hover:text-purple-400 transition-all tooltip-trigger'
+                                            title="View Reports"
+                                        >
+                                            <FolderOpen className='w-4 h-4' />
+                                        </button>
+                                        <button
                                             onClick={() => changeUserStatus(item._id)}
                                             className={`p-2 rounded-lg transition-all ${item.blocked
                                                 ? 'text-green-600 hover:bg-green-50'
@@ -144,6 +153,12 @@ const UsersList = () => {
                                                 <History className='w-3 h-3' /> History
                                             </button>
                                             <button
+                                                onClick={() => setViewReportsFor({ userId: item._id, name: item.name })}
+                                                className='px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 text-xs font-medium hover:bg-purple-100 transition-colors flex items-center gap-1'
+                                            >
+                                                <FolderOpen className='w-3 h-3' /> Reports
+                                            </button>
+                                            <button
                                                 onClick={() => changeUserStatus(item._id)}
                                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors flex items-center gap-1 ${item.blocked
                                                     ? 'bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-900/30'
@@ -166,6 +181,14 @@ const UsersList = () => {
                 isOpen={isHistoryOpen}
                 onClose={() => setIsHistoryOpen(false)}
             />
+
+            {viewReportsFor && (
+                <AdminUserReportsViewer
+                    userId={viewReportsFor.userId}
+                    patientName={viewReportsFor.name}
+                    onClose={() => setViewReportsFor(null)}
+                />
+            )}
         </div>
     )
 }

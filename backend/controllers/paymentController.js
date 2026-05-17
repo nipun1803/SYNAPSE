@@ -16,7 +16,7 @@ const razorpayInstance = new Razorpay({
 // Create Razorpay order for appointment booking
 
 const createOrder = catchAsync(async (req, res) => {
-    const { docId, slotDate, slotTime, purpose } = req.body;
+    const { docId, slotDate, slotTime, purpose, consultationMode } = req.body;
     const userId = req.user.id;
 
     // Fetch doctor details to get fees
@@ -47,6 +47,7 @@ const createOrder = catchAsync(async (req, res) => {
             slotDate,
             slotTime,
             purpose: purpose || '',
+            consultationMode: consultationMode || 'online',
         },
     };
 
@@ -75,6 +76,7 @@ const verifyPayment = catchAsync(async (req, res) => {
         slotDate,
         slotTime,
         purpose,
+        consultationMode,
     } = req.body;
 
     const userId = req.user.id;
@@ -109,6 +111,7 @@ const verifyPayment = catchAsync(async (req, res) => {
         slotDate,
         date: Date.now(),
         purpose: purpose || '',
+        consultationMode: consultationMode || 'online',
         razorpayOrderId: razorpay_order_id,
         razorpayPaymentId: razorpay_payment_id,
         razorpaySignature: razorpay_signature,

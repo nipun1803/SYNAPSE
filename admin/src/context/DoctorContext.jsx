@@ -10,6 +10,7 @@ const DoctorContextProvider = ({ children }) => {
   const [dToken, setDToken] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [appointments, setAppointments] = useState([]);
+  const [apptCounts, setApptCounts] = useState({ all: 0, upcoming: 0, completed: 0, cancelled: 0 });
   const [dashData, setDashData] = useState(false);
   const [profileData, setProfileData] = useState(null);
 
@@ -84,7 +85,8 @@ const DoctorContextProvider = ({ children }) => {
 
       const { data } = await doctorService.getAppointments(params);
       if (data.success) {
-        setAppointments([...data.appointments].reverse());
+        setAppointments(data.appointments);
+        if (data.counts) setApptCounts(data.counts);
         return data.pagination;
       } else {
         toast.error(data.message);
@@ -160,6 +162,7 @@ const DoctorContextProvider = ({ children }) => {
     checkingAuth,
     appointments,
     setAppointments,
+    apptCounts,
     getAppointments,
     cancelAppointment,
     completeAppointment,

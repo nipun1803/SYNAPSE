@@ -28,6 +28,19 @@ export const doctorService = {
     // Dashboard & Profile
     getDashboard: () => api.get('/api/doctors/me/dashboard'),
     getProfile: () => api.get('/api/doctors/me/profile'),
+
+    // Video Call
+    startVideoCall: (appointmentId) =>
+        api.post(`/api/doctors/me/appointments/${appointmentId}/video/start`),
+    endVideoCall: (appointmentId) =>
+        api.post(`/api/doctors/me/appointments/${appointmentId}/video/end`),
+    getVideoCallStatus: (appointmentId) =>
+        api.get(`/api/doctors/me/appointments/${appointmentId}/video/status`),
+
+    // Patient Reports
+    getPatientReports: (userId) =>
+        api.get(`/api/doctors/me/patients/${userId}/reports`),
 };
 
 export default api;
+
