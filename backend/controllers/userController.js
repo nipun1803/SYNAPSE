@@ -292,7 +292,7 @@ const updateProfile = catchAsync(async (req, res) => {
 
 const bookAppointment = catchAsync(async (req, res) => {
   const userId = req.user?.id;
-  const { docId, slotDate, slotTime, paymentMode, purpose } = req.body || {};
+  const { docId, slotDate, slotTime, paymentMode, purpose, consultationMode } = req.body || {};
 
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -369,6 +369,7 @@ const bookAppointment = catchAsync(async (req, res) => {
         slotDate,
         date: Date.now(),
         purpose: purpose || '',
+        consultationMode: consultationMode || 'offline',
         payment: false, // Cash payment - not paid yet
         paymentStatus: "pending",
       });

@@ -80,9 +80,17 @@ const appointmentsDoctor = catchAsync(async (req, res) => {
     .skip(skip)
     .limit(limit);
 
+  const counts = {
+    all: await appointmentModel.countDocuments({ docId }),
+    upcoming: await appointmentModel.countDocuments({ docId, cancelled: false, isCompleted: false }),
+    completed: await appointmentModel.countDocuments({ docId, isCompleted: true }),
+    cancelled: await appointmentModel.countDocuments({ docId, cancelled: true }),
+  };
+
   res.json({
     success: true,
     appointments,
+    counts,
     pagination: {
       total,
       page,

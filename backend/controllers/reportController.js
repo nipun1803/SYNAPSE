@@ -56,7 +56,7 @@ const uploadReport = catchAsync(async (req, res) => {
     appointmentId: appointmentId || null,
     fileName: file.originalname,
     fileUrl: uploadResult.secure_url,
-    fileType: uploadResult.resource_type === 'image' && mimeType === 'application/pdf' ? 'pdf' : (uploadResult.resource_type === 'image' ? 'image' : 'other'),
+    fileType: mimeType === 'application/pdf' ? 'pdf' : (uploadResult.resource_type === 'image' ? 'image' : 'other'),
     cloudinaryId: uploadResult.public_id,
     cloudinaryResourceType: uploadResult.resource_type, // Storing this for reliable deletion
     description: description || '',
@@ -128,8 +128,14 @@ const deleteReport = catchAsync(async (req, res) => {
   // Delete from Cloudinary
   if (report.cloudinaryId) {
     try {
+      // Cloudinary destroy doesn't support 'auto'. Must be 'image', 'video' or 'raw'.
+      // PDF and images are 'image' resource type in Cloudinary.
+      const resourceType = report.cloudinaryResourceType === 'auto' || !report.cloudinaryResourceType
+        ? (report.fileType === 'pdf' ? 'image' : 'image') 
+        : report.cloudinaryResourceType;
+
       await cloudinary.uploader.destroy(report.cloudinaryId, {
-        resource_type: report.cloudinaryResourceType || (report.fileType === 'pdf' ? 'image' : 'auto')
+        resource_type: resourceType
       });
     } catch (err) {
       console.error("Cloudinary deletion failed:", err?.message);

@@ -15,13 +15,14 @@ import prescriptionRouter from './routes/prescriptionRoute.js';
 import reviewRouter from './routes/reviewRoute.js';
 import chatRouter from './routes/chatRoute.js';
 import reportRouter from './routes/reportRoute.js';
+import videoRouter from './routes/videoRoute.js';
 import { createSocketServer } from './realtime/socket.js';
 
 const app = express();
 const port = process.env.PORT || 4000;
 
 app.set('trust proxy', 1);
-connectDB();
+await connectDB();
 connectCloudinary();
 
 // Security: HTTP headers
@@ -71,6 +72,7 @@ app.use('/api/payment', paymentRouter);
 app.use('/api/prescriptions', prescriptionRouter);
 app.use('/api/reviews', reviewRouter);
 app.use('/api/reports', reportRouter);
+app.use('/api/video', videoRouter);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API Working' });
@@ -99,7 +101,11 @@ const server = app.listen(port, () => {
   console.log(`Server started on PORT: ${port}`);
 });
 
-// Initialize Socket.IO server
-createSocketServer(server);
+// Initialize Socket.IO server and attach emitToAdmins to app.locals
+// so controllers can emit realtime events to admin/doctor dashboards
+const { emitToAdmins } = createSocketServer(server, {
+  jwtSecret: process.env.JWT_SECRET,
+});
+app.locals.emitToAdmins = emitToAdmins;
 
 export default app;

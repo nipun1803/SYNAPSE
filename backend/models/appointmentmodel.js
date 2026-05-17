@@ -13,6 +13,7 @@ const appointmentSchema = new mongoose.Schema({
     payment: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     purpose: { type: String, default: '' },
+    consultationMode: { type: String, enum: ['online', 'offline'], default: 'offline' },
     // Razorpay payment fields
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },

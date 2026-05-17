@@ -7,7 +7,7 @@ import { AppContext } from '../context/AppContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Info, CreditCard } from 'lucide-react'
+import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Info, CreditCard, Video, MapPin } from 'lucide-react'
 import { doctorService, reviewService, userService } from '../api/services'
 
 const Appointment = () => {
@@ -29,6 +29,7 @@ const Appointment = () => {
   const [booking, setBooking] = useState(false)
   const [paymentMode, setPaymentMode] = useState('online') // 'online' or 'cash'
   const [purpose, setPurpose] = useState('')
+  const [consultationMode, setConsultationMode] = useState('online') // 'online' or 'offline'
 
   const toLocalDateInputValue = (d) => {
     const offset = d.getTimezoneOffset()
@@ -233,7 +234,7 @@ const Appointment = () => {
 
       // If cash payment mode, book directly without payment
       if (paymentMode === 'cash') {
-        const data = await userService.bookAppointment({ docId, slotDate, slotTime, paymentMode: 'cash', purpose })
+        const data = await userService.bookAppointment({ docId, slotDate, slotTime, paymentMode: 'cash', purpose, consultationMode })
 
         if (data.success) {
           toast.success('Appointment booked successfully! Pay at the clinic.')
@@ -251,7 +252,7 @@ const Appointment = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ docId, slotDate, slotTime, purpose })
+        body: JSON.stringify({ docId, slotDate, slotTime, purpose, consultationMode })
       })
 
       const orderData = await orderResponse.json()
@@ -284,7 +285,8 @@ const Appointment = () => {
                 docId,
                 slotDate,
                 slotTime,
-                purpose
+                purpose,
+                consultationMode
               })
             })
 
@@ -608,6 +610,66 @@ const Appointment = () => {
               maxLength={500}
             />
             <p className='text-sm text-gray-500 mt-1'>{purpose.length}/500 characters</p>
+          </div>
+
+          {/* Consultation Mode Selection */}
+          <div className='mb-8'>
+            <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2'>
+              <Video className='w-5 h-5 text-purple-600' />
+              Consultation Mode
+            </h3>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <button
+                onClick={() => setConsultationMode('online')}
+                className={`p-4 border-2 rounded-xl transition-all ${consultationMode === 'online'
+                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 bg-white dark:bg-gray-700'
+                  }`}
+              >
+                <div className='flex items-center gap-3'>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${consultationMode === 'online' ? 'border-blue-600' : 'border-gray-300'
+                    }`}>
+                    {consultationMode === 'online' && (
+                      <div className='w-3 h-3 rounded-full bg-blue-600'></div>
+                    )}
+                  </div>
+                  <div className='text-left flex-1'>
+                    <div className='flex items-center justify-between'>
+                      <p className='font-semibold text-gray-900 dark:text-white flex items-center gap-1.5'>
+                        <Video className='w-4 h-4 text-purple-600' />
+                        Online Video Consult
+                      </p>
+                      <Badge className='bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-none'>Popular</Badge>
+                    </div>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mt-1'>Consult from the comfort of your home via HD video call</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setConsultationMode('offline')}
+                className={`p-4 border-2 rounded-xl transition-all ${consultationMode === 'offline'
+                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 bg-white dark:bg-gray-700'
+                  }`}
+              >
+                <div className='flex items-center gap-3'>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${consultationMode === 'offline' ? 'border-blue-600' : 'border-gray-300'
+                    }`}>
+                    {consultationMode === 'offline' && (
+                      <div className='w-3 h-3 rounded-full bg-blue-600'></div>
+                    )}
+                  </div>
+                  <div className='text-left flex-1'>
+                    <p className='font-semibold text-gray-900 dark:text-white flex items-center gap-1.5'>
+                      <MapPin className='w-4 h-4 text-amber-600' />
+                      In-Clinic Visit
+                    </p>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mt-1'>Visit the doctor in person at the clinic location</p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Payment Mode Selection */}
